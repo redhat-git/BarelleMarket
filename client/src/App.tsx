@@ -18,29 +18,34 @@ import AdminOrders from "@/pages/admin-orders";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400 mx-auto mb-4"></div>
+          <p className="text-amber-400">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {isLoading ? (
-        <Route path="/" component={() => <div className="min-h-screen flex items-center justify-center">Loading...</div>} />
-      ) : (
+      <Route path="/" component={isAuthenticated ? Home : Landing} />
+      <Route path="/products" component={Products} />
+      <Route path="/products/:slug" component={ProductDetail} />
+      {isAuthenticated && (
+        <Route path="/profile" component={B2BProfile} />
+      )}
+      {isAuthenticated && (
         <>
-          <Route path="/" component={isAuthenticated ? Home : Landing} />
-          <Route path="/products" component={Products} />
-          <Route path="/products/:slug" component={ProductDetail} />
-          {isAuthenticated && (
-            <Route path="/profile" component={B2BProfile} />
-          )}
-          {isAuthenticated && (
-            <>
-              <Route path="/admin" component={AdminDashboard} />
-              <Route path="/admin/users" component={AdminUsers} />
-              <Route path="/admin/products" component={AdminProducts} />
-              <Route path="/admin/orders" component={AdminOrders} />
-            </>
-          )}
-          <Route component={NotFound} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/users" component={AdminUsers} />
+          <Route path="/admin/products" component={AdminProducts} />
+          <Route path="/admin/orders" component={AdminOrders} />
         </>
       )}
+      <Route component={NotFound} />
     </Switch>
   );
 }

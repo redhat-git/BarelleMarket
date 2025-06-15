@@ -1,0 +1,40 @@
+User-agent: *
+Allow: /
+Allow: /products
+Allow: /products/*
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api
+Disallow: /api/*
+Disallow: /profile
+
+Sitemap: https://barelle.ci/sitemap.xml
+
+# Specific crawlers
+User-agent: Googlebot
+Allow: /
+Allow: /products
+Allow: /products/*
+Disallow: /admin
+Disallow: /api
+
+User-agent: Bingbot
+Allow: /
+Allow: /products
+Allow: /products/*
+Disallow: /admin
+Disallow: /api
+
+# Social media crawlers
+User-agent: facebookexternalhit
+Allow: /
+Allow: /products
+Allow: /products/*
+
+User-agent: Twitterbot
+Allow: /
+Allow: /products
+Allow: /products/*
+
+# Crawl delay for courtesy
+Crawl-delay: 1
