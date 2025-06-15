@@ -1,8 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { b2cOrderSchema, b2bRegistrationSchema } from "@shared/schema";
+import { setupAuth, isAuthenticated, requireAdmin, requireSupport } from "./replitAuth";
+import { 
+  b2cOrderSchema, 
+  b2bRegistrationSchema, 
+  createUserSchema, 
+  updateOrderStatusSchema, 
+  createProductSchema 
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -238,6 +244,195 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching order:", error);
       res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Admin Routes
+  
+  // User Management
+  app.get('/api/admin/users', requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const result = await storage.getAllUsers(page, limit);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post('/api/admin/users', requireAdmin, async (req, res) => {
+    try {
+      const userData = createUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      res.json(user);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(400).json({ message: "Failed to create user", error: error.message });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/role', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { role, permissions } = req.body;
+      
+      const user = await storage.updateUserRole(userId, role, permissions);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(400).json({ message: "Failed to update user role" });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/deactivate', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      await storage.deactivateUser(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deactivating user:", error);
+      res.status(400).json({ message: "Failed to deactivate user" });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/activate', requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      await storage.activateUser(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error activating user:", error);
+      res.status(400).json({ message: "Failed to activate user" });
+    }
+  });
+
+  // Product Management
+  app.post('/api/admin/products', requireAdmin, async (req, res) => {
+    try {
+      const productData = createProductSchema.parse(req.body);
+      const product = await storage.createProduct(productData);
+      res.json(product);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      res.status(400).json({ message: "Failed to create product", error: error.message });
+    }
+  });
+
+  app.patch('/api/admin/products/:id', requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const productData = req.body;
+      
+      const product = await storage.updateProduct(id, productData);
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(400).json({ message: "Failed to update product" });
+    }
+  });
+
+  app.delete('/api/admin/products/:id', requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteProduct(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(400).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Category Management
+  app.post('/api/admin/categories', requireAdmin, async (req, res) => {
+    try {
+      const categoryData = req.body;
+      const category = await storage.createCategory(categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(400).json({ message: "Failed to create category" });
+    }
+  });
+
+  app.patch('/api/admin/categories/:id', requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const categoryData = req.body;
+      
+      const category = await storage.updateCategory(id, categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(400).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete('/api/admin/categories/:id', requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteCategory(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(400).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // Order Management  
+  app.get('/api/admin/orders', requireSupport, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const status = req.query.status as string;
+      
+      const result = await storage.getAllOrders(page, limit, status);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.patch('/api/admin/orders/:id/status', requireSupport, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const statusData = updateOrderStatusSchema.parse(req.body);
+      
+      const order = await storage.updateOrderStatus(orderId, statusData);
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(400).json({ message: "Failed to update order status" });
+    }
+  });
+
+  app.get('/api/admin/orders/:id', requireSupport, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getOrderById(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Dashboard Stats
+  app.get('/api/admin/stats', requireSupport, async (req, res) => {
+    try {
+      const stats = await storage.getOrderStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      res.status(500).json({ message: "Failed to fetch stats" });
     }
   });
 

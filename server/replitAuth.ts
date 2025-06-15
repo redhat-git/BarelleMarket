@@ -155,3 +155,36 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return;
   }
 };
+
+export const requireRole = (requiredRoles: string[]): RequestHandler => {
+  return async (req, res, next) => {
+    const user = req.user as any;
+    
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const userId = user.claims.sub;
+      const dbUser = await storage.getUser(userId);
+      
+      if (!dbUser || !dbUser.isActive) {
+        return res.status(403).json({ message: "Account inactive" });
+      }
+
+      if (!requiredRoles.includes(dbUser.role || 'user')) {
+        return res.status(403).json({ message: "Insufficient permissions" });
+      }
+
+      // Add user info to request for convenience
+      (req as any).dbUser = dbUser;
+      return next();
+    } catch (error) {
+      console.error("Role check error:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+};
+
+export const requireAdmin = requireRole(['admin']);
+export const requireSupport = requireRole(['admin', 'support']);
