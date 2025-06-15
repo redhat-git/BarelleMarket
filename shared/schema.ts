@@ -36,9 +36,12 @@ export const users = pgTable("users", {
   companyName: varchar("company_name"),
   companyType: varchar("company_type"), // restaurant, bar, hotel, retail, etc
   siret: varchar("siret"),
+  rccm: varchar("rccm"), // Registre du Commerce et du Crédit Mobilier
   address: text("address"),
   city: varchar("city"),
   phone: varchar("phone"),
+  secondContactName: varchar("second_contact_name"),
+  secondContactPhone: varchar("second_contact_phone"),
   isB2B: boolean("is_b2b").default(false),
   isActive: boolean("is_active").default(true),
   // Admin & Support roles
@@ -231,10 +234,13 @@ export const b2bRegistrationSchema = z.object({
   lastName: z.string().min(2, "Nom requis"),
   companyName: z.string().min(2, "Nom de l'entreprise requis"),
   companyType: z.string().min(2, "Type d'entreprise requis"),
+  rccm: z.string().min(1, "Numéro RCCM requis"),
   siret: z.string().optional(),
   address: z.string().min(10, "Adresse complète requise"),
   city: z.string().min(2, "Ville requise"),
   phone: z.string().min(8, "Numéro de téléphone requis"),
+  secondContactName: z.string().min(2, "Nom du second contact requis"),
+  secondContactPhone: z.string().min(8, "Téléphone du second contact requis"),
 });
 
 // Admin schemas

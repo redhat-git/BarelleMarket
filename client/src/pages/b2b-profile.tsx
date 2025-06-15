@@ -51,15 +51,18 @@ import {
 } from "lucide-react";
 
 const profileSchema = z.object({
-  firstName: z.string().min(2, "Prénom requis"),
-  lastName: z.string().min(2, "Nom requis"),
+  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   email: z.string().email("Email invalide"),
-  companyName: z.string().min(2, "Nom de l'entreprise requis"),
-  companyType: z.string().min(2, "Type d'entreprise requis"),
+  companyName: z.string().min(2, "Le nom de l'entreprise est requis"),
+  companyType: z.string().min(1, "Le type d'entreprise est requis"),
+  rccm: z.string().min(1, "Le numéro RCCM est requis"),
   siret: z.string().optional(),
-  address: z.string().min(10, "Adresse complète requise"),
-  city: z.string().min(2, "Ville requise"),
-  phone: z.string().min(8, "Numéro de téléphone requis"),
+  address: z.string().min(5, "L'adresse est requise"),
+  city: z.string().min(2, "La ville est requise"),
+  phone: z.string().min(10, "Le numéro de téléphone est requis"),
+  secondContactName: z.string().min(2, "Le nom du second contact est requis"),
+  secondContactPhone: z.string().min(10, "Le téléphone du second contact est requis"),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -78,10 +81,13 @@ export default function B2BProfile() {
       email: "",
       companyName: "",
       companyType: "",
+      rccm: "",
       siret: "",
       address: "",
       city: "",
       phone: "",
+      secondContactName: "",
+      secondContactPhone: "",
     },
   });
 
@@ -109,10 +115,13 @@ export default function B2BProfile() {
         email: user.email || "",
         companyName: user.companyName || "",
         companyType: user.companyType || "",
+        rccm: (user as any).rccm || "",
         siret: user.siret || "",
         address: user.address || "",
         city: user.city || "",
         phone: user.phone || "",
+        secondContactName: (user as any).secondContactName || "",
+        secondContactPhone: (user as any).secondContactPhone || "",
       });
     }
   }, [user, form]);
@@ -306,7 +315,7 @@ export default function B2BProfile() {
                           <User className="h-4 w-4" />
                           Informations Personnelles
                         </h4>
-                        
+
                         <FormField
                           control={form.control}
                           name="firstName"
@@ -401,6 +410,20 @@ export default function B2BProfile() {
 
                         <FormField
                           control={form.control}
+                          name="rccm"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>RCCM</FormLabel>
+                              <FormControl>
+                                <Input {...field} disabled={!isEditing} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
                           name="siret"
                           render={({ field }) => (
                             <FormItem>
@@ -433,6 +456,34 @@ export default function B2BProfile() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Ville</FormLabel>
+                              <FormControl>
+                                <Input {...field} disabled={!isEditing} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="secondContactName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nom du second contact</FormLabel>
+                              <FormControl>
+                                <Input {...field} disabled={!isEditing} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="secondContactPhone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Téléphone du second contact</FormLabel>
                               <FormControl>
                                 <Input {...field} disabled={!isEditing} />
                               </FormControl>
@@ -512,7 +563,7 @@ export default function B2BProfile() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="grid md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <p className="font-medium text-gray-700">Livraison</p>
@@ -612,9 +663,9 @@ export default function B2BProfile() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div className="text-center">
                     <Button className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber">
                       Programmer un rendez-vous

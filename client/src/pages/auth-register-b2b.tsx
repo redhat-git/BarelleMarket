@@ -17,10 +17,13 @@ const b2bRegistrationSchema = z.object({
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   companyName: z.string().min(2, "Le nom de l'entreprise est requis"),
   companyType: z.string().min(1, "Le type d'entreprise est requis"),
+  rccm: z.string().min(1, "Le numéro RCCM est requis"),
   siret: z.string().optional(),
   address: z.string().min(5, "L'adresse est requise"),
   city: z.string().min(2, "La ville est requise"),
   phone: z.string().min(10, "Le numéro de téléphone est requis"),
+  secondContactName: z.string().min(2, "Le nom du second contact est requis"),
+  secondContactPhone: z.string().min(10, "Le téléphone du second contact est requis"),
 });
 
 type B2BRegistrationData = z.infer<typeof b2bRegistrationSchema>;
@@ -37,10 +40,13 @@ export default function AuthRegisterB2B() {
       lastName: "",
       companyName: "",
       companyType: "",
+      rccm: "",
       siret: "",
       address: "",
       city: "",
       phone: "",
+      secondContactName: "",
+      secondContactPhone: "",
     },
   });
 
@@ -234,6 +240,21 @@ export default function AuthRegisterB2B() {
                 </div>
 
                 <div>
+                  <Label htmlFor="rccm">Numéro RCCM *</Label>
+                  <Input
+                    id="rccm"
+                    {...form.register("rccm")}
+                    className="mt-1"
+                    placeholder="CI-ABJ-01-2024-B12-00001"
+                  />
+                  {form.formState.errors.rccm && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {form.formState.errors.rccm.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <Label htmlFor="siret">Numéro SIRET (optionnel)</Label>
                   <Input
                     id="siret"
@@ -277,6 +298,44 @@ export default function AuthRegisterB2B() {
                   {form.formState.errors.city && (
                     <p className="text-sm text-red-600 mt-1">
                       {form.formState.errors.city.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Second Contact */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Phone className="w-5 h-5" />
+                  Contact secondaire
+                </h3>
+
+                <div>
+                  <Label htmlFor="secondContactName">Nom du second contact *</Label>
+                  <Input
+                    id="secondContactName"
+                    {...form.register("secondContactName")}
+                    className="mt-1"
+                    placeholder="Prénom Nom"
+                  />
+                  {form.formState.errors.secondContactName && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {form.formState.errors.secondContactName.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="secondContactPhone">Téléphone du second contact *</Label>
+                  <Input
+                    id="secondContactPhone"
+                    {...form.register("secondContactPhone")}
+                    className="mt-1"
+                    placeholder="+225 XX XX XX XX"
+                  />
+                  {form.formState.errors.secondContactPhone && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {form.formState.errors.secondContactPhone.message}
                     </p>
                   )}
                 </div>
