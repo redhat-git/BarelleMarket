@@ -84,7 +84,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(user: {
+  async upsertUser(userData: {
     id: string;
     email: string;
     firstName?: string;
@@ -95,12 +95,12 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values({
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
-          provider: user.provider || "replit",
+          id: userData.id,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          provider: userData.provider || "replit",
           role: "user",
           isActive: true,
           createdAt: new Date(),
@@ -109,11 +109,11 @@ export class DatabaseStorage implements IStorage {
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
-          provider: user.provider || "replit",
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          provider: userData.provider || "replit",
           updatedAt: new Date(),
         },
       })
