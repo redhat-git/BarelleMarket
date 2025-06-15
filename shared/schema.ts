@@ -25,7 +25,7 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Replit Auth + B2B
+// User storage table for Replit Auth + B2B + Admin
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
@@ -41,6 +41,9 @@ export const users = pgTable("users", {
   phone: varchar("phone"),
   isB2B: boolean("is_b2b").default(false),
   isActive: boolean("is_active").default(true),
+  // Admin & Support roles
+  role: varchar("role").default("user"), // user, support, admin
+  permissions: jsonb("permissions"), // specific permissions for fine-grained access
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -234,6 +237,40 @@ export const b2bRegistrationSchema = z.object({
   phone: z.string().min(8, "Numéro de téléphone requis"),
 });
 
+// Admin schemas
+export const createUserSchema = z.object({
+  email: z.string().email("Email invalide"),
+  firstName: z.string().min(2, "Prénom requis"),
+  lastName: z.string().min(2, "Nom requis"),
+  role: z.enum(["user", "support", "admin"]),
+  companyName: z.string().optional(),
+  companyType: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+});
+
+export const updateOrderStatusSchema = z.object({
+  orderStatus: z.enum(["pending", "confirmed", "preparing", "shipped", "delivered", "cancelled"]),
+  paymentStatus: z.enum(["pending", "paid", "failed"]),
+  notes: z.string().optional(),
+});
+
+export const createProductSchema = z.object({
+  name: z.string().min(2, "Nom du produit requis"),
+  slug: z.string().min(2, "Slug requis"),
+  description: z.string().min(10, "Description requise"),
+  shortDescription: z.string().max(300).optional(),
+  price: z.string().min(1, "Prix requis"),
+  originalPrice: z.string().optional(),
+  categoryId: z.number().min(1, "Catégorie requise"),
+  imageUrl: z.string().url().optional(),
+  additionalImages: z.array(z.string().url()).optional(),
+  specifications: z.record(z.string()).optional(),
+  stockQuantity: z.number().min(0).default(0),
+  isFeatured: z.boolean().default(false),
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -244,3 +281,6 @@ export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type B2COrder = z.infer<typeof b2cOrderSchema>;
 export type B2BRegistration = z.infer<typeof b2bRegistrationSchema>;
+export type CreateUser = z.infer<typeof createUserSchema>;
+export type UpdateOrderStatus = z.infer<typeof updateOrderStatusSchema>;
+export type CreateProduct = z.infer<typeof createProductSchema>;

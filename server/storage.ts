@@ -14,6 +14,9 @@ import {
   type OrderItem,
   type B2COrder,
   type B2BRegistration,
+  type CreateUser,
+  type UpdateOrderStatus,
+  type CreateProduct,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, like, inArray } from "drizzle-orm";
@@ -27,15 +30,28 @@ export interface IStorage {
   registerB2BUser(registration: B2BRegistration): Promise<User>;
   updateB2BProfile(userId: string, profile: Partial<UpsertUser>): Promise<User>;
   
-  // Categories
+  // Admin operations
+  getAllUsers(page?: number, limit?: number): Promise<{ users: User[]; total: number }>;
+  createUser(userData: CreateUser): Promise<User>;
+  updateUserRole(userId: string, role: string, permissions?: any): Promise<User>;
+  deactivateUser(userId: string): Promise<void>;
+  activateUser(userId: string): Promise<void>;
+  
+  // Categories management
   getCategories(): Promise<Category[]>;
   getCategoryBySlug(slug: string): Promise<Category | undefined>;
+  createCategory(categoryData: any): Promise<Category>;
+  updateCategory(id: number, categoryData: any): Promise<Category>;
+  deleteCategory(id: number): Promise<void>;
   
-  // Products
+  // Products management
   getProducts(categoryId?: number, search?: string, featured?: boolean): Promise<Product[]>;
   getProductById(id: number): Promise<Product | undefined>;
   getProductBySlug(slug: string): Promise<Product | undefined>;
   getFeaturedProducts(limit?: number): Promise<Product[]>;
+  createProduct(productData: CreateProduct): Promise<Product>;
+  updateProduct(id: number, productData: Partial<CreateProduct>): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
   
   // Cart operations
   getCartItems(sessionId: string, userId?: string): Promise<(CartItem & { product: Product })[]>;
@@ -49,6 +65,16 @@ export interface IStorage {
   createB2BOrder(userId: string, orderData: Partial<B2COrder>, cartItems: (CartItem & { product: Product })[]): Promise<Order>;
   getOrdersByUser(userId: string): Promise<Order[]>;
   getOrderById(id: number): Promise<(Order & { orderItems: (OrderItem & { product: Product })[] }) | undefined>;
+  
+  // Admin order management
+  getAllOrders(page?: number, limit?: number, status?: string): Promise<{ orders: Order[]; total: number }>;
+  updateOrderStatus(orderId: number, statusData: UpdateOrderStatus): Promise<Order>;
+  getOrderStats(): Promise<{
+    totalOrders: number;
+    pendingOrders: number;
+    todayOrders: number;
+    totalRevenue: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -79,6 +105,7 @@ export class DatabaseStorage implements IStorage {
       id: Math.random().toString(), // Will be replaced by actual auth ID
       isB2B: true,
       isActive: true,
+      role: "user",
     };
     
     const [user] = await db.insert(users).values(userData).returning();
@@ -94,7 +121,61 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Categories
+  // Admin operations
+  async getAllUsers(page: number = 1, limit: number = 20): Promise<{ users: User[]; total: number }> {
+    const offset = (page - 1) * limit;
+    
+    const [usersData, totalCount] = await Promise.all([
+      db.select().from(users).limit(limit).offset(offset).orderBy(desc(users.createdAt)),
+      db.select({ count: users.id }).from(users)
+    ]);
+    
+    return {
+      users: usersData,
+      total: totalCount.length
+    };
+  }
+
+  async createUser(userData: CreateUser): Promise<User> {
+    const newUserData: UpsertUser = {
+      ...userData,
+      id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      isB2B: userData.role !== "user",
+      isActive: true,
+    };
+    
+    const [user] = await db.insert(users).values(newUserData).returning();
+    return user;
+  }
+
+  async updateUserRole(userId: string, role: string, permissions?: any): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        role, 
+        permissions, 
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async deactivateUser(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  async activateUser(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  // Categories management
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories).where(eq(categories.isActive, true));
   }
@@ -105,6 +186,27 @@ export class DatabaseStorage implements IStorage {
       .from(categories)
       .where(and(eq(categories.slug, slug), eq(categories.isActive, true)));
     return category;
+  }
+
+  async createCategory(categoryData: any): Promise<Category> {
+    const [category] = await db.insert(categories).values(categoryData).returning();
+    return category;
+  }
+
+  async updateCategory(id: number, categoryData: any): Promise<Category> {
+    const [category] = await db
+      .update(categories)
+      .set(categoryData)
+      .where(eq(categories.id, id))
+      .returning();
+    return category;
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await db
+      .update(categories)
+      .set({ isActive: false })
+      .where(eq(categories.id, id));
   }
 
   // Products
@@ -150,6 +252,31 @@ export class DatabaseStorage implements IStorage {
       .from(products)
       .where(and(eq(products.isActive, true), eq(products.isFeatured, true)))
       .limit(limit);
+  }
+
+  async createProduct(productData: CreateProduct): Promise<Product> {
+    const [product] = await db.insert(products).values({
+      ...productData,
+      rating: "0.0",
+      reviewCount: 0,
+    }).returning();
+    return product;
+  }
+
+  async updateProduct(id: number, productData: Partial<CreateProduct>): Promise<Product> {
+    const [product] = await db
+      .update(products)
+      .set({ ...productData, updatedAt: new Date() })
+      .where(eq(products.id, id))
+      .returning();
+    return product;
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    await db
+      .update(products)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(products.id, id));
   }
 
   // Cart operations
@@ -334,6 +461,73 @@ export class DatabaseStorage implements IStorage {
     return {
       ...order,
       orderItems: items.map(item => ({ ...item.order_items, product: item.products }))
+    };
+  }
+
+  // Admin order management
+  async getAllOrders(page: number = 1, limit: number = 20, status?: string): Promise<{ orders: Order[]; total: number }> {
+    const offset = (page - 1) * limit;
+    
+    let baseQuery = db.select().from(orders);
+    let countQuery = db.select({ count: orders.id }).from(orders);
+    
+    if (status) {
+      baseQuery = baseQuery.where(eq(orders.orderStatus, status));
+      countQuery = countQuery.where(eq(orders.orderStatus, status));
+    }
+    
+    const [ordersData, totalCount] = await Promise.all([
+      baseQuery.limit(limit).offset(offset).orderBy(desc(orders.createdAt)),
+      countQuery
+    ]);
+    
+    return {
+      orders: ordersData,
+      total: totalCount.length
+    };
+  }
+
+  async updateOrderStatus(orderId: number, statusData: UpdateOrderStatus): Promise<Order> {
+    const [order] = await db
+      .update(orders)
+      .set({ 
+        ...statusData, 
+        updatedAt: new Date() 
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+    return order;
+  }
+
+  async getOrderStats(): Promise<{
+    totalOrders: number;
+    pendingOrders: number;
+    todayOrders: number;
+    totalRevenue: number;
+  }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const [
+      totalOrders,
+      pendingOrders,
+      todayOrders,
+      totalRevenue
+    ] = await Promise.all([
+      db.select({ count: orders.id }).from(orders),
+      db.select({ count: orders.id }).from(orders).where(eq(orders.orderStatus, 'pending')),
+      db.select({ count: orders.id }).from(orders).where(and(
+        eq(orders.orderStatus, 'delivered'),
+        eq(orders.createdAt, today)
+      )),
+      db.select({ sum: orders.total }).from(orders).where(eq(orders.orderStatus, 'delivered'))
+    ]);
+
+    return {
+      totalOrders: totalOrders.length,
+      pendingOrders: pendingOrders.length,
+      todayOrders: todayOrders.length,
+      totalRevenue: totalRevenue.reduce((sum, order) => sum + parseFloat(order.sum || '0'), 0)
     };
   }
 }
