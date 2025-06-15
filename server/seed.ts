@@ -108,7 +108,7 @@ async function seed() {
         shortDescription: "Kit complet pour dégustation professionnelle",
         price: "15000",
         imageUrl: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400",
-        categoryId: insertedCategories[3].id,
+        categoryId: existingCategories.find(c => c.slug === 'accessoires')?.id || 4,
         rating: "4.5",
         reviewCount: 6,
         stockQuantity: 30,
