@@ -37,10 +37,11 @@ async function seed() {
       },
     ];
 
-    const insertedCategories = await db.insert(categories).values(categoryData).onConflictDoNothing().returning();
+    await db.insert(categories).values(categoryData).onConflictDoNothing();
     console.log(`✅ Categories ensured in database`);
 
-
+    // Get existing categories
+    const existingCategories = await db.select().from(categories);
 
     // Create sample products
     const productData = [
@@ -51,7 +52,7 @@ async function seed() {
         shortDescription: "Spiritueux premium ivoirien authentique",
         price: "25000",
         imageUrl: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400",
-        categoryId: insertedCategories[0].id,
+        categoryId: existingCategories.find(c => c.slug === 'spiritueux')?.id || 1,
         rating: "4.8",
         reviewCount: 12,
         stockQuantity: 50,
@@ -65,7 +66,7 @@ async function seed() {
         shortDescription: "Boisson rafraîchissante aux fleurs d'hibiscus",
         price: "3500",
         imageUrl: "https://images.unsplash.com/photo-1546938576-6e6a64f317cc?w=400",
-        categoryId: insertedCategories[1].id,
+        categoryId: existingCategories.find(c => c.slug === 'jus-naturels')?.id || 2,
         rating: "4.6",
         reviewCount: 28,
         stockQuantity: 120,
@@ -79,7 +80,7 @@ async function seed() {
         shortDescription: "Boisson épicée revitalisante",
         price: "4000",
         imageUrl: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400",
-        categoryId: insertedCategories[1].id,
+        categoryId: existingCategories.find(c => c.slug === 'jus-naturels')?.id || 2,
         rating: "4.7",
         reviewCount: 15,
         stockQuantity: 80,
@@ -93,7 +94,7 @@ async function seed() {
         shortDescription: "Cigare artisanal de qualité supérieure",
         price: "8500",
         imageUrl: "https://images.unsplash.com/photo-1516796181074-bf453fbfa3e6?w=400",
-        categoryId: insertedCategories[2].id,
+        categoryId: existingCategories.find(c => c.slug === 'cigares')?.id || 3,
         rating: "4.9",
         reviewCount: 8,
         stockQuantity: 25,
@@ -116,8 +117,8 @@ async function seed() {
       },
     ];
 
-    const insertedProducts = await db.insert(products).values(productData).returning();
-    console.log(`✅ Created ${insertedProducts.length} products`);
+    const insertedProducts = await db.insert(products).values(productData).onConflictDoNothing().returning();
+    console.log(`✅ Products ensured in database`);
 
     // Create admin user
     const adminUser = {
