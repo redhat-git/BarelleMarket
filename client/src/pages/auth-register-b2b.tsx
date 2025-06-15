@@ -207,6 +207,7 @@ export default function AuthRegisterB2B() {
                     id="companyName"
                     {...form.register("companyName")}
                     className="mt-1"
+                    placeholder="Nom officiel de votre entreprise"
                   />
                   {form.formState.errors.companyName && (
                     <p className="text-sm text-red-600 mt-1">
@@ -338,6 +339,28 @@ export default function AuthRegisterB2B() {
                       {form.formState.errors.secondContactPhone.message}
                     </p>
                   )}
+                </div>
+              </div>
+
+              {/* MOQ Information */}
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="bg-amber-400 rounded-full p-1 mt-0.5">
+                    <svg className="w-4 h-4 text-amber-800" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-amber-800 mb-1">
+                      Commande Minimum B2B
+                    </h4>
+                    <p className="text-sm text-amber-700">
+                      <strong>Montant minimum de commande : 200 000 XOF (FCFA)</strong>
+                    </p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      Ce montant minimum vous permet de bénéficier de nos tarifs préférentiels et de la livraison gratuite.
+                    </p>
+                  </div>
                 </div>
               </div>
 

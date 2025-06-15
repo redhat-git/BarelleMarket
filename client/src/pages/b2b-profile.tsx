@@ -608,7 +608,11 @@ export default function B2BProfile() {
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-ivorian-yellow" />
-                    <span>Livraison gratuite pour les commandes +100,000 FCFA</span>
+                    <span>Livraison gratuite dès 200 000 XOF (FCFA)</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-ivorian-yellow" />
+                    <span>Commande minimum : 200 000 XOF (FCFA)</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-ivorian-yellow" />
