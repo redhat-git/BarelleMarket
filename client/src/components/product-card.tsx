@@ -1,3 +1,7 @@
+The ProductCard component is updated to include a hidePrice prop, conditionally hiding the price display based on its value.
+```
+
+```tsx
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,13 +27,15 @@ interface ProductCardProps {
   categoryName?: string;
   viewMode?: "grid" | "list";
   showB2BPrice?: boolean;
+  hidePrice?: boolean;
 }
 
 export default function ProductCard({ 
   product, 
   categoryName,
   viewMode = "grid",
-  showB2BPrice = false 
+  showB2BPrice = false,
+  hidePrice = false
 }: ProductCardProps) {
   const { addToCart, isAdding } = useCart();
 
@@ -231,9 +237,11 @@ export default function ProductCard({
                 </div>
               </div>
             ) : (
-              <div className="text-lg font-bold text-ivorian-black">
-                {formatPrice(product.price)}
-              </div>
+              !hidePrice && (
+                <div className="text-lg font-bold text-ivorian-black">
+                  {formatPrice(product.price)}
+                </div>
+              )
             )}
           </div>
 
