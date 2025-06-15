@@ -3,8 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Package, ShoppingCart, TrendingUp } from "lucide-react";
 
+interface AdminStats {
+  totalOrders: number;
+  pendingOrders: number;
+  todayOrders: number;
+  totalRevenue: number;
+}
+
 export default function AdminDashboard() {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
   });
 
@@ -36,38 +43,50 @@ export default function AdminDashboard() {
       title: "Commandes Totales",
       value: stats?.totalOrders || 0,
       icon: ShoppingCart,
-      color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-100 dark:bg-blue-900",
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      borderColor: "border-amber-200",
     },
     {
       title: "Commandes en Attente",
       value: stats?.pendingOrders || 0,
       icon: Package,
-      color: "text-yellow-600 dark:text-yellow-400",
-      bgColor: "bg-yellow-100 dark:bg-yellow-900",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      borderColor: "border-orange-200",
     },
     {
       title: "Commandes Aujourd'hui",
       value: stats?.todayOrders || 0,
       icon: TrendingUp,
-      color: "text-green-600 dark:text-green-400",
-      bgColor: "bg-green-100 dark:bg-green-900",
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      borderColor: "border-green-200",
     },
     {
       title: "Chiffre d'Affaires",
       value: `${(stats?.totalRevenue || 0).toLocaleString()} CFA`,
       icon: Users,
-      color: "text-purple-600 dark:text-purple-400",
-      bgColor: "bg-purple-100 dark:bg-purple-900",
+      color: "text-black",
+      bgColor: "bg-gray-50",
+      borderColor: "border-gray-200",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-amber-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Tableau de Bord Administrateur</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center">
+              <Users className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Tableau de Bord Administrateur</h1>
+              <p className="text-gray-600">Barelle Distribution - Interface de gestion</p>
+            </div>
+          </div>
+          <p className="text-gray-600 mt-2">
             Gérez votre plateforme e-commerce Barelle Distribution
           </p>
         </div>
@@ -77,18 +96,24 @@ export default function AdminDashboard() {
           {statCards.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card key={index} className={`hover:shadow-xl transition-all duration-300 border-2 ${stat.borderColor} ${stat.bgColor}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <CardTitle className="text-sm font-medium text-gray-700">
                     {stat.title}
                   </CardTitle>
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <IconComponent className={`h-4 w-4 ${stat.color}`} />
+                  <div className="p-3 rounded-xl bg-white shadow-sm">
+                    <IconComponent className={`h-5 w-5 ${stat.color}`} />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
                     {stat.value}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {index === 0 && "Total des commandes reçues"}
+                    {index === 1 && "En cours de traitement"}
+                    {index === 2 && "Commandes du jour"}
+                    {index === 3 && "Revenus totaux en CFA"}
                   </div>
                 </CardContent>
               </Card>
@@ -98,40 +123,44 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-xl transition-all duration-300 border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
-                Gestion des Utilisateurs
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Users className="h-5 w-5 text-amber-600" />
+                </div>
+                <span className="text-gray-900">Gestion des Utilisateurs</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Gérez les comptes utilisateurs, les rôles et les permissions.
+              <p className="text-gray-600 mb-4">
+                Gérez les comptes utilisateurs B2B, les rôles et les permissions d'accès.
               </p>
               <a
                 href="/admin/users"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-black font-semibold rounded-lg hover:from-amber-500 hover:to-amber-600 transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Gérer les Utilisateurs
               </a>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-xl transition-all duration-300 border-2 border-green-200 bg-gradient-to-br from-green-50 to-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-green-600" />
-                Gestion des Produits
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Package className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-gray-900">Gestion des Produits</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Ajoutez, modifiez et organisez votre catalogue de produits.
+              <p className="text-gray-600 mb-4">
+                Ajoutez, modifiez et organisez votre catalogue de produits ivoiriens.
               </p>
               <a
                 href="/admin/products"
-                className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Gérer les Produits
               </a>
