@@ -10,6 +10,10 @@ import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
 import B2BProfile from "@/pages/b2b-profile";
+import AdminDashboard from "@/pages/admin-dashboard";
+import AdminUsers from "@/pages/admin-users";
+import AdminProducts from "@/pages/admin-products";
+import AdminOrders from "@/pages/admin-orders";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,6 +29,14 @@ function Router() {
           <Route path="/products/:slug" component={ProductDetail} />
           {isAuthenticated && (
             <Route path="/profile" component={B2BProfile} />
+          )}
+          {isAuthenticated && (
+            <>
+              <Route path="/admin" component={AdminDashboard} />
+              <Route path="/admin/users" component={AdminUsers} />
+              <Route path="/admin/products" component={AdminProducts} />
+              <Route path="/admin/orders" component={AdminOrders} />
+            </>
           )}
           <Route component={NotFound} />
         </>
