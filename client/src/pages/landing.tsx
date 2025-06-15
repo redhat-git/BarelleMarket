@@ -95,7 +95,7 @@ export default function Landing() {
                   onClick={() => window.location.href = '/api/login'}
                 >
                   <Users className="mr-2 h-5 w-5" />
-                  Espace professionnel
+                  Se connecter / S'inscrire
                 </Button>
               </div>
 
@@ -322,10 +322,10 @@ export default function Landing() {
                     className="w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4"
                     onClick={() => window.location.href = '/api/login'}
                   >
-                    S'inscrire maintenant
+                    Se connecter / S'inscrire
                   </Button>
                   <p className="text-sm text-gray-400 text-center">
-                    Déjà inscrit ? <button onClick={() => window.location.href = '/api/login'} className="text-amber-400 hover:underline">Se connecter</button>
+                    Accès gratuit avec votre compte Replit
                   </p>
                 </div>
               </div>
