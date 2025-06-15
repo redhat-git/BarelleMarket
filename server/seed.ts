@@ -37,32 +37,10 @@ async function seed() {
       },
     ];
 
-    const insertedCategories = await db.insert(categories).values(categoryData).returning();
-    console.log(`✅ Created ${insertedCategories.length} categories`);
+    const insertedCategories = await db.insert(categories).values(categoryData).onConflictDoNothing().returning();
+    console.log(`✅ Categories ensured in database`);
 
-    // Create admin user
-    const adminUser = {
-      id: "admin-1",
-      email: "admin@barelle.ci",
-      firstName: "Administrateur",
-      lastName: "Barelle",
-      role: "admin",
-      permissions: JSON.stringify({
-        users: { read: true, write: true, delete: true },
-        products: { read: true, write: true, delete: true },
-        orders: { read: true, write: true, delete: true },
-        analytics: { read: true }
-      }),
-      companyName: "Barelle Distribution",
-      companyType: "Distribution",
-      address: "Abidjan, Côte d'Ivoire",
-      city: "Abidjan",
-      phone: "+225 XX XX XX XX",
-      isActive: true,
-    };
 
-    await db.insert(users).values(adminUser).onConflictDoNothing();
-    console.log(`✅ Created admin user: admin@barelle.ci`);
 
     // Create sample products
     const productData = [
