@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
       const search = req.query.search as string;
       const featured = req.query.featured === 'true';
-      
+
       const products = await storage.getProducts(categoryId, search, featured);
       res.json(products);
     } catch (error) {
@@ -133,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessionId = req.sessionID;
       const userId = req.user?.claims?.sub;
-      
+
       const cartItems = await storage.getCartItems(sessionId, userId);
       res.json(cartItems);
     } catch (error) {
@@ -147,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { productId, quantity = 1 } = req.body;
       const sessionId = req.sessionID;
       const userId = req.user?.claims?.sub;
-      
+
       const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
       res.json(cartItem);
     } catch (error) {
@@ -160,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const { quantity } = req.body;
-      
+
       const cartItem = await storage.updateCartItem(id, quantity);
       res.json(cartItem);
     } catch (error) {
@@ -184,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessionId = req.sessionID;
       const userId = req.user?.claims?.sub;
-      
+
       await storage.clearCart(sessionId, userId);
       res.json({ success: true });
     } catch (error) {
@@ -198,13 +198,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const orderData = b2cOrderSchema.parse(req.body);
       const sessionId = req.sessionID;
-      
+
       // Get cart items
       const cartItems = await storage.getCartItems(sessionId);
       if (cartItems.length === 0) {
         return res.status(400).json({ message: "Cart is empty" });
       }
-      
+
       const order = await storage.createB2COrder(orderData, cartItems, sessionId);
       res.json(order);
     } catch (error) {
@@ -217,13 +217,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const orderData = req.body;
-      
+
       // Get cart items
       const cartItems = await storage.getCartItems('', userId);
       if (cartItems.length === 0) {
         return res.status(400).json({ message: "Cart is empty" });
       }
-      
+
       const order = await storage.createB2BOrder(userId, orderData, cartItems);
       res.json(order);
     } catch (error) {
@@ -247,12 +247,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const userId = req.user.claims.sub;
-      
+
       const order = await storage.getOrderById(id);
       if (!order || order.userId !== userId) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       res.json(order);
     } catch (error) {
       console.error("Error fetching order:", error);
@@ -261,13 +261,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Routes
-  
+
   // User Management
   app.get('/api/admin/users', requireAdmin, async (req, res) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
-      
+
       const result = await storage.getAllUsers(page, limit);
       res.json(result);
     } catch (error) {
@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.params.id;
       const { role, permissions } = req.body;
-      
+
       const user = await storage.updateUserRole(userId, role, permissions);
       res.json(user);
     } catch (error) {
@@ -338,7 +338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const productData = req.body;
-      
+
       const product = await storage.updateProduct(id, productData);
       res.json(product);
     } catch (error) {
@@ -374,7 +374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const categoryData = req.body;
-      
+
       const category = await storage.updateCategory(id, categoryData);
       res.json(category);
     } catch (error) {
@@ -400,7 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string;
-      
+
       const result = await storage.getAllOrders(page, limit, status);
       res.json(result);
     } catch (error) {
@@ -413,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const orderId = parseInt(req.params.id);
       const statusData = updateOrderStatusSchema.parse(req.body);
-      
+
       const order = await storage.updateOrderStatus(orderId, statusData);
       res.json(order);
     } catch (error) {
@@ -426,11 +426,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const order = await storage.getOrderById(id);
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       res.json(order);
     } catch (error) {
       console.error("Error fetching order:", error);
@@ -453,12 +453,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/setup/admin', async (req, res) => {
     try {
       const { email, firstName, lastName, setupKey } = req.body;
-      
+
       // Simple protection - you should change this key
       if (setupKey !== "BARELLE_SETUP_2024") {
         return res.status(403).json({ message: "Invalid setup key" });
       }
-      
+
       const admin = await storage.createAdminUser(email, firstName, lastName);
       res.json({ message: "Admin créé avec succès", user: admin });
     } catch (error) {
@@ -466,6 +466,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create admin" });
     }
   });
+
+  // Google OAuth routes (only if configured)
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    app.get('/api/auth/google', 
+      passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
+
+    app.get('/api/auth/google/callback',
+      passport.authenticate('google', { failureRedirect: '/auth/login' }),
+      (req, res) => {
+        res.redirect('/');
+      }
+    );
+  }
+
+  // Facebook OAuth routes (only if configured)
+  if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    app.get('/api/auth/facebook',
+      passport.authenticate('facebook', { scope: ['email'] })
+    );
+
+    app.get('/api/auth/facebook/callback',
+      passport.authenticate('facebook', { failureRedirect: '/auth/login' }),
+      (req, res) => {
+        res.redirect('/');
+      }
+    );
+  }
 
   const httpServer = createServer(app);
   return httpServer;
