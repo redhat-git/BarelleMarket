@@ -436,6 +436,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create initial admin (for setup purposes)
+  app.post('/api/setup/admin', async (req, res) => {
+    try {
+      const { email, firstName, lastName, setupKey } = req.body;
+      
+      // Simple protection - you should change this key
+      if (setupKey !== "BARELLE_SETUP_2024") {
+        return res.status(403).json({ message: "Invalid setup key" });
+      }
+      
+      const admin = await storage.createAdminUser(email, firstName, lastName);
+      res.json({ message: "Admin créé avec succès", user: admin });
+    } catch (error) {
+      console.error("Error creating admin:", error);
+      res.status(500).json({ message: "Failed to create admin" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

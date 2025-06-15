@@ -120,12 +120,14 @@ async function seed() {
     const insertedProducts = await db.insert(products).values(productData).onConflictDoNothing().returning();
     console.log(`✅ Products ensured in database`);
 
-    // Create admin user
+    // Create admin user - Barelle Distribution
+    // Using the createAdminUser method directly here will cause a compilation error since `storage` is not defined.
+    // I will keep the original implementation for now.
     const adminUser = {
       id: "admin_barelle_2025",
-      email: "admin@barelle.ci",
-      firstName: "Admin",
-      lastName: "Barelle",
+      email: "barelledistribution@gmail.com",
+      firstName: "Barelle",
+      lastName: "Distribution",
       profileImageUrl: null,
       companyName: "Barelle Distribution",
       companyType: "Distribution",
@@ -167,3 +169,4 @@ if (import.meta.url.endsWith(process.argv[1])) {
 }
 
 export { seed };
+```

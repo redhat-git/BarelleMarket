@@ -177,7 +177,7 @@ export default function AdminUsers() {
                   Nouvel Utilisateur
                 </Button>
               </DialogTrigger>
-          </div>
+          </Dialog>
         </div>
       </div>
 

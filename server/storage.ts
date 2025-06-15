@@ -175,6 +175,41 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
   }
 
+  async createAdminUser(email: string, firstName: string, lastName: string): Promise<User> {
+    const adminData: UpsertUser = {
+      id: `admin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      email,
+      firstName,
+      lastName,
+      role: "admin",
+      isActive: true,
+      isB2B: false,
+    };
+    
+    // Check if user already exists
+    const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    
+    if (existingUser.length > 0) {
+      // Update existing user to admin
+      const [updatedUser] = await db
+        .update(users)
+        .set({ 
+          role: "admin", 
+          isActive: true,
+          firstName,
+          lastName,
+          updatedAt: new Date() 
+        })
+        .where(eq(users.email, email))
+        .returning();
+      return updatedUser;
+    } else {
+      // Create new admin user
+      const [newUser] = await db.insert(users).values(adminData).returning();
+      return newUser;
+    }
+  }
+
   // Categories management
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories).where(eq(categories.isActive, true));
