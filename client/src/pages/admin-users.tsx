@@ -170,19 +170,14 @@ export default function AdminUsers() {
                 </p>
               </div>
             </div>
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm shadow-lg">
                   <Plus className="w-4 h-4 mr-2" />
                   Nouvel Utilisateur
                 </Button>
               </DialogTrigger>
-          </Dialog>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-            <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Créer un Nouvel Utilisateur</DialogTitle>
               </DialogHeader>
@@ -295,9 +290,12 @@ export default function AdminUsers() {
                   </div>
                 </form>
               </Form>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
 
         <Card>
           <CardHeader>
