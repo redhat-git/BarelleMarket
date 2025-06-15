@@ -247,11 +247,20 @@ export default function Landing() {
             {featuredProducts.slice(0, 4).map((product) => {
               const category = categories.find(c => c.id === product.categoryId);
               return (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  categoryName={category?.name}
-                />
+                
+                  
+                    
+                      
+                        
+                          Voir Détails
+                        
+                      
+                      
+                        Découvrir
+                      
+                    
+                  
+                
               );
             })}
           </div>
