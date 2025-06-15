@@ -1,7 +1,3 @@
-The ProductCard component is updated to include a hidePrice prop, conditionally hiding the price display based on its value.
-```
-
-```tsx
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
