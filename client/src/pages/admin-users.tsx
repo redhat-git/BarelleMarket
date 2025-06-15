@@ -441,6 +441,7 @@ export default function AdminUsers() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
