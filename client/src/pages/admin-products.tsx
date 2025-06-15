@@ -211,12 +211,7 @@ export default function AdminProducts() {
                   Nouveau Produit
                 </Button>
               </DialogTrigger>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingProduct ? "Modifier le Produit" : "Créer un Nouveau Produit"}
@@ -396,9 +391,13 @@ export default function AdminProducts() {
                   </div>
                 </form>
               </Form>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
 
         <Card className="border-2 border-yellow-200 bg-white/80 backdrop-blur-sm shadow-xl">
           <CardHeader className="bg-gradient-to-r from-yellow-50 to-amber-50 border-b border-yellow-200">
