@@ -6,19 +6,36 @@ import Footer from "@/components/footer";
 import ProductCard from "@/components/product-card";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Star, Globe, Award, Users, ShoppingBag, Truck, Shield } from "lucide-react";
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  imageUrl?: string;
+  categoryId: number;
+  rating: string;
+  reviewCount: number;
+}
 
 export default function Landing() {
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
-  const { data: featuredProducts = [] } = useQuery({
+  const { data: featuredProducts = [] } = useQuery<Product[]>({
     queryKey: ["/api/products/featured"],
   });
 
   const getCategoryImage = (slug: string) => {
-    const images = {
+    const images: { [key: string]: string } = {
       'spiritueux': 'https://images.unsplash.com/photo-1613743983303-b3e89f8a2b80?w=400&h=300&fit=crop',
       'jus-naturels': 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop',
       'cigares': 'https://images.unsplash.com/photo-1605792657660-596af9009e82?w=400&h=300&fit=crop',
@@ -28,8 +45,8 @@ export default function Landing() {
   };
 
   const getCategoryColor = (slug: string) => {
-    const colors = {
-      'spiritueux': 'from-ivorian-yellow to-ivorian-amber',
+    const colors: { [key: string]: string } = {
+      'spiritueux': 'from-amber-400 to-amber-600',
       'jus-naturels': 'from-green-400 to-green-600',
       'cigares': 'from-amber-700 to-amber-900',
       'accessoires': 'from-gray-700 to-gray-900',
@@ -38,81 +55,174 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-ivorian-black to-ivorian-dark text-white">
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div className="relative container mx-auto px-4 py-16 lg:py-24">
+      <section className="relative bg-gradient-to-br from-black via-gray-900 to-amber-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
+        <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-amber-400/20 to-transparent"></div>
+        
+        <div className="relative container mx-auto px-4 py-20 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl lg:text-6xl font-bold mb-6">
-                Découvrez l'Excellence 
-                <span className="text-ivorian-yellow"> Ivoirienne</span>
-              </h2>
-              <p className="text-xl mb-8 text-gray-300">
-                Spiritueux d'exception, jus naturels authentiques et cigares premium. 
-                Une sélection exclusive de produits 100% ivoiriens pour les connaisseurs.
-              </p>
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <Badge className="bg-amber-400 text-black font-semibold px-4 py-2">
+                  🇨🇮 100% Produits Ivoiriens Authentiques
+                </Badge>
+                <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+                  <span className="text-white">Barelle</span>
+                  <br />
+                  <span className="text-amber-400">Distribution</span>
+                </h1>
+                <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed">
+                  Découvrez l'excellence des produits ivoiriens : spiritueux premium, 
+                  jus naturels, cigares artisanaux et accessoires de qualité.
+                </p>
+              </div>
+              
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/products">
-                  <Button className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber font-semibold px-8 py-4 text-lg">
-                    Découvrir nos Produits
+                  <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-black font-semibold px-8 py-4 text-lg">
+                    <ShoppingBag className="mr-2 h-5 w-5" />
+                    Découvrir nos produits
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  className="border-ivorian-yellow text-ivorian-yellow hover:bg-ivorian-yellow hover:text-ivorian-black font-semibold px-8 py-4 text-lg"
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black px-8 py-4 text-lg"
                   onClick={() => window.location.href = '/api/login'}
                 >
-                  Espace Professionnel B2B
+                  <Users className="mr-2 h-5 w-5" />
+                  Espace professionnel
                 </Button>
               </div>
-            </div>
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=800&h=600&fit=crop"
-                alt="Bouteille de spiritueux ivoirien premium"
-                className="rounded-xl shadow-2xl w-full h-auto"
-              />
-              <div className="absolute -bottom-4 -right-4 bg-ivorian-yellow text-ivorian-black p-4 rounded-lg shadow-lg">
-                <p className="font-bold text-sm">100% Authentique</p>
-                <p className="text-xs">Côte d'Ivoire</p>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-700">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-amber-400">500+</div>
+                  <div className="text-sm text-gray-400">Produits authentiques</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-amber-400">4</div>
+                  <div className="text-sm text-gray-400">Catégories premium</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-amber-400">100%</div>
+                  <div className="text-sm text-gray-400">Made in Côte d'Ivoire</div>
+                </div>
               </div>
+            </div>
+
+            <div className="relative">
+              <div className="relative z-10">
+                <img 
+                  src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=800&fit=crop&crop=center" 
+                  alt="Produits ivoiriens premium" 
+                  className="rounded-2xl shadow-2xl border-4 border-amber-400/30"
+                />
+              </div>
+              <div className="absolute -top-4 -right-4 w-full h-full bg-gradient-to-br from-amber-400/30 to-transparent rounded-2xl"></div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-16 bg-white">
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-ivorian-black mb-4">Nos Catégories</h3>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Explorez notre sélection exclusive de produits ivoiriens authentiques, 
-              soigneusement choisis pour leur qualité exceptionnelle.
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Pourquoi choisir Barelle Distribution ?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Nous sommes votre partenaire de confiance pour découvrir et distribuer 
+              les meilleurs produits de Côte d'Ivoire
             </p>
           </div>
-          
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow border-2 hover:border-amber-400">
+              <CardContent className="space-y-4">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                  <Award className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">Qualité Premium</h3>
+                <p className="text-gray-600">
+                  Sélection rigoureuse des meilleurs producteurs ivoiriens
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow border-2 hover:border-amber-400">
+              <CardContent className="space-y-4">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                  <Globe className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">Livraison Internationale</h3>
+                <p className="text-gray-600">
+                  Expédition sécurisée vers l'Afrique, l'Europe et l'Amérique
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow border-2 hover:border-amber-400">
+              <CardContent className="space-y-4">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                  <Shield className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">Authenticité Garantie</h3>
+                <p className="text-gray-600">
+                  Certificats d'origine et traçabilité complète de nos produits
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow border-2 hover:border-amber-400">
+              <CardContent className="space-y-4">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                  <Users className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">Support B2B</h3>
+                <p className="text-gray-600">
+                  Solutions personnalisées pour professionnels et revendeurs
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Nos Catégories Premium
+            </h2>
+            <p className="text-xl text-gray-600">
+              Explorez notre sélection de produits ivoiriens d'exception
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => (
               <Link key={category.id} href={`/products?category=${category.slug}`}>
-                <Card className="group cursor-pointer hover:shadow-xl transition-shadow duration-300">
-                  <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${getCategoryColor(category.slug)} p-8 text-center text-white transform group-hover:scale-105 transition-transform duration-300`}>
-                    <img
-                      src={getCategoryImage(category.slug)}
+                <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer border-2 hover:border-amber-400">
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={getCategoryImage(category.slug)} 
                       alt={category.name}
-                      className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
-                    <h4 className="text-xl font-bold mb-2">{category.name}</h4>
-                    <p className="text-sm opacity-90 mb-4">
-                      {category.description || "Découvrez notre sélection"}
-                    </p>
-                    <Badge className="bg-white text-gray-800">
-                      Voir les produits
-                    </Badge>
+                    <div className={`absolute inset-0 bg-gradient-to-t ${getCategoryColor(category.slug)} opacity-80`}></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <h3 className="text-2xl font-bold text-white text-center px-4">
+                        {category.name}
+                      </h3>
+                    </div>
                   </div>
                 </Card>
               </Link>
@@ -121,84 +231,66 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Featured Products */}
+      <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-ivorian-black mb-4">Produits en Vedette</h3>
-            <p className="text-gray-600">Découvrez notre sélection exclusive de produits phares</p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Produits Vedettes
+            </h2>
+            <p className="text-xl text-gray-600">
+              Découvrez nos produits les plus appréciés par nos clients
+            </p>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProducts.slice(0, 4).map((product) => {
+              const category = categories.find(c => c.id === product.categoryId);
+              return (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  categoryName={category?.name}
+                />
+              );
+            })}
           </div>
-          
+
           <div className="text-center mt-12">
             <Link href="/products">
-              <Button className="bg-ivorian-black text-white hover:bg-ivorian-dark px-8 py-3">
-                Voir Tous les Produits
+              <Button size="lg" className="bg-black hover:bg-gray-800 text-white px-8 py-4">
+                Voir tous nos produits
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* B2B Section */}
-      <section className="py-16 bg-ivorian-black text-white">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h3 className="text-3xl font-bold mb-6">Espace Professionnel B2B</h3>
-              <p className="text-gray-300 mb-8">
-                Rejoignez notre réseau de partenaires professionnels et bénéficiez de conditions privilégiées, 
-                tarifs dégressifs et service dédié pour votre entreprise.
-              </p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center">
-                  <CheckCircle className="text-ivorian-yellow mr-3 h-5 w-5" />
-                  <span>Tarifs préférentiels pour les professionnels</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="text-ivorian-yellow mr-3 h-5 w-5" />
-                  <span>Livraisons rapides et en gros volumes</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="text-ivorian-yellow mr-3 h-5 w-5" />
-                  <span>Service client dédié et personnalisé</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="text-ivorian-yellow mr-3 h-5 w-5" />
-                  <span>Catalogue exclusif pour professionnels</span>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber font-semibold"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  Créer un Compte Pro
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-black to-amber-900 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <h2 className="text-4xl lg:text-5xl font-bold">
+              Prêt à découvrir l'authenticité ivoirienne ?
+            </h2>
+            <p className="text-xl text-gray-300">
+              Rejoignez des milliers de clients satisfaits qui font confiance à Barelle Distribution 
+              pour leurs produits ivoiriens premium.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/products">
+                <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-black font-semibold px-8 py-4">
+                  Commander maintenant
                 </Button>
-                <Button
-                  variant="outline"
-                  className="border-ivorian-yellow text-ivorian-yellow hover:bg-ivorian-yellow hover:text-ivorian-black font-semibold"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  Se Connecter
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=600&fit=crop"
-                alt="Professionnel travaillant dans un bureau moderne"
-                className="rounded-xl shadow-2xl w-full h-auto"
-              />
-              <div className="absolute -bottom-4 -left-4 bg-ivorian-yellow text-ivorian-black p-4 rounded-lg shadow-lg">
-                <p className="font-bold text-sm">+ de 500</p>
-                <p className="text-xs">Entreprises Partenaires</p>
-              </div>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white text-white hover:bg-white hover:text-black px-8 py-4"
+                onClick={() => window.location.href = '/api/login'}
+              >
+                Devenir partenaire B2B
+              </Button>
             </div>
           </div>
         </div>
