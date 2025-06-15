@@ -26,7 +26,8 @@ import {
   User, 
   ShoppingCart, 
   ChevronDown,
-  LogOut
+  LogOut,
+  LogIn
 } from "lucide-react";
 
 interface Category {
@@ -105,7 +106,7 @@ export default function Header() {
                     Espace Pro B2B
                   </Button>
                 )}
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -154,7 +155,7 @@ export default function Header() {
                 >
                   Accueil
                 </Link>
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
@@ -206,7 +207,7 @@ export default function Header() {
                         Accueil
                       </Link>
                     </SheetClose>
-                    
+
                     <div className="space-y-2">
                       <h3 className="text-lg font-medium">Produits</h3>
                       {categories.map((category) => (
@@ -221,11 +222,26 @@ export default function Header() {
                       ))}
                     </div>
 
-                    {isAuthenticated && (
+                    {isAuthenticated ? (
+                      <div className="space-y-2">
+                        <SheetClose asChild>
+                          <Link href="/profile" className="text-lg font-medium">
+                            Mon Espace B2B
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <a href="/api/logout" className="text-lg font-medium flex items-center">
+                            <LogOut className="h-4 w-4 mr-2" />
+                            Se Déconnecter
+                          </a>
+                        </SheetClose>
+                      </div>
+                    ) : (
                       <SheetClose asChild>
-                        <Link href="/profile" className="text-lg font-medium">
-                          Mon Espace B2B
-                        </Link>
+                        <a href="/api/login" className="text-lg font-medium flex items-center">
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Se Connecter
+                        </a>
                       </SheetClose>
                     )}
                   </nav>

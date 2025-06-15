@@ -266,6 +266,74 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* B2B Registration Section */}
+      <section className="py-20 bg-gradient-to-r from-gray-900 to-black text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+                Devenez Partenaire B2B
+              </h2>
+              <p className="text-xl text-gray-300">
+                Accédez à des prix préférentiels et bénéficiez d'un service dédié
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="text-amber-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Prix préférentiels</h3>
+                    <p className="text-gray-300">Bénéficiez de remises importantes sur tous nos produits</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="text-amber-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Service dédié</h3>
+                    <p className="text-gray-300">Un conseiller commercial attitré pour vos besoins</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="text-amber-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Livraison prioritaire</h3>
+                    <p className="text-gray-300">Délais de livraison réduits et suivi personnalisé</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="text-amber-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Catalogue exclusif</h3>
+                    <p className="text-gray-300">Accès à des produits réservés aux partenaires</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+                <h3 className="text-2xl font-bold mb-6 text-center">Inscription Gratuite</h3>
+                <div className="space-y-6">
+                  <p className="text-gray-300 text-center">
+                    Connectez-vous avec votre compte Replit pour commencer
+                  </p>
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4"
+                    onClick={() => window.location.href = '/api/login'}
+                  >
+                    S'inscrire maintenant
+                  </Button>
+                  <p className="text-sm text-gray-400 text-center">
+                    Déjà inscrit ? <button onClick={() => window.location.href = '/api/login'} className="text-amber-400 hover:underline">Se connecter</button>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-black to-amber-900 text-white">
         <div className="container mx-auto px-4 text-center">
@@ -283,14 +351,6 @@ export default function Landing() {
                   Commander maintenant
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="border-white text-white hover:bg-white hover:text-black px-8 py-4"
-                onClick={() => window.location.href = '/api/login'}
-              >
-                Devenir partenaire B2B
-              </Button>
             </div>
           </div>
         </div>

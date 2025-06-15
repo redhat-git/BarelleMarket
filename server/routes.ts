@@ -27,6 +27,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/login', (req, res) => {
+    res.redirect(`${process.env.REPLIT_OAUTH_URL || 'https://replit.com/auth/oauth2/authorize'}?client_id=${process.env.REPLIT_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.REPLIT_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/callback`)}&response_type=code&scope=read:user`);
+  });
+
+  app.get('/api/logout', (req: any, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        console.error('Logout error:', err);
+      }
+      res.redirect('/');
+    });
+  });
+
   // B2B Registration
   app.post('/api/auth/register-b2b', async (req, res) => {
     try {
