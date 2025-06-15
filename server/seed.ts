@@ -154,7 +154,7 @@ async function seed() {
 }
 
 // Run seed if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url.endsWith(process.argv[1])) {
   seed()
     .then(() => {
       console.log("Seeding completed");

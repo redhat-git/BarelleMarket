@@ -184,22 +184,38 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gestion des Produits</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Gérez votre catalogue de produits Barelle Distribution
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
+      {/* Header professionnel */}
+      <div className="relative bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-600 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-8">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Gestion des Produits</h1>
+                <p className="text-yellow-100 mt-1">
+                  Gérez votre catalogue de produits Barelle Distribution
+                </p>
+              </div>
+            </div>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-yellow-600 hover:bg-yellow-700 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Nouveau Produit
-              </Button>
-            </DialogTrigger>
+              <DialogTrigger asChild>
+                <Button className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm shadow-lg">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau Produit
+                </Button>
+              </DialogTrigger>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
@@ -384,20 +400,22 @@ export default function AdminProducts() {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
+        <Card className="border-2 border-yellow-200 bg-white/80 backdrop-blur-sm shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-yellow-50 to-amber-50 border-b border-yellow-200">
+            <CardTitle className="flex items-center gap-3 text-gray-800">
+              <div className="p-2 bg-yellow-500 rounded-lg">
+                <Package className="w-5 h-5 text-white" />
+              </div>
               Catalogue de Produits
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {productsData?.map((product: Product) => {
                 const category = categories?.find((c: Category) => c.id === product.categoryId);
                 return (
-                  <Card key={product.id} className="hover:shadow-lg transition-shadow">
-                    <div className="aspect-square relative overflow-hidden rounded-t-lg">
+                  <Card key={product.id} className="hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-yellow-300 bg-white relative overflow-hidden group">
+                    <div className="aspect-square relative overflow-hidden rounded-t-lg bg-gradient-to-br from-gray-50 to-gray-100">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}

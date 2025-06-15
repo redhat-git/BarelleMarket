@@ -124,32 +124,47 @@ export default function AdminOrders() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gestion des Commandes</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Total: {ordersData?.total || 0} commandes
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
+      {/* Header professionnel */}
+      <div className="relative bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-600 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+        <div className="relative max-w-7xl mx-auto px-6 py-8">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+                <ShoppingCart className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Gestion des Commandes</h1>
+                <p className="text-yellow-100 mt-1">
+                  Total: {ordersData?.total || 0} commandes
+                </p>
+              </div>
+            </div>
           <div className="flex gap-4">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Filtrer par statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Tous les statuts</SelectItem>
-                <SelectItem value="pending">En attente</SelectItem>
-                <SelectItem value="confirmed">Confirmées</SelectItem>
-                <SelectItem value="shipped">Expédiées</SelectItem>
-                <SelectItem value="delivered">Livrées</SelectItem>
-                <SelectItem value="cancelled">Annulées</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48 bg-white/20 border-white/30 text-white backdrop-blur-sm">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filtrer par statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Tous les statuts</SelectItem>
+                  <SelectItem value="pending">En attente</SelectItem>
+                  <SelectItem value="confirmed">Confirmées</SelectItem>
+                  <SelectItem value="shipped">Expédiées</SelectItem>
+                  <SelectItem value="delivered">Livrées</SelectItem>
+                  <SelectItem value="cancelled">Annulées</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
 
         <Card>
           <CardHeader>
