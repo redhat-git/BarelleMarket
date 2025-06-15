@@ -4,16 +4,18 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import Home from "@/pages/home";
-import Products from "@/pages/products";
-import ProductDetail from "@/pages/product-detail";
-import B2BProfile from "@/pages/b2b-profile";
-import AdminDashboard from "@/pages/admin-dashboard";
-import AdminUsers from "@/pages/admin-users";
-import AdminProducts from "@/pages/admin-products";
-import AdminOrders from "@/pages/admin-orders";
+import NotFound from "./pages/not-found";
+import Landing from "./pages/landing";
+import Home from "./pages/home";
+import Products from "./pages/products";
+import ProductDetail from "./pages/product-detail";
+import B2BProfile from "./pages/b2b-profile";
+import AuthLogin from "./pages/auth-login";
+import AuthRegisterB2B from "./pages/auth-register-b2b";
+import AdminDashboard from "./pages/admin-dashboard";
+import AdminUsers from "./pages/admin-users";
+import AdminProducts from "./pages/admin-products";
+import AdminOrders from "./pages/admin-orders";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -37,6 +39,8 @@ function Router() {
       {isAuthenticated && (
         <Route path="/profile" component={B2BProfile} />
       )}
+      <Route path="/auth/login" component={AuthLogin} />
+      <Route path="/auth/register-b2b" component={AuthRegisterB2B} />
       {isAuthenticated && (
         <>
           <Route path="/admin" component={AdminDashboard} />

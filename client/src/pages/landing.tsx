@@ -62,7 +62,7 @@ export default function Landing() {
       <section className="relative bg-gradient-to-br from-black via-gray-900 to-amber-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
         <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-amber-400/20 to-transparent"></div>
-        
+
         <div className="relative container mx-auto px-4 py-20 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
@@ -80,7 +80,7 @@ export default function Landing() {
                   jus naturels, cigares artisanaux et accessoires de qualité.
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/products">
                   <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-black font-semibold px-8 py-4 text-lg">
@@ -92,7 +92,7 @@ export default function Landing() {
                   variant="outline" 
                   size="lg" 
                   className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black px-8 py-4 text-lg"
-                  onClick={() => window.location.href = '/api/login'}
+                  onClick={() => window.location.href = '/auth/login'}
                 >
                   <Users className="mr-2 h-5 w-5" />
                   Se connecter / S'inscrire
@@ -278,7 +278,7 @@ export default function Landing() {
                 Accédez à des prix préférentiels et bénéficiez d'un service dédié
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
                 <div className="flex items-start gap-4">
@@ -310,7 +310,7 @@ export default function Landing() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
                 <h3 className="text-2xl font-bold mb-6 text-center">Inscription Gratuite</h3>
                 <div className="space-y-6">
@@ -320,7 +320,7 @@ export default function Landing() {
                   <Button 
                     size="lg" 
                     className="w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4"
-                    onClick={() => window.location.href = '/api/login'}
+                    onClick={() => window.location.href = '/auth/login'}
                   >
                     Se connecter / S'inscrire
                   </Button>

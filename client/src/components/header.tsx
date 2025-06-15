@@ -100,7 +100,7 @@ export default function Header() {
                     variant="ghost" 
                     size="sm" 
                     className="text-white hover:text-ivorian-yellow hover:bg-transparent"
-                    onClick={() => window.location.href = '/api/login'}
+                    onClick={() => window.location.href = '/auth/login'}
                   >
                     <User className="h-3 w-3 mr-1" />
                     Espace Pro B2B

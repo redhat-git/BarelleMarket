@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, requireAdmin, requireSupport } from "./replitAuth";
+import { setupAuth, isAuthenticated, requireAdmin, requireSupport } from "./auth";
 import { 
   b2cOrderSchema, 
   b2bRegistrationSchema, 
