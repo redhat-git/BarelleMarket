@@ -5,34 +5,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
 
-export default function AuthLogin() {
-  const { isAuthenticated } = useAuth();
+export default function AuthRegister() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      window.location.href = "/";
-    }
-  }, [isAuthenticated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccess("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,9 +45,16 @@ export default function AuthLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        window.location.href = "/";
+        setSuccess("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+        setFormData({
+          email: "",
+          password: "",
+          confirmPassword: "",
+          firstName: "",
+          lastName: "",
+        });
       } else {
-        setError(data.message || "Erreur lors de la connexion");
+        setError(data.message || "Erreur lors de l'inscription");
       }
     } catch (error) {
       setError("Erreur de connexion au serveur");
@@ -73,18 +82,18 @@ export default function AuthLogin() {
             Barelle Distribution
           </h1>
           <p className="text-gray-600">
-            Connectez-vous à votre compte
+            Créez votre compte pour commander
           </p>
         </div>
 
-        {/* Formulaire de connexion */}
+        {/* Formulaire d'inscription */}
         <Card className="border border-gray-200 shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-xl text-center text-gray-900">
-              Connexion
+              Inscription
             </CardTitle>
             <CardDescription className="text-center">
-              Entrez vos identifiants pour accéder à votre compte
+              Remplissez le formulaire pour créer votre compte
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -94,7 +103,50 @@ export default function AuthLogin() {
               </Alert>
             )}
 
+            {success && (
+              <Alert className="border-green-200 bg-green-50 text-green-800">
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Prénom</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      placeholder="Prénom"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Nom</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      placeholder="Nom"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -120,7 +172,7 @@ export default function AuthLogin() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Votre mot de passe"
+                    placeholder="Minimum 6 caractères"
                     value={formData.password}
                     onChange={handleChange}
                     className="pl-10 pr-10"
@@ -136,46 +188,46 @@ export default function AuthLogin() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirmez votre mot de passe"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="pl-10 pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
               <Button
                 type="submit"
                 disabled={isLoading}
                 className="w-full h-12 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-medium"
               >
-                {isLoading ? "Connexion..." : "Se connecter"}
+                {isLoading ? "Inscription..." : "Créer mon compte"}
               </Button>
             </form>
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Pas encore de compte ?{" "}
-                <a href="/auth/register" className="text-amber-600 hover:underline font-medium">
-                  S'inscrire
+                Vous avez déjà un compte ?{" "}
+                <a href="/auth/login" className="text-amber-600 hover:underline font-medium">
+                  Se connecter
                 </a>
               </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Separator className="my-6" />
-
-        {/* Inscription B2B */}
-        <Card className="border border-gray-200">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Vous êtes un professionnel ?
-              </h3>
-              <p className="text-sm text-gray-600 mb-3">
-                Créez un compte B2B pour bénéficier de tarifs privilégiés
-              </p>
-              <Button
-                variant="outline"
-                className="w-full border-amber-600 text-amber-600 hover:bg-amber-50"
-                onClick={() => window.location.href = "/auth/register-b2b"}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Inscription B2B
-              </Button>
             </div>
           </CardContent>
         </Card>

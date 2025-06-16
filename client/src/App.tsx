@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/admin-dashboard";
 import AdminUsers from "./pages/admin-users";
 import AdminProducts from "./pages/admin-products";
 import AdminOrders from "./pages/admin-orders";
+import { lazy } from "react";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,6 +41,7 @@ function Router() {
         <Route path="/profile" component={B2BProfile} />
       )}
       <Route path="/auth/login" component={AuthLogin} />
+      <Route path="/auth/register" component={lazy(() => import("./pages/auth-register"))} />
       <Route path="/auth/register-b2b" component={AuthRegisterB2B} />
       {isAuthenticated && (
         <>

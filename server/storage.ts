@@ -75,6 +75,10 @@ export interface IStorage {
     todayOrders: number;
     totalRevenue: number;
   }>;
+
+  // Local auth methods
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createLocalUser(userData: { email: string; password: string; firstName: string; lastName: string; isB2B?: boolean }): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -104,6 +108,7 @@ export class DatabaseStorage implements IStorage {
         isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
+        provider: userData.provider || 'external',
       })
       .onConflictDoUpdate({
         target: users.id,
@@ -578,6 +583,28 @@ export class DatabaseStorage implements IStorage {
       todayOrders: todayOrders.length,
       totalRevenue: totalRevenue.reduce((sum, order) => sum + parseFloat(order.sum || '0'), 0)
     };
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return user;
+  }
+
+  async createLocalUser(userData: { email: string; password: string; firstName: string; lastName: string; isB2B?: boolean }): Promise<User> {
+    const [user] = await db.insert(users).values({
+      id: `local_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      email: userData.email,
+      password: userData.password,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      isB2B: userData.isB2B || false,
+      provider: 'local',
+      role: 'user',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return user;
   }
 }
 
