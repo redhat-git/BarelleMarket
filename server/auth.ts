@@ -245,3 +245,4 @@ export const requireRole = (requiredRoles: string[]): RequestHandler => {
 
 export const requireAdmin = requireRole(['admin']);
 export const requireSupport = requireRole(['admin', 'support']);
+
