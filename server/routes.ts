@@ -13,6 +13,7 @@ import {
   loginSchema
 } from "@shared/schema";
 import { hashPassword } from "./auth";
+import { nanoid } from "nanoid";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -34,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/register', async (req, res) => {
     try {
       const userData = registerSchema.parse(req.body);
-      
+
       // Vérifier si l'email existe déjà
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
@@ -63,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', (req, res, next) => {
     try {
       const loginData = loginSchema.parse(req.body);
-      
+
       passport.authenticate('local', (err: any, user: any, info: any) => {
         if (err) {
           return res.status(500).json({ message: "Erreur serveur" });
@@ -88,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/register-b2b', async (req, res) => {
     try {
       const registrationData = b2bRegistrationSchema.parse(req.body);
-      
+
       // Vérifier si l'email existe déjà
       const existingUser = await storage.getUserByEmail(registrationData.email);
       if (existingUser) {
@@ -97,12 +98,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Hacher le mot de passe
       const hashedPassword = await hashPassword(registrationData.password);
-      
+
       const user = await storage.registerB2BUser({
         ...registrationData,
         password: hashedPassword
       });
-      
+
       res.json({ message: "Inscription B2B réussie. En attente d'approbation.", user: { id: user.id, email: user.email } });
     } catch (error) {
       console.error("B2B registration error:", error);
@@ -527,6 +528,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create admin" });
     }
   });
+
+    // Route pour créer le premier compte admin (à utiliser une seule fois)
+    app.post("/api/init-admin", async (req: Request, res: Response) => {
+      try {
+        // Vérifier s'il y a déjà un admin
+        const existingAdmin = await storage.getUserByRole("admin");
+        if (existingAdmin) {
+          return res.status(400).json({ error: "Un administrateur existe déjà" });
+        }
+  
+        const { email, password, firstName, lastName } = req.body;
+  
+        if (!email || !password || !firstName || !lastName) {
+          return res.status(400).json({ error: "Tous les champs sont requis" });
+        }
+  
+        const hashedPassword = await hashPassword(password);
+  
+        const adminUser = await storage.createUser({
+          id: nanoid(),
+          email,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          role: "admin",
+          isActive: true,
+          provider: "local"
+        });
+  
+        res.json({ 
+          message: "Compte administrateur créé avec succès",
+          user: { 
+            id: adminUser.id, 
+            email: adminUser.email, 
+            firstName: adminUser.firstName,
+            lastName: adminUser.lastName,
+            role: adminUser.role 
+          }
+        });
+      } catch (error) {
+        console.error("Erreur lors de la création de l'admin:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
 
   // Google OAuth routes (only if configured)
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

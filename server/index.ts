@@ -14,13 +14,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Connexion à PostgreSQL
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-});
-client.connect()
-  .then(() => console.log('Connecté à PostgreSQL'))
-  .catch(err => console.error('Erreur de connexion PostgreSQL:', err.stack));
+// Connexion à PostgreSQL - Utilisation de la base de données Replit
+let client: Client;
+if (process.env.DATABASE_URL) {
+  client = new Client({
+    connectionString: process.env.DATABASE_URL,
+  });
+  client.connect()
+    .then(() => console.log('Connecté à PostgreSQL'))
+    .catch(err => console.error('Erreur de connexion PostgreSQL:', err.stack));
+} else {
+  console.log('DATABASE_URL non configurée - veuillez créer une base de données PostgreSQL dans Replit');
+}
 
 // Configuration de la session
 app.use(session({
@@ -35,6 +40,9 @@ app.use(passport.session());
 passport.use(new LocalStrategy(
   async (username, password, done) => {
     try {
+      if (!client) {
+        return done(new Error('Base de données non configurée'));
+      }
       const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
       const user = result.rows[0];
       if (!user || !await bcrypt.compare(password, user.password)) {
@@ -73,6 +81,9 @@ declare module "express" {
 passport.serializeUser((user, done) => done(null, (user as User).id));
 passport.deserializeUser(async (id, done) => {
   try {
+    if (!client) {
+      return done(new Error('Base de données non configurée'));
+    }
     const result = await client.query('SELECT * FROM users WHERE id = $1', [id]);
     done(null, result.rows[0]);
   } catch (err) {

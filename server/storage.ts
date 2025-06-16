@@ -79,6 +79,7 @@ export interface IStorage {
   // Local auth methods
   getUserByEmail(email: string): Promise<User | undefined>;
   createLocalUser(userData: { email: string; password: string; firstName: string; lastName: string; isB2B?: boolean }): Promise<User>;
+  getUserByRole(role: string): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -604,6 +605,11 @@ export class DatabaseStorage implements IStorage {
       createdAt: new Date(),
       updatedAt: new Date(),
     }).returning();
+    return user;
+  }
+
+  async getUserByRole(role: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.role, role)).limit(1);
     return user;
   }
 }
