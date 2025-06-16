@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -48,9 +47,9 @@ interface B2CCheckoutModalProps {
   cartSummary: CartSummary;
 }
 
-export default function B2CCheckoutModal({ isOpen, onClose, cartSummary }: B2CCheckoutModalProps) {
+export default function B2CCheckoutModal({ isOpen, onClose, cartSummary }: Readonly<B2CCheckoutModalProps>) {
   const { toast } = useToast();
-  
+
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -78,7 +77,7 @@ export default function B2CCheckoutModal({ isOpen, onClose, cartSummary }: B2CCh
       form.reset();
       onClose();
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erreur",
         description: "Impossible de finaliser la commande. Veuillez réessayer.",
@@ -166,11 +165,11 @@ export default function B2CCheckoutModal({ isOpen, onClose, cartSummary }: B2CCh
                       <FormItem>
                         <FormLabel>Adresse *</FormLabel>
                         <FormControl>
-                          <Textarea 
+                          <Textarea
                             placeholder="Votre adresse complète"
                             className="resize-none"
                             rows={2}
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />

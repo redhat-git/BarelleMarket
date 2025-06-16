@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
@@ -7,7 +6,6 @@ import ProductCard from "@/components/product-card";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
-import { Product, Category } from "@/lib/types";
 import {
   Select,
   SelectContent,
@@ -19,15 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Search, 
-  Filter, 
-  Grid3X3, 
-  List, 
-  SortAsc, 
+import {
+  Search,
+  Filter,
+  Grid3X3,
+  List,
+  SortAsc,
   Package,
-  Star,
-  TrendingUp,
   Users
 } from "lucide-react";
 
@@ -38,8 +34,8 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
-  const { user, isAuthenticated } = useAuth();
-  const { addToCart } = useCart();
+  const { user } = useAuth() as { user: { isB2B?: boolean } | null };
+  useCart();
 
   // Fetch products
   const { data: products = [], isLoading: productsLoading } = useQuery({
@@ -73,7 +69,7 @@ export default function Products() {
 
     // Apply category filter
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.categoryId === parseInt(selectedCategory)
       );
     }
@@ -90,7 +86,7 @@ export default function Products() {
         filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
         break;
       case "rating":
-        filtered.sort((a, b) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"));
+        filtered.sort((a, b) => parseFloat(b.rating ?? "0") - parseFloat(a.rating ?? "0"));
         break;
       case "featured":
       default:
@@ -105,13 +101,7 @@ export default function Products() {
     setFilteredProducts(filtered);
   }, [products, searchQuery, selectedCategory, sortBy]);
 
-  const formatPrice = (price: string) => {
-    return new Intl.NumberFormat('fr-FR').format(parseFloat(price)) + ' XOF';
-  };
 
-  const handleAddToCart = (productId: number, quantity: number = 1) => {
-    addToCart(productId, quantity);
-  };
 
   if (productsLoading || categoriesLoading) {
     return (
@@ -119,15 +109,18 @@ export default function Products() {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <div className="h-48 bg-gray-200 animate-pulse"></div>
-                <CardContent className="p-4">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
-                </CardContent>
-              </Card>
-            ))}
+            {[...Array(8)].map((_, i) => {
+              const skeletonKey = `skeleton-${Date.now()}-${i}`;
+              return (
+                <Card key={skeletonKey} className="overflow-hidden">
+                  <div className="h-48 bg-gray-200 animate-pulse"></div>
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
         <Footer />
@@ -149,7 +142,7 @@ export default function Products() {
             <p className="text-xl text-gray-300 mb-6">
               Découvrez notre sélection de produits de qualité pour professionnels et particuliers
             </p>
-            
+
             {user?.isB2B && (
               <div className="bg-ivorian-yellow text-ivorian-black px-6 py-3 rounded-lg inline-flex items-center gap-2">
                 <Users className="w-5 h-5" />
@@ -238,7 +231,7 @@ export default function Products() {
           <div className="flex flex-wrap gap-2 mt-4">
             {searchQuery && (
               <Badge variant="secondary" className="gap-1">
-                Recherche: "{searchQuery}"
+                Recherche: &quot;{searchQuery}&quot;
                 <button
                   onClick={() => setSearchQuery("")}
                   className="ml-1 hover:bg-gray-200 rounded-full w-4 h-4 flex items-center justify-center"
@@ -266,7 +259,7 @@ export default function Products() {
           <p className="text-gray-600">
             {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} trouvé{filteredProducts.length > 1 ? 's' : ''}
           </p>
-          
+
           {/* MOQ Notice for B2B Users */}
           {user?.isB2B && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-sm">
@@ -308,7 +301,6 @@ export default function Products() {
               <ProductCard
                 key={product.id}
                 product={product}
-                onAddToCart={handleAddToCart}
                 viewMode={viewMode}
                 showB2BPrice={user?.isB2B}
               />
@@ -320,4 +312,21 @@ export default function Products() {
       <Footer />
     </div>
   );
+}
+
+export interface Category {
+  id: number;
+  name: string;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  description?: string;
+  price: string;
+  categoryId: number;
+  isFeatured?: boolean;
+  rating: string;
+  slug: string;
+  reviewCount: number;
 }

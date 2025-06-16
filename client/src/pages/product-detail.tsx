@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, Link } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Heart, Star, ArrowLeft, Minus, Plus } from "lucide-react";
-import { Link } from "wouter";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
@@ -18,12 +16,33 @@ export default function ProductDetail() {
   const { addToCart, isAdding } = useCart();
   const { toast } = useToast();
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading } = useQuery<Product>({
     queryKey: [`/api/products/${params?.slug}`],
     enabled: !!params?.slug,
   });
 
-  const { data: categories = [] } = useQuery({
+  interface Category {
+      id: number;
+      name: string;
+      slug: string;
+    }
+  
+    interface Product {
+      id: number;
+      categoryId: number;
+      name: string;
+      description: string;
+      price: string;
+      originalPrice?: string;
+      imageUrl: string;
+      additionalImages?: string[];
+      rating: string;
+      reviewCount: number;
+      stockQuantity: number;
+      specifications?: Record<string, string>;
+    }
+  
+    const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -76,16 +95,15 @@ export default function ProductDetail() {
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
-    
-    for (let i = 0; i < fullStars; i++) {
+ for (let i = 0; i < fullStars; i++) {
       stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
     }
-    
-    const emptyStars = 5 - fullStars;
-    for (let i = 0; i < emptyStars; i++) {
+
+  const emptyStars = 5 - fullStars;
+  for (let i = 0; i < emptyStars; i++) {
       stars.push(<Star key={`empty-${i}`} className="h-4 w-4 text-gray-300" />);
     }
-    
+
     return stars;
   };
 
@@ -142,18 +160,16 @@ export default function ProductDetail() {
                   className="w-full h-96 object-cover"
                 />
               </div>
-              
-              {/* Thumbnail Images */}
+
+          {/* Thumbnail Images */}
               {images.length > 1 && (
                 <div className="flex gap-2">
                   {images.map((image, index) => (
                     <button
-                      key={index}
+                      key={`${product.id}-${image}`}
                       onClick={() => setSelectedImageIndex(index)}
                       className={`w-16 h-16 rounded border-2 overflow-hidden ${
-                        selectedImageIndex === index 
-                          ? 'border-ivorian-yellow' 
-                          : 'border-gray-200 hover:border-ivorian-yellow'
+                        selectedImageIndex === index ? 'border-ivorian-yellow' : 'border-gray-200 hover:border-ivorian-yellow'
                       }`}
                     >
                       <img
@@ -171,10 +187,10 @@ export default function ProductDetail() {
             <div>
               <div className="mb-4">
                 <Badge className={`text-xs font-semibold mb-3 ${getCategoryColor(product.categoryId)}`}>
-                  {category?.name || 'Produit'}
+                  {category?.name ?? 'Produit'}
                 </Badge>
-                
-                <div className="flex items-center mb-4">
+
+                <div className="flex items-center">
                   <div className="flex mr-2">
                     {renderStars(parseFloat(product.rating))}
                   </div>
@@ -261,12 +277,12 @@ export default function ProductDetail() {
                   <ShoppingCart className="h-5 w-5 mr-2" />
                   {isAdding ? "Ajout en cours..." : "Ajouter au Panier"}
                 </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleAddToWishlist}
-                  className="border-ivorian-black text-ivorian-black hover:bg-ivorian-black hover:text-white font-semibold py-3"
-                >
+
+      <Button
+        variant="outline"
+        onClick={handleAddToWishlist}
+        className="border-ivorian-black text-ivorian-black hover:bg-ivorian-black hover:text-white font-semibold py-3"
+      >
                   <Heart className="h-5 w-5 mr-2" />
                   Ajouter aux Favoris
                 </Button>

@@ -73,11 +73,12 @@ export default function AuthRegisterB2B() {
         const error = await response.json();
         toast({
           title: "Erreur d'inscription",
-          description: error.message || "Une erreur est survenue",
+          description: error.message ?? "Une erreur est survenue",
           variant: "destructive",
         });
       }
     } catch (error) {
+      console.error("Error during B2B registration:", error);
       toast({
         title: "Erreur",
         description: "Impossible de créer le compte. Veuillez réessayer.",
@@ -101,7 +102,7 @@ export default function AuthRegisterB2B() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
           </Button>
-          
+
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-ivorian-yellow to-amber-400 rounded-full flex items-center justify-center mb-4">
               <Building className="w-8 h-8 text-ivorian-black" />
@@ -118,7 +119,7 @@ export default function AuthRegisterB2B() {
         <Card className="border-2 border-ivorian-yellow/20 shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-ivorian-black text-center">
-              Informations de l'entreprise
+              Informations de l&apos;entreprise
             </CardTitle>
             <CardDescription className="text-center">
               Remplissez les informations ci-dessous pour créer votre compte B2B
@@ -132,7 +133,7 @@ export default function AuthRegisterB2B() {
                   <Mail className="w-5 h-5" />
                   Informations personnelles
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">Prénom *</Label>
@@ -198,11 +199,11 @@ export default function AuthRegisterB2B() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <Building className="w-5 h-5" />
-                  Informations de l'entreprise
+                  Informations de l&apos;entreprise
                 </h3>
 
                 <div>
-                  <Label htmlFor="companyName">Nom de l'entreprise *</Label>
+                  <Label htmlFor="companyName">Nom de l&apos;entreprise *</Label>
                   <Input
                     id="companyName"
                     {...form.register("companyName")}
@@ -217,7 +218,7 @@ export default function AuthRegisterB2B() {
                 </div>
 
                 <div>
-                  <Label htmlFor="companyType">Type d'entreprise *</Label>
+                  <Label htmlFor="companyType">Type d&apos;entreprise *</Label>
                   <Select onValueChange={(value) => form.setValue("companyType", value)}>
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Sélectionnez le type d'entreprise" />
@@ -270,7 +271,7 @@ export default function AuthRegisterB2B() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
-                  Adresse de l'entreprise
+                  Adresse de l&apos;entreprise
                 </h3>
 
                 <div>

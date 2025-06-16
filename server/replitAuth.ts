@@ -44,25 +44,38 @@ export function getSession() {
   });
 }
 
+type Claims = {
+  exp?: number;
+  [key: string]: unknown;
+};
+
+type UserSession = {
+  claims?: Claims;
+  access_token?: string;
+  refresh_token?: string;
+  expires_at?: number;
+  [key: string]: unknown;
+};
+
 function updateUserSession(
-  user: any,
+  user: UserSession,
   tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
 ) {
-  user.claims = tokens.claims();
+  user.claims = tokens.claims() as Claims;
   user.access_token = tokens.access_token;
   user.refresh_token = tokens.refresh_token;
   user.expires_at = user.claims?.exp;
 }
 
 async function upsertUser(
-  claims: any,
+  claims: Claims,
 ) {
   await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    id: String(claims["sub"]),
+    email: String(claims["email"]),
+    firstName: typeof claims["first_name"] === "string" ? claims["first_name"] : undefined,
+    lastName: typeof claims["last_name"] === "string" ? claims["last_name"] : undefined,
+    profileImageUrl: typeof claims["profile_image_url"] === "string" ? claims["profile_image_url"] : undefined,
   });
 }
 
@@ -74,14 +87,15 @@ export async function setupAuth(app: Express) {
 
   const config = await getOidcConfig();
 
-  const verify: VerifyFunction = async (
+  const verify: VerifyFunction = (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
     const user = {};
     updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
+    upsertUser(tokens.claims() ?? {})
+      .then(() => verified(null, user))
+      .catch((err) => verified(err));
   };
 
   for (const domain of process.env
@@ -127,8 +141,8 @@ export async function setupAuth(app: Express) {
   });
 }
 
-export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
+export const isAuthenticated: RequestHandler = (req, res, next) => {
+  const user = req.user as UserSession;
 
   if (!req.isAuthenticated() || !user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -145,44 +159,51 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return;
   }
 
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+  getOidcConfig()
+    .then((config) => client.refreshTokenGrant(config, refreshToken))
+    .then((tokenResponse) => {
+      updateUserSession(user, tokenResponse);
+      return next();
+    })
+    .catch(() => {
+      res.status(401).json({ message: "Unauthorized" });
+    });
 };
 
+type RequestWithDbUser = Express.Request & { dbUser?: Awaited<ReturnType<typeof storage.getUser>> };
+
 export const requireRole = (requiredRoles: string[]): RequestHandler => {
-  return async (req, res, next) => {
-    const user = req.user as any;
-    
+  return (req, res, next) => {
+    const user = req.user as UserSession;
+
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    try {
-      const userId = user.claims.sub;
-      const dbUser = await storage.getUser(userId);
-      
-      if (!dbUser || !dbUser.isActive) {
-        return res.status(403).json({ message: "Account inactive" });
-      }
+    (async () => {
+      try {
+        const userId = user.claims?.sub;
+        if (typeof userId !== "string") {
+          return res.status(401).json({ message: "User not authenticated" });
+        }
+        const dbUser = await storage.getUser(userId);
 
-      if (!requiredRoles.includes(dbUser.role || 'user')) {
-        return res.status(403).json({ message: "Insufficient permissions" });
-      }
+        if (!dbUser?.isActive) {
+          return res.status(403).json({ message: "Account inactive" });
+        }
 
-      // Add user info to request for convenience
-      (req as any).dbUser = dbUser;
-      return next();
-    } catch (error) {
-      console.error("Role check error:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
+        if (!requiredRoles.includes(dbUser.role ?? 'user')) {
+          return res.status(403).json({ message: "Insufficient permissions" });
+        }
+
+        // Add user info to request for convenience
+        (req as RequestWithDbUser).dbUser = dbUser;
+        return next();
+      } catch (error) {
+        console.error("Role check error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+    })();
   };
 };
 

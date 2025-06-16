@@ -1,24 +1,27 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, requireAdmin, requireSupport } from "./auth";
-import { 
-  b2cOrderSchema, 
-  b2bRegistrationSchema, 
-  createUserSchema, 
-  updateOrderStatusSchema, 
-  createProductSchema 
+import passport from "passport";
+import {
+  b2cOrderSchema,
+  b2bRegistrationSchema,
+  createUserSchema,
+  updateOrderStatusSchema,
+  createProductSchema
 } from "@shared/schema";
-import { z } from "zod";
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+
+  app.get('/api/auth/user', isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as { claims: { sub: string } })?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -28,11 +31,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/login', (req, res) => {
-    res.redirect(`${process.env.REPLIT_OAUTH_URL || 'https://replit.com/auth/oauth2/authorize'}?client_id=${process.env.REPLIT_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.REPLIT_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/callback`)}&response_type=code&scope=read:user`);
+    const baseUrl = process.env.REPLIT_OAUTH_URL ?? 'https://replit.com/auth/oauth2/authorize';
+    const clientId = process.env.REPLIT_CLIENT_ID;
+    const redirectUri = process.env.REPLIT_REDIRECT_URI ?? req.protocol + '://' + req.get('host') + '/api/auth/callback';
+    const url =
+      baseUrl +
+      '?client_id=' + encodeURIComponent(clientId ?? '') +
+      '&redirect_uri=' + encodeURIComponent(redirectUri) +
+      '&response_type=code&scope=read:user';
+    res.redirect(url);
   });
 
-  app.get('/api/logout', (req: any, res) => {
-    req.session.destroy((err: any) => {
+  app.get('/api/logout', (req: Request, res: Response) => {
+    req.session.destroy((err: Error | null) => {
       if (err) {
         console.error('Logout error:', err);
       }
@@ -48,14 +59,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       console.error("B2B registration error:", error);
-      res.status(400).json({ message: "Registration failed", error: error.message });
+      res.status(400).json({ message: "Registration failed", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
   // B2B Profile Update
-  app.patch('/api/auth/profile', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/auth/profile', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as { claims: { sub: string } }).claims.sub;
       const profileData = req.body;
       const user = await storage.updateB2BProfile(userId, profileData);
       res.json(user);
@@ -132,7 +143,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/cart', async (req, res) => {
     try {
       const sessionId = req.sessionID;
-      const userId = req.user?.claims?.sub;
+      interface AuthenticatedUser {
+        claims: { sub: string };
+      }
+      const userId = (req.user as AuthenticatedUser)?.claims?.sub;
 
       const cartItems = await storage.getCartItems(sessionId, userId);
       res.json(cartItems);
@@ -146,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { productId, quantity = 1 } = req.body;
       const sessionId = req.sessionID;
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as { claims?: { sub?: string } })?.claims?.sub;
 
       const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
       res.json(cartItem);
@@ -183,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/cart', async (req, res) => {
     try {
       const sessionId = req.sessionID;
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as { claims?: { sub?: string } })?.claims?.sub;
 
       await storage.clearCart(sessionId, userId);
       res.json({ success: true });
@@ -209,13 +223,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(order);
     } catch (error) {
       console.error("Error creating B2C order:", error);
-      res.status(400).json({ message: "Failed to create order", error: error.message });
+      res.status(400).json({ message: "Failed to create order", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
-  app.post('/api/orders/b2b', isAuthenticated, async (req: any, res) => {
+  app.post('/api/orders/b2b', isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as { claims: { sub: string } }).claims.sub;
       const orderData = req.body;
 
       // Get cart items
@@ -232,9 +246,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/orders', isAuthenticated, async (req: any, res) => {
+  app.get('/api/orders', isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = (req.user as { claims: { sub: string } }).claims.sub;
       const orders = await storage.getOrdersByUser(userId);
       res.json(orders);
     } catch (error) {
@@ -243,10 +257,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/orders/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/orders/:id', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = (req.user as { claims: { sub: string } }).claims.sub;
 
       const order = await storage.getOrderById(id);
       if (!order || order.userId !== userId) {
@@ -283,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       console.error("Error creating user:", error);
-      res.status(400).json({ message: "Failed to create user", error: error.message });
+      res.status(400).json({ message: "Failed to create user", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -330,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(product);
     } catch (error) {
       console.error("Error creating product:", error);
-      res.status(400).json({ message: "Failed to create product", error: error.message });
+      res.status(400).json({ message: "Failed to create product", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -469,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Google OAuth routes (only if configured)
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    app.get('/api/auth/google', 
+    app.get('/api/auth/google',
       passport.authenticate('google', { scope: ['profile', 'email'] })
     );
 

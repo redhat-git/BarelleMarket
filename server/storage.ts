@@ -19,7 +19,7 @@ import {
   type CreateProduct,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, like, inArray } from "drizzle-orm";
+import { eq, and, desc, like } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -33,15 +33,15 @@ export interface IStorage {
   // Admin operations
   getAllUsers(page?: number, limit?: number): Promise<{ users: User[]; total: number }>;
   createUser(userData: CreateUser): Promise<User>;
-  updateUserRole(userId: string, role: string, permissions?: any): Promise<User>;
+  updateUserRole(userId: string, role: string, permissions?: Record<string, boolean>): Promise<User>;
   deactivateUser(userId: string): Promise<void>;
   activateUser(userId: string): Promise<void>;
 
   // Categories management
   getCategories(): Promise<Category[]>;
   getCategoryBySlug(slug: string): Promise<Category | undefined>;
-  createCategory(categoryData: any): Promise<Category>;
-  updateCategory(id: number, categoryData: any): Promise<Category>;
+  createCategory(categoryData: { name: string; slug: string; description?: string; imageUrl?: string; isActive?: boolean }): Promise<Category>;
+  updateCategory(id: number, categoryData: { name?: string; slug?: string; description?: string; imageUrl?: string; isActive?: boolean }): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
 
   // Products management
@@ -95,17 +95,16 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values({
-          id: userData.id,
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          provider: userData.provider || "replit",
-          role: "user",
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
+        id: userData.id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+        role: "user",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
@@ -113,7 +112,6 @@ export class DatabaseStorage implements IStorage {
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
-          provider: userData.provider || "replit",
           updatedAt: new Date(),
         },
       })
@@ -161,7 +159,7 @@ export class DatabaseStorage implements IStorage {
   async createUser(userData: CreateUser): Promise<User> {
     const newUserData: UpsertUser = {
       ...userData,
-      id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `manual_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       isB2B: userData.role !== "user",
       isActive: true,
     };
@@ -170,13 +168,13 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserRole(userId: string, role: string, permissions?: any): Promise<User> {
+  async updateUserRole(userId: string, role: string, permissions?: Record<string, boolean>): Promise<User> {
     const [user] = await db
       .update(users)
-      .set({ 
-        role, 
-        permissions, 
-        updatedAt: new Date() 
+      .set({
+        role,
+        permissions,
+        updatedAt: new Date()
       })
       .where(eq(users.id, userId))
       .returning();
@@ -199,7 +197,7 @@ export class DatabaseStorage implements IStorage {
 
   async createAdminUser(email: string, firstName: string, lastName: string): Promise<User> {
     const adminData: UpsertUser = {
-      id: `admin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `admin_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       email,
       firstName,
       lastName,
@@ -215,12 +213,12 @@ export class DatabaseStorage implements IStorage {
       // Update existing user to admin
       const [updatedUser] = await db
         .update(users)
-        .set({ 
-          role: "admin", 
+        .set({
+          role: "admin",
           isActive: true,
           firstName,
           lastName,
-          updatedAt: new Date() 
+          updatedAt: new Date()
         })
         .where(eq(users.email, email))
         .returning();
@@ -245,12 +243,12 @@ export class DatabaseStorage implements IStorage {
     return category;
   }
 
-  async createCategory(categoryData: any): Promise<Category> {
+  async createCategory(categoryData: { name: string; slug: string; description?: string; imageUrl?: string; isActive?: boolean }): Promise<Category> {
     const [category] = await db.insert(categories).values(categoryData).returning();
     return category;
   }
 
-  async updateCategory(id: number, categoryData: any): Promise<Category> {
+  async updateCategory(id: number, categoryData: { name?: string; slug?: string; description?: string; imageUrl?: string; isActive?: boolean }): Promise<Category> {
     const [category] = await db
       .update(categories)
       .set(categoryData)
@@ -268,8 +266,6 @@ export class DatabaseStorage implements IStorage {
 
   // Products
   async getProducts(categoryId?: number, search?: string, featured?: boolean): Promise<Product[]> {
-    let query = db.select().from(products).where(eq(products.isActive, true));
-
     const conditions = [eq(products.isActive, true)];
 
     if (categoryId) {
@@ -338,7 +334,7 @@ export class DatabaseStorage implements IStorage {
 
   // Cart operations
   async getCartItems(sessionId: string, userId?: string): Promise<(CartItem & { product: Product })[]> {
-    const condition = userId 
+    const condition = userId
       ? eq(cartItems.userId, userId)
       : eq(cartItems.sessionId, sessionId);
 
@@ -352,7 +348,7 @@ export class DatabaseStorage implements IStorage {
 
   async addToCart(sessionId: string, productId: number, quantity: number, userId?: string): Promise<CartItem> {
     // Check if item already exists in cart
-    const condition = userId 
+    const condition = userId
       ? and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
       : and(eq(cartItems.sessionId, sessionId), eq(cartItems.productId, productId));
 
@@ -362,7 +358,7 @@ export class DatabaseStorage implements IStorage {
       // Update quantity
       const [updatedItem] = await db
         .update(cartItems)
-        .set({ 
+        .set({
           quantity: existingItem.quantity + quantity,
           updatedAt: new Date()
         })
@@ -398,7 +394,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async clearCart(sessionId: string, userId?: string): Promise<void> {
-    const condition = userId 
+    const condition = userId
       ? eq(cartItems.userId, userId)
       : eq(cartItems.sessionId, sessionId);
 
@@ -407,9 +403,9 @@ export class DatabaseStorage implements IStorage {
 
   // Order operations
   async createB2COrder(orderData: B2COrder, cartItemsData: (CartItem & { product: Product })[], sessionId: string): Promise<Order> {
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
-    const subtotal = cartItemsData.reduce((sum, item) => 
+    const subtotal = cartItemsData.reduce((sum, item) =>
       sum + (parseFloat(item.product.price) * item.quantity), 0
     );
 
@@ -454,9 +450,9 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
 
-    const orderNumber = `B2B-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    const orderNumber = `B2B-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
-    const subtotal = cartItemsData.reduce((sum, item) => 
+    const subtotal = cartItemsData.reduce((sum, item) =>
       sum + (parseFloat(item.product.price) * item.quantity), 0
     );
 
@@ -474,7 +470,7 @@ export class DatabaseStorage implements IStorage {
       subtotal: subtotal.toString(),
       deliveryFee: deliveryFee.toString(),
       total: total.toString(),
-      paymentMethod: orderData.paymentMethod || 'bank',
+      paymentMethod: orderData.paymentMethod ?? 'bank',
       notes: orderData.notes,
       customerType: 'B2B',
     }).returning();
@@ -525,13 +521,9 @@ export class DatabaseStorage implements IStorage {
   async getAllOrders(page: number = 1, limit: number = 20, status?: string): Promise<{ orders: Order[]; total: number }> {
     const offset = (page - 1) * limit;
 
-    let baseQuery = db.select().from(orders);
-    let countQuery = db.select({ count: orders.id }).from(orders);
-
-    if (status) {
-      baseQuery = baseQuery.where(eq(orders.orderStatus, status));
-      countQuery = countQuery.where(eq(orders.orderStatus, status));
-    }
+    const conditions = status ? [eq(orders.orderStatus, status)] : [];
+    const baseQuery = db.select().from(orders).where(and(...conditions));
+    const countQuery = db.select({ count: orders.id }).from(orders).where(and(...conditions));
 
     const [ordersData, totalCount] = await Promise.all([
       baseQuery.limit(limit).offset(offset).orderBy(desc(orders.createdAt)),
@@ -547,9 +539,9 @@ export class DatabaseStorage implements IStorage {
   async updateOrderStatus(orderId: number, statusData: UpdateOrderStatus): Promise<Order> {
     const [order] = await db
       .update(orders)
-      .set({ 
-        ...statusData, 
-        updatedAt: new Date() 
+      .set({
+        ...statusData,
+        updatedAt: new Date()
       })
       .where(eq(orders.id, orderId))
       .returning();

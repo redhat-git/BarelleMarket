@@ -1,47 +1,55 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    
-    <!-- SEO Meta Tags -->
-    <title>Barelle Distribution - Produits Ivoiriens Authentiques | Spiritueux, Jus Naturels, Cigares</title>
-    <meta name="description" content="Découvrez Barelle Distribution, votre plateforme e-commerce spécialisée dans les produits 100% ivoiriens : spiritueux premium, jus naturels, cigares artisanaux et accessoires. Livraison en Côte d'Ivoire et à l'international." />
-    <meta name="keywords" content="Barelle Distribution, produits ivoiriens, spiritueux Côte d'Ivoire, jus naturels, cigares artisanaux, e-commerce Abidjan, produits authentiques, distribution Afrique" />
-    <meta name="author" content="Barelle Distribution" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Viewport & Mobile -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Barelle" />
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Theme Colors -->
-    <meta name="theme-color" content="#fbbf24" />
-    <meta name="msapplication-TileColor" content="#fbbf24" />
-    
-    <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icon.svg" />
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Barelle Distribution - Produits Ivoiriens Authentiques" />
-    <meta property="og:description" content="Plateforme e-commerce spécialisée dans la distribution de produits 100% ivoiriens : spiritueux premium, jus naturels, cigares artisanaux et accessoires de qualité." />
-    <meta property="og:site_name" content="Barelle Distribution" />
-    <meta property="og:locale" content="fr_CI" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Barelle Distribution - Produits Ivoiriens Authentiques" />
-    <meta name="twitter:description" content="Découvrez notre sélection de produits 100% ivoiriens : spiritueux, jus naturels, cigares et accessoires premium." />
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- SEO Meta Tags -->
+  <title>Barelle Distribution - Produits Ivoiriens Authentiques | Spiritueux, Jus Naturels, Cigares</title>
+  <meta name="description"
+    content="Découvrez Barelle Distribution, votre plateforme e-commerce spécialisée dans les produits 100% ivoiriens : spiritueux premium, jus naturels, cigares artisanaux et accessoires. Livraison en Côte d'Ivoire et à l'international." />
+  <meta name="keywords"
+    content="Barelle Distribution, produits ivoiriens, spiritueux Côte d'Ivoire, jus naturels, cigares artisanaux, e-commerce Abidjan, produits authentiques, distribution Afrique" />
+  <meta name="author" content="Barelle Distribution" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Viewport & Mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Barelle" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Theme Colors -->
+  <meta name="theme-color" content="#fbbf24" />
+  <meta name="theme-color" content="#fbbf24" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#222222" media="(prefers-color-scheme: dark)" />
+  <meta name="msapplication-TileColor" content="#fbbf24" />
+  <meta name="msapplication-navbutton-color" content="#fbbf24" />
+
+  <!-- Icons -->
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.svg" />
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Barelle Distribution - Produits Ivoiriens Authentiques" />
+  <meta property="og:description"
+    content="Plateforme e-commerce spécialisée dans la distribution de produits 100% ivoiriens : spiritueux premium, jus naturels, cigares artisanaux et accessoires de qualité." />
+  <meta property="og:site_name" content="Barelle Distribution" />
+  <meta property="og:locale" content="fr_CI" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Barelle Distribution - Produits Ivoiriens Authentiques" />
+  <meta name="twitter:description"
+    content="Découvrez notre sélection de produits 100% ivoiriens : spiritueux, jus naturels, cigares et accessoires premium." />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -55,33 +63,35 @@
       }
     }
     </script>
-    
-    <!-- Preconnect -->
-    <link rel="preconnect" href="https://images.unsplash.com" />
-    
-    <!-- Performance -->
-    <link rel="preload" href="/src/main.tsx" as="script" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- PWA Service Worker -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
-    
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
-  </body>
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://images.unsplash.com" />
+
+  <!-- Performance -->
+  <link rel="preload" href="/src/main.tsx" as="script" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
+
+  <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+  <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+</body>
+
 </html>

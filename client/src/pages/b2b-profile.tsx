@@ -35,12 +35,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  User, 
-  Building2, 
-  Phone, 
-  Mail, 
-  MapPin, 
+import {
+  User,
+  Building2,
+  Phone,
+  Mail,
+  MapPin,
   FileText,
   CheckCircle,
   Package,
@@ -68,7 +68,25 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function B2BProfile() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth() as {
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      companyName?: string;
+      companyType?: string;
+      rccm?: string;
+      siret?: string;
+      address?: string;
+      city?: string;
+      phone?: string;
+      secondContactName?: string;
+      secondContactPhone?: string;
+      createdAt?: string;
+    };
+    isAuthenticated: boolean;
+    isLoading: boolean;
+  };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -102,7 +120,6 @@ export default function B2BProfile() {
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
-      return;
     }
   }, [isAuthenticated, isLoading, toast]);
 
@@ -113,25 +130,38 @@ export default function B2BProfile() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
-        companyName: user.companyName || "",
-        companyType: user.companyType || "",
-        rccm: (user as any).rccm || "",
-        siret: user.siret || "",
-        address: user.address || "",
-        city: user.city || "",
-        phone: user.phone || "",
-        secondContactName: (user as any).secondContactName || "",
-        secondContactPhone: (user as any).secondContactPhone || "",
+        companyName: user.companyName ?? "",
+        companyType: user.companyType ?? "",
+        rccm: user.rccm ?? "",
+        siret: user.siret ?? "",
+        address: user.address ?? "",
+        city: user.city ?? "",
+        phone: user.phone ?? "",
+        secondContactName: user.secondContactName ?? "",
+        secondContactPhone: user.secondContactPhone ?? "",
       });
     }
   }, [user, form]);
 
   // Fetch user orders
-  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
     enabled: isAuthenticated,
     retry: false,
   });
+
+  // Define the Order type according to the fields used in this file
+  type Order = {
+    id: string;
+    orderNumber: string;
+    createdAt: string;
+    orderStatus: string;
+    total: string;
+    deliveryCity: string;
+    paymentMethod: string;
+  };
+
+  const orders: Order[] = (ordersData as Order[]) || [];
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -200,7 +230,7 @@ export default function B2BProfile() {
       'delivered': 'Livrée',
       'cancelled': 'Annulée',
     };
-    return labels[status] || status;
+    return labels[status as keyof typeof labels] || status;
   };
 
   if (isLoading) {
@@ -231,7 +261,7 @@ export default function B2BProfile() {
             Mon Espace Professionnel B2B
           </h1>
           <p className="text-gray-600">
-            Gérez vos informations d'entreprise et suivez vos commandes
+            Gérez vos informations d&apos;entreprise et suivez vos commandes
           </p>
         </div>
 
@@ -245,7 +275,7 @@ export default function B2BProfile() {
                 </h2>
                 <p className="text-gray-300">
                   {user.companyName && `${user.companyName} • `}
-                  Membre depuis {formatDate(user.createdAt)}
+                  Membre depuis {user.createdAt ? formatDate(user.createdAt) : "Date inconnue"}
                 </p>
               </div>
               <div className="text-right">
@@ -281,7 +311,7 @@ export default function B2BProfile() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Informations de l'entreprise</CardTitle>
+                    <CardTitle>Informations de l&apos;entreprise</CardTitle>
                     <CardDescription>
                       Gérez les informations de votre compte professionnel
                     </CardDescription>
@@ -377,7 +407,7 @@ export default function B2BProfile() {
                       <div className="space-y-4">
                         <h4 className="font-semibold text-ivorian-black flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
-                          Informations de l'Entreprise
+                          Informations de l&apos;Entreprise
                         </h4>
 
                         <FormField
@@ -385,7 +415,7 @@ export default function B2BProfile() {
                           name="companyName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Nom de l'entreprise</FormLabel>
+                              <FormLabel>Nom de l&apos;entreprise</FormLabel>
                               <FormControl>
                                 <Input {...field} disabled={!isEditing} />
                               </FormControl>
@@ -399,7 +429,7 @@ export default function B2BProfile() {
                           name="companyType"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Type d'entreprise</FormLabel>
+                              <FormLabel>Type d&apos;entreprise</FormLabel>
                               <FormControl>
                                 <Input {...field} placeholder="Restaurant, Bar, Hôtel, Commerce..." disabled={!isEditing} />
                               </FormControl>
@@ -524,69 +554,75 @@ export default function B2BProfile() {
             <Card>
               <CardHeader>
                 <CardTitle>Historique des commandes</CardTitle>
-                <CardDescription>
-                  Suivez vos commandes et téléchargez vos factures
-                </CardDescription>
+                <CardDescription></CardDescription>
               </CardHeader>
               <CardContent>
-                {ordersLoading ? (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-ivorian-yellow"></div>
-                    <p className="mt-2 text-gray-600">Chargement des commandes...</p>
-                  </div>
-                ) : orders.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Aucune commande trouvée</p>
-                    <Button className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber">
-                      Commencer vos achats
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div key={order.id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold">Commande #{order.orderNumber}</h4>
-                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(order.createdAt)}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className={getOrderStatusColor(order.orderStatus)}>
-                              {getOrderStatusLabel(order.orderStatus)}
-                            </Badge>
-                            <p className="font-bold text-lg text-ivorian-black mt-1">
-                              {formatPrice(order.total)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <p className="font-medium text-gray-700">Livraison</p>
-                            <p className="text-gray-600">{order.deliveryCity}</p>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-700 flex items-center gap-1">
-                              <CreditCard className="h-3 w-3" />
-                              Paiement
-                            </p>
-                            <p className="text-gray-600 capitalize">{order.paymentMethod}</p>
-                          </div>
-                          <div className="text-right">
-                            <Button variant="outline" size="sm">
-                              <FileText className="h-3 w-3 mr-1" />
-                              Voir détails
-                            </Button>
-                          </div>
-                        </div>
+                {(() => {
+                  if (ordersLoading) {
+                    return (
+                      <div className="text-center py-8">
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-ivorian-yellow"></div>
+                        <p className="mt-2 text-gray-600">Chargement des commandes...</p>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  } else if (orders.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 mb-4">Aucune commande trouvée</p>
+                        <Button className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber">
+                          Commencer vos achats
+                        </Button>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="space-y-4">
+                        {orders.map((order) => (
+                          <div key={order.id} className="border border-gray-200 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <h4 className="font-semibold">Commande #{order.orderNumber}</h4>
+                                <p className="text-sm text-gray-600 flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {formatDate(order.createdAt)}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <Badge className={getOrderStatusColor(order.orderStatus)}>
+                                  {getOrderStatusLabel(order.orderStatus)}
+                                </Badge>
+                                <p className="font-bold text-lg text-ivorian-black mt-1">
+                                  {formatPrice(order.total)}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <p className="font-medium text-gray-700">Livraison</p>
+                                <p className="text-gray-600">{order.deliveryCity}</p>
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-700 flex items-center gap-1">
+                                  <CreditCard className="h-3 w-3" />
+                                  Paiement
+                                </p>
+                                <p className="text-gray-600 capitalize">{order.paymentMethod}</p>
+                              </div>
+                              <div className="text-right">
+                                <Button variant="outline" size="sm">
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Voir détails
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
@@ -635,7 +671,7 @@ export default function B2BProfile() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-ivorian-black">Besoin d'aide ?</CardTitle>
+                  <CardTitle className="text-ivorian-black">Besoin d&apos;aide ?</CardTitle>
                   <CardDescription>
                     Notre équipe B2B est là pour vous accompagner
                   </CardDescription>
@@ -662,7 +698,7 @@ export default function B2BProfile() {
                         <p className="font-medium">Showroom professionnel</p>
                         <p className="text-sm text-gray-600">
                           Zone Industrielle de Yopougon<br />
-                          Abidjan, Côte d'Ivoire
+                          Abidjan, Côte d&apos;Ivoire
                         </p>
                       </div>
                     </div>

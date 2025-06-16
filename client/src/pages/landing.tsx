@@ -6,7 +6,7 @@ import Footer from "@/components/footer";
 import ProductCard from "@/components/product-card";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { CheckCircle, Star, Globe, Award, Users, ShoppingBag, Truck, Shield } from "lucide-react";
+import { CheckCircle, Globe, Award, Users, ShoppingBag, Shield } from "lucide-react";
 
 interface Category {
   id: number;
@@ -23,6 +23,8 @@ interface Product {
   categoryId: number;
   rating: string;
   reviewCount: number;
+  price: string;
+  isFeatured?: boolean;
 }
 
 export default function Landing() {
@@ -76,7 +78,7 @@ export default function Landing() {
                   <span className="text-amber-400">Distribution</span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed">
-                  Découvrez l'excellence des produits ivoiriens : spiritueux premium, 
+                  Découvrez l&apos;excellence des produits ivoiriens : spiritueux premium,
                   jus naturels, cigares artisanaux et accessoires de qualité.
                 </p>
               </div>
@@ -88,14 +90,14 @@ export default function Landing() {
                     Découvrir nos produits
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black px-8 py-4 text-lg"
                   onClick={() => window.location.href = '/auth/login'}
                 >
                   <Users className="mr-2 h-5 w-5" />
-                  Se connecter / S'inscrire
+                  Se connecter / S&apos;inscrire
                 </Button>
               </div>
 
@@ -111,16 +113,16 @@ export default function Landing() {
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-amber-400">100%</div>
-                  <div className="text-sm text-gray-400">Made in Côte d'Ivoire</div>
+                  <div className="text-sm text-gray-400">Made in Côte d&apos;Ivoire</div>
                 </div>
               </div>
             </div>
 
             <div className="relative">
               <div className="relative z-10">
-                <img 
-                  src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=800&fit=crop&crop=center" 
-                  alt="Produits ivoiriens premium" 
+                <img
+                  src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=800&fit=crop&crop=center"
+                  alt="Produits ivoiriens premium"
                   className="rounded-2xl shadow-2xl border-4 border-amber-400/30"
                 />
               </div>
@@ -138,8 +140,8 @@ export default function Landing() {
               Pourquoi choisir Barelle Distribution ?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nous sommes votre partenaire de confiance pour découvrir et distribuer 
-              les meilleurs produits de Côte d'Ivoire
+              Nous sommes votre partenaire de confiance pour découvrir et distribuer
+              les meilleurs produits de Côte d&apos;Ivoire
             </p>
           </div>
 
@@ -163,7 +165,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">Livraison Internationale</h3>
                 <p className="text-gray-600">
-                  Expédition sécurisée vers l'Afrique, l'Europe et l'Amérique
+                  Expédition sécurisée vers l&apos;Afrique, l&apos;Europe et l&apos;Amérique
                 </p>
               </CardContent>
             </Card>
@@ -175,7 +177,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">Authenticité Garantie</h3>
                 <p className="text-gray-600">
-                  Certificats d'origine et traçabilité complète de nos produits
+                  Certificats d&apos;origine et traçabilité complète de nos produits
                 </p>
               </CardContent>
             </Card>
@@ -203,7 +205,7 @@ export default function Landing() {
               Nos Catégories Premium
             </h2>
             <p className="text-xl text-gray-600">
-              Explorez notre sélection de produits ivoiriens d'exception
+              Explorez notre sélection de produits ivoiriens d&apos;exception
             </p>
           </div>
 
@@ -212,8 +214,8 @@ export default function Landing() {
               <Link key={category.id} href={`/products?category=${category.slug}`}>
                 <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer border-2 hover:border-amber-400">
                   <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={getCategoryImage(category.slug)} 
+                    <img
+                      src={getCategoryImage(category.slug)}
                       alt={category.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -244,17 +246,13 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.slice(0, 4).map((product) => {
-              const category = categories.find(c => c.id === product.categoryId);
-              return (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  category={category}
-                  hidePrice={true}
-                />
-              );
-            })}
+            {featuredProducts.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                hidePrice={true}
+              />
+            ))}
           </div>
 
           <div className="text-center mt-12">
@@ -276,7 +274,7 @@ export default function Landing() {
                 Devenez Partenaire B2B
               </h2>
               <p className="text-xl text-gray-300">
-                Accédez à des prix préférentiels et bénéficiez d'un service dédié
+                Accédez à des prix préférentiels et bénéficiez d&apos;un service dédié
               </p>
             </div>
 
@@ -318,12 +316,12 @@ export default function Landing() {
                   <p className="text-gray-300 text-center">
                     Connectez-vous avec votre compte Replit pour commencer
                   </p>
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="w-full bg-amber-400 hover:bg-amber-500 text-black font-semibold py-4"
                     onClick={() => window.location.href = '/auth/login'}
                   >
-                    Se connecter / S'inscrire
+                    Se connecter / S&apos;inscrire
                   </Button>
                   <p className="text-sm text-gray-400 text-center">
                     Accès gratuit avec votre compte Replit
@@ -340,10 +338,10 @@ export default function Landing() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto space-y-8">
             <h2 className="text-4xl lg:text-5xl font-bold">
-              Prêt à découvrir l'authenticité ivoirienne ?
+              Prêt à découvrir l&apos;authenticité ivoirienne ?
             </h2>
             <p className="text-xl text-gray-300">
-              Rejoignez des milliers de clients satisfaits qui font confiance à Barelle Distribution 
+              Rejoignez des milliers de clients satisfaits qui font confiance à Barelle Distribution
               pour leurs produits ivoiriens premium.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -52,7 +52,7 @@ async function seed() {
         shortDescription: "Spiritueux premium ivoirien authentique",
         price: "25000",
         imageUrl: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400",
-        categoryId: existingCategories.find(c => c.slug === 'spiritueux')?.id || 1,
+        categoryId: existingCategories.find(c => c.slug === 'spiritueux')?.id ?? 1,
         rating: "4.8",
         reviewCount: 12,
         stockQuantity: 50,
@@ -66,7 +66,7 @@ async function seed() {
         shortDescription: "Boisson rafraîchissante aux fleurs d'hibiscus",
         price: "3500",
         imageUrl: "https://images.unsplash.com/photo-1546938576-6e6a64f317cc?w=400",
-        categoryId: existingCategories.find(c => c.slug === 'jus-naturels')?.id || 2,
+        categoryId: existingCategories.find(c => c.slug === 'jus-naturels')?.id ?? 2,
         rating: "4.6",
         reviewCount: 28,
         stockQuantity: 120,
@@ -80,7 +80,7 @@ async function seed() {
         shortDescription: "Boisson épicée revitalisante",
         price: "4000",
         imageUrl: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400",
-        categoryId: existingCategories.find(c => c.slug === 'jus-naturels')?.id || 2,
+        categoryId: existingCategories.find(c => c.slug === 'jus-naturels')?.id ?? 2,
         rating: "4.7",
         reviewCount: 15,
         stockQuantity: 80,
@@ -94,7 +94,7 @@ async function seed() {
         shortDescription: "Cigare artisanal de qualité supérieure",
         price: "8500",
         imageUrl: "https://images.unsplash.com/photo-1516796181074-bf453fbfa3e6?w=400",
-        categoryId: existingCategories.find(c => c.slug === 'cigares')?.id || 3,
+        categoryId: existingCategories.find(c => c.slug === 'cigares')?.id ?? 3,
         rating: "4.9",
         reviewCount: 8,
         stockQuantity: 25,
@@ -108,7 +108,7 @@ async function seed() {
         shortDescription: "Kit complet pour dégustation professionnelle",
         price: "15000",
         imageUrl: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400",
-        categoryId: existingCategories.find(c => c.slug === 'accessoires')?.id || 4,
+        categoryId: existingCategories.find(c => c.slug === 'accessoires')?.id ?? 4,
         rating: "4.5",
         reviewCount: 6,
         stockQuantity: 30,
@@ -117,7 +117,7 @@ async function seed() {
       },
     ];
 
-    const insertedProducts = await db.insert(products).values(productData).onConflictDoNothing().returning();
+    await db.insert(products).values(productData).onConflictDoNothing();
     console.log(`✅ Products ensured in database`);
 
     // Create admin user - Barelle Distribution
@@ -125,7 +125,7 @@ async function seed() {
     // I will keep the original implementation for now.
     const adminUser = {
       id: "admin_barelle_2025",
-      email: "barelledistribution@gmail.com",
+      email: "info@barelle-distribution.com",
       firstName: "Barelle",
       lastName: "Distribution",
       profileImageUrl: null,
@@ -148,9 +148,9 @@ async function seed() {
     const insertedAdmin = await db.insert(users).values(adminUser).returning();
     console.log(`✅ Created admin user: ${insertedAdmin[0].email}`);
 
-    console.log("🎉 Database seeded successfully!");
+    console.log("Database seeded successfully!");
   } catch (error) {
-    console.error("❌ Error seeding database:", error);
+    console.error("Error seeding database:", error);
     throw error;
   }
 }
@@ -169,4 +169,3 @@ if (import.meta.url.endsWith(process.argv[1])) {
 }
 
 export { seed };
-```

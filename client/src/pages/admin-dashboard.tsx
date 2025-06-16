@@ -25,8 +25,8 @@ export default function AdminDashboard() {
             <div className="h-4 bg-yellow-100 rounded w-1/2"></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="animate-pulse border-yellow-200">
+            {[...Array(4)].map(() => (
+              <Card key={`loading-stat-card-${crypto.randomUUID()}`} className="animate-pulse border-yellow-200">
                 <CardHeader className="pb-2">
                   <div className="h-4 bg-yellow-100 rounded w-3/4"></div>
                 </CardHeader>
@@ -108,11 +108,11 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-4 mt-3">
                 <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
                   <Calendar className="w-3 h-3 mr-1" />
-                  {new Date().toLocaleDateString('fr-FR', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                  {new Date().toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                   })}
                 </Badge>
               </div>
@@ -142,11 +142,10 @@ export default function AdminDashboard() {
                     {stat.value}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      stat.changeType === 'positive' 
-                        ? 'bg-green-100 text-green-700' 
+                    <span className={`text-xs px-2 py-1 rounded-full ${stat.changeType === 'positive'
+                        ? 'bg-green-100 text-green-700'
                         : 'bg-gray-100 text-gray-600'
-                    }`}>
+                      }`}>
                       {stat.change}
                     </span>
                     <span className="text-xs text-gray-500">
@@ -176,7 +175,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                Gérez les comptes utilisateurs B2B, les rôles et les permissions d'accès à votre plateforme.
+                Gérez les comptes utilisateurs B2B, les rôles et les permissions d&apos;accès à votre plateforme.
               </p>
               <a
                 href="/admin/users"

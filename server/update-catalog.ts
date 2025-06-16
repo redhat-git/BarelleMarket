@@ -1,7 +1,6 @@
 
 import { db } from "./db";
 import { categories, products } from "../shared/schema";
-import { eq } from "drizzle-orm";
 
 interface ProductData {
   name: string;
@@ -42,8 +41,7 @@ export async function updateCatalog() {
     target: categories.id,
     set: {
       name: categories.name,
-      description: categories.description,
-      updatedAt: new Date()
+      description: categories.description
     }
   });
 

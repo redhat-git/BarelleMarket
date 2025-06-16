@@ -50,7 +50,7 @@ export function useCart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour la quantité",
@@ -71,7 +71,7 @@ export function useCart() {
         description: "Le produit a été retiré de votre panier",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Erreur",
         description: "Impossible de retirer le produit",

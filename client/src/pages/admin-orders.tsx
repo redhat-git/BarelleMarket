@@ -2,13 +2,39 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import styles from "@/styles/admin-orders.module.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Eye, Filter, Calendar } from "lucide-react";
 import type { Order } from "@shared/schema";
+
+interface OrderItem {
+  id: number;
+  quantity: number;
+  price: string;
+  product: {
+    name: string;
+    imageUrl?: string;
+  };
+}
+
+interface OrderDetail extends Order {
+  trackingNumber?: string;
+  orderItems?: OrderItem[];
+  deliveryInstructions?: string;
+  orderType: 'b2b' | 'b2c';
+  city?: string;
+  phone?: string;
+  email?: string;
+}
+
+interface OrdersResponse {
+  orders: Order[];
+  total: number;
+}
 
 export default function AdminOrders() {
   const [page, setPage] = useState(1);
@@ -18,35 +44,36 @@ export default function AdminOrders() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: ordersData, isLoading } = useQuery({
+  const { data: ordersData, isLoading } = useQuery<OrdersResponse>({
     queryKey: ['/api/admin/orders', page, statusFilter],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '20'
       });
       if (statusFilter) params.append('status', statusFilter);
-      return apiRequest(`/api/admin/orders?${params}`);
-    },
+      const response = await apiRequest('GET', `/api/admin/orders?${params}`);
+      return response.json() as Promise<OrdersResponse>;
+    }
   });
 
-  const { data: orderDetail } = useQuery({
+  const { data: orderDetail } = useQuery<OrderDetail>({
     queryKey: ['/api/admin/orders', selectedOrder?.id],
-    queryFn: () => apiRequest(`/api/admin/orders/${selectedOrder?.id}`),
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/admin/orders/${selectedOrder?.id}`);
+      const data = await response.json();
+      return data as OrderDetail;
+    },
     enabled: !!selectedOrder?.id,
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ orderId, orderStatus, trackingNumber }: { 
-      orderId: number; 
-      orderStatus: string; 
-      trackingNumber?: string; 
+    mutationFn: async ({ orderId, orderStatus, trackingNumber }: {
+      orderId: number;
+      orderStatus: string;
+      trackingNumber?: string;
     }) => {
-      return await apiRequest(`/api/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ orderStatus, trackingNumber }),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return await apiRequest('PATCH', `/api/admin/orders/${orderId}/status`, { orderStatus, trackingNumber });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
@@ -92,7 +119,8 @@ export default function AdminOrders() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: '2-digit',
@@ -112,8 +140,8 @@ export default function AdminOrders() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                {['top', 'second', 'middle', 'fourth', 'bottom'].map((position) => (
+                  <div key={`loading-skeleton-${position}`} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 ))}
               </div>
             </CardContent>
@@ -127,10 +155,7 @@ export default function AdminOrders() {
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50">
       {/* Header professionnel */}
       <div className="relative bg-gradient-to-r from-yellow-600 via-amber-500 to-yellow-600 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}></div>
+        <div className={`absolute inset-0 ${styles.backgroundPattern}`}></div>
         <div className="relative max-w-7xl mx-auto px-6 py-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -140,11 +165,11 @@ export default function AdminOrders() {
               <div>
                 <h1 className="text-3xl font-bold">Gestion des Commandes</h1>
                 <p className="text-yellow-100 mt-1">
-                  Total: {ordersData?.total || 0} commandes
+                  Total: {ordersData?.total ?? 0} commandes
                 </p>
               </div>
             </div>
-          <div className="flex gap-4">
+            <div className="flex gap-4">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-48 bg-white/20 border-white/30 text-white backdrop-blur-sm">
                   <Filter className="w-4 h-4 mr-2" />
@@ -206,7 +231,7 @@ export default function AdminOrders() {
                           #{order.id}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {order.orderType === 'b2b' ? 'B2B' : 'B2C'}
+                          {order.customerType === 'b2b' ? 'B2B' : 'B2C'}
                         </div>
                       </td>
                       <td className="py-4 px-4">
@@ -214,14 +239,14 @@ export default function AdminOrders() {
                           {order.customerName}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {order.email}
+                          {order.customerEmail}
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-900 dark:text-white">
-                            {formatDate(order.createdAt)}
+                            {formatDate(order.createdAt?.toString() ?? null)}
                           </span>
                         </div>
                       </td>
@@ -230,16 +255,16 @@ export default function AdminOrders() {
                           {parseFloat(order.total).toLocaleString()} CFA
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Livraison: {parseFloat(order.deliveryFee).toLocaleString()} CFA
+                          Livraison: {parseFloat(order.deliveryFee ?? '0').toLocaleString()} CFA
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <Select
-                          value={order.orderStatus}
-                          onValueChange={(status) => 
-                            updateStatusMutation.mutate({ 
-                              orderId: order.id, 
-                              orderStatus: status 
+                          value={order.orderStatus ?? ''}
+                          onValueChange={(status) =>
+                            updateStatusMutation.mutate({
+                              orderId: order.id,
+                              orderStatus: status
                             })
                           }
                         >
@@ -277,7 +302,7 @@ export default function AdminOrders() {
             {/* Pagination */}
             <div className="flex justify-between items-center mt-6">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Page {page} sur {Math.ceil((ordersData?.total || 0) / 20)}
+                Page {page} sur {Math.ceil((ordersData?.total ?? 0) / 20)}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -292,7 +317,7 @@ export default function AdminOrders() {
                   variant="outline"
                   size="sm"
                   onClick={() => setPage(p => p + 1)}
-                  disabled={page >= Math.ceil((ordersData?.total || 0) / 20)}
+                  disabled={page >= Math.ceil((ordersData?.total ?? 0) / 20)}
                 >
                   Suivant
                 </Button>
@@ -339,7 +364,7 @@ export default function AdminOrders() {
                       <div>{orderDetail.deliveryAddress}</div>
                       <div>{orderDetail.city}</div>
                       <div>
-                        <span className="font-medium">Instructions:</span> {orderDetail.deliveryInstructions || 'Aucune'}
+                        <span className="font-medium">Instructions:</span> {orderDetail.deliveryInstructions ?? 'Aucune'}
                       </div>
                     </CardContent>
                   </Card>
@@ -352,7 +377,7 @@ export default function AdminOrders() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {orderDetail.orderItems?.map((item: any) => (
+                      {orderDetail.orderItems?.map((item: OrderItem) => (
                         <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="flex items-center gap-4">
                             {item.product.imageUrl && (
@@ -383,7 +408,7 @@ export default function AdminOrders() {
                       </div>
                       <div className="flex justify-between">
                         <span>Livraison:</span>
-                        <span>{parseFloat(orderDetail.deliveryFee).toLocaleString()} CFA</span>
+                        <span>{parseFloat(orderDetail.deliveryFee ?? '0').toLocaleString()} CFA</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t pt-2">
                         <span>Total:</span>
@@ -400,8 +425,8 @@ export default function AdminOrders() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-4">
-                      <Badge className={getStatusBadgeColor(orderDetail.orderStatus)}>
-                        {getStatusText(orderDetail.orderStatus)}
+                      <Badge className={getStatusBadgeColor(orderDetail.orderStatus ?? 'pending')}>
+                        {getStatusText(orderDetail.orderStatus ?? 'pending')}
                       </Badge>
                       {orderDetail.trackingNumber && (
                         <div>

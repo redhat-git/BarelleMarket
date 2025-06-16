@@ -1,8 +1,9 @@
 import type { Config } from "tailwindcss";
+import tailwindAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 export default {
   darkMode: ["class"],
-  content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       borderRadius: {
@@ -84,7 +85,8 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-    },
+    }
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+  plugins: [tailwindAnimate, typography],
 } satisfies Config;
