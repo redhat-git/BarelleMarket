@@ -25,13 +25,15 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Replit Auth + B2B + Admin
+// User storage table for local auth + B2B + Admin
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password"), // hash du mot de passe
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
   profileImageUrl: varchar("profile_image_url"),
+  provider: varchar("provider").default("local"), // local, google, facebook
   // B2B specific fields
   companyName: varchar("company_name"),
   companyType: varchar("company_type"), // restaurant, bar, hotel, retail, etc
@@ -227,9 +229,28 @@ export const b2cOrderSchema = z.object({
   notes: z.string().optional(),
 });
 
+// Schémas d'authentification locale
+export const registerSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string(),
+  firstName: z.string().min(2, "Prénom requis"),
+  lastName: z.string().min(2, "Nom requis"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
+});
+
+export const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(1, "Mot de passe requis"),
+});
+
 // B2B Registration schema
 export const b2bRegistrationSchema = z.object({
   email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string(),
   firstName: z.string().min(2, "Prénom requis"),
   lastName: z.string().min(2, "Nom requis"),
   companyName: z.string().min(2, "Nom de l'entreprise requis"),
@@ -241,6 +262,9 @@ export const b2bRegistrationSchema = z.object({
   phone: z.string().min(8, "Numéro de téléphone requis"),
   secondContactName: z.string().min(2, "Nom du second contact requis"),
   secondContactPhone: z.string().min(8, "Téléphone du second contact requis"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
 });
 
 // Admin schemas
@@ -290,3 +314,5 @@ export type B2BRegistration = z.infer<typeof b2bRegistrationSchema>;
 export type CreateUser = z.infer<typeof createUserSchema>;
 export type UpdateOrderStatus = z.infer<typeof updateOrderStatusSchema>;
 export type CreateProduct = z.infer<typeof createProductSchema>;
+export type Register = z.infer<typeof registerSchema>;
+export type Login = z.infer<typeof loginSchema>;

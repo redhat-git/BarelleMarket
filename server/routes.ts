@@ -8,8 +8,12 @@ import {
   b2bRegistrationSchema,
   createUserSchema,
   updateOrderStatusSchema,
-  createProductSchema
+  createProductSchema,
+  registerSchema,
+  loginSchema
 } from "@shared/schema";
+import { hashPassword } from "./auth";
+import { nanoid } from "nanoid";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -18,48 +22,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/auth/user', isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const userId = (req.user as { claims: { sub: string } })?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const user = req.user as any;
+      const dbUser = await storage.getUser(user.id);
+      res.json(dbUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  app.get('/api/login', (req, res) => {
-    const baseUrl = process.env.REPLIT_OAUTH_URL ?? 'https://replit.com/auth/oauth2/authorize';
-    const clientId = process.env.REPLIT_CLIENT_ID;
-    const redirectUri = process.env.REPLIT_REDIRECT_URI ?? req.protocol + '://' + req.get('host') + '/api/auth/callback';
-    const url =
-      baseUrl +
-      '?client_id=' + encodeURIComponent(clientId ?? '') +
-      '&redirect_uri=' + encodeURIComponent(redirectUri) +
-      '&response_type=code&scope=read:user';
-    res.redirect(url);
+  // Inscription
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const userData = registerSchema.parse(req.body);
+
+      // Vérifier si l'email existe déjà
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Cet email est déjà utilisé" });
+      }
+
+      // Hacher le mot de passe
+      const hashedPassword = await hashPassword(userData.password);
+
+      // Créer l'utilisateur
+      const user = await storage.createLocalUser({
+        email: userData.email,
+        password: hashedPassword,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+      });
+
+      res.json({ message: "Inscription réussie", user: { id: user.id, email: user.email, firstName: user.firstName } });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(400).json({ message: "Erreur lors de l'inscription", error: error instanceof Error ? error.message : String(error) });
+    }
   });
 
-  app.get('/api/logout', (req: Request, res: Response) => {
-    req.session.destroy((err: Error | null) => {
-      if (err) {
-        console.error('Logout error:', err);
-      }
-      res.redirect('/');
-    });
+  // Connexion
+  app.post('/api/auth/login', (req, res, next) => {
+    try {
+      const loginData = loginSchema.parse(req.body);
+
+      passport.authenticate('local', (err: any, user: any, info: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Erreur serveur" });
+        }
+        if (!user) {
+          return res.status(401).json({ message: info?.message || "Email ou mot de passe incorrect" });
+        }
+
+        req.logIn(user, (err) => {
+          if (err) {
+            return res.status(500).json({ message: "Erreur lors de la connexion" });
+          }
+          res.json({ message: "Connexion réussie", user });
+        });
+      })(req, res, next);
+    } catch (error) {
+      res.status(400).json({ message: "Données invalides", error: error instanceof Error ? error.message : String(error) });
+    }
   });
 
   // B2B Registration
   app.post('/api/auth/register-b2b', async (req, res) => {
     try {
       const registrationData = b2bRegistrationSchema.parse(req.body);
-      const user = await storage.registerB2BUser(registrationData);
-      res.json(user);
+
+      // Vérifier si l'email existe déjà
+      const existingUser = await storage.getUserByEmail(registrationData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Cet email est déjà utilisé" });
+      }
+
+      // Hacher le mot de passe
+      const hashedPassword = await hashPassword(registrationData.password);
+
+      const user = await storage.registerB2BUser({
+        ...registrationData,
+        password: hashedPassword
+      });
+
+      res.json({ message: "Inscription B2B réussie. En attente d'approbation.", user: { id: user.id, email: user.email } });
     } catch (error) {
       console.error("B2B registration error:", error);
-      res.status(400).json({ message: "Registration failed", error: error instanceof Error ? error.message : String(error) });
+      res.status(400).json({ message: "Erreur lors de l'inscription", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -480,6 +528,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create admin" });
     }
   });
+
+    // Route pour créer le premier compte admin (à utiliser une seule fois)
+    app.post("/api/init-admin", async (req: Request, res: Response) => {
+      try {
+        // Vérifier s'il y a déjà un admin
+        const existingAdmin = await storage.getUserByRole("admin");
+        if (existingAdmin) {
+          return res.status(400).json({ error: "Un administrateur existe déjà" });
+        }
+  
+        const { email, password, firstName, lastName } = req.body;
+  
+        if (!email || !password || !firstName || !lastName) {
+          return res.status(400).json({ error: "Tous les champs sont requis" });
+        }
+  
+        const hashedPassword = await hashPassword(password);
+  
+        const adminUser = await storage.createUser({
+          id: nanoid(),
+          email,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          role: "admin",
+          isActive: true,
+          provider: "local"
+        });
+  
+        res.json({ 
+          message: "Compte administrateur créé avec succès",
+          user: { 
+            id: adminUser.id, 
+            email: adminUser.email, 
+            firstName: adminUser.firstName,
+            lastName: adminUser.lastName,
+            role: adminUser.role 
+          }
+        });
+      } catch (error) {
+        console.error("Erreur lors de la création de l'admin:", error);
+        res.status(500).json({ error: "Erreur serveur" });
+      }
+    });
 
   // Google OAuth routes (only if configured)
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

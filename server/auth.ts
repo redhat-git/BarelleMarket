@@ -1,6 +1,6 @@
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as FacebookStrategy } from "passport-facebook";
+import bcrypt from "bcrypt";
 import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
@@ -47,39 +47,13 @@ export function getSession() {
   });
 }
 
-interface Claims {
-  sub?: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  given_name?: string;
-  family_name?: string;
-  name?: string;
-  profile_image_url?: string;
-  picture?: string;
-  exp?: number;
-  [key: string]: unknown;
-}
-
 interface UserSession {
-  claims?: Claims;
-  access_token?: string;
-  refresh_token?: string;
-  expires_at?: number;
-}
-
-async function upsertUser(claims: Claims, provider: string) {
-  if (!claims.sub && !claims.id) {
-    throw new Error("No user ID provided in claims");
-  }
-  await storage.upsertUser({
-    id: String(claims["sub"] ?? claims.id),
-    email: claims["email"] ?? "",
-    firstName: claims["first_name"] ?? claims.given_name ?? claims.name?.split(' ')[0] ?? "",
-    lastName: claims["last_name"] ?? claims.family_name ?? claims.name?.split(' ')[1] ?? "",
-    profileImageUrl: claims["profile_image_url"] ?? claims.picture ?? "",
-    provider,
-  });
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  isB2B: boolean;
 }
 
 export async function setupAuth(app: Express) {
@@ -88,158 +62,104 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Stratégie Google OAuth (si configurée)
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    passport.use(
-      new GoogleStrategy(
-        {
-          clientID: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "/api/auth/google/callback",
-        },
-        async (accessToken, refreshToken, profile, done) => {
-          try {
-            const user: UserSession = {
-              claims: {
-                sub: profile.id,
-                email: profile.emails?.[0]?.value,
-                given_name: profile.name?.givenName,
-                family_name: profile.name?.familyName,
-                picture: profile.photos?.[0]?.value,
-              },
-              access_token: accessToken,
-              refresh_token: refreshToken,
-              expires_at: Math.floor(Date.now() / 1000) + 3600,
-            };
-            await upsertUser(user.claims ?? {}, 'google');
-            done(null, user);
-          } catch (error) {
-            done(error as Error, false);
-          }
+  // Stratégie locale (email/mot de passe)
+  passport.use(new LocalStrategy(
+    {
+      usernameField: 'email',
+      passwordField: 'password'
+    },
+    async (email: string, password: string, done) => {
+      try {
+        const user = await storage.getUserByEmail(email);
+        if (!user) {
+          return done(null, false, { message: 'Email ou mot de passe incorrect' });
         }
-      )
-    );
-  }
 
-  // Stratégie Facebook (si configurée)
-  if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    passport.use(
-      new FacebookStrategy(
-        {
-          clientID: process.env.FACEBOOK_APP_ID,
-          clientSecret: process.env.FACEBOOK_APP_SECRET,
-          callbackURL: "/api/auth/facebook/callback",
-          profileFields: ['id', 'emails', 'name', 'picture'],
-        },
-        async (accessToken, refreshToken, profile, done) => {
-          try {
-            const user: UserSession = {
-              claims: {
-                sub: profile.id,
-                email: profile.emails?.[0]?.value,
-                given_name: profile.name?.givenName,
-                family_name: profile.name?.familyName,
-                picture: profile.photos?.[0]?.value,
-              },
-              access_token: accessToken,
-              refresh_token: refreshToken,
-              expires_at: Math.floor(Date.now() / 1000) + 3600,
-            };
-            await upsertUser(user.claims ?? {}, 'facebook');
-            done(null, user);
-          } catch (error) {
-            done(error as Error, false);
-          }
+        if (!user.password) {
+          return done(null, false, { message: 'Compte créé avec un service externe' });
         }
-      )
-    );
-  }
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
+          return done(null, false, { message: 'Email ou mot de passe incorrect' });
+        }
 
-  // Routes Google Auth
-  app.get(
-    "/api/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
-  app.get(
-    "/api/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/api/login" }),
-    (req, res) => {
-      res.redirect("/");
+        const userSession: UserSession = {
+          id: user.id,
+          email: user.email!,
+          firstName: user.firstName!,
+          lastName: user.lastName!,
+          role: user.role!,
+          isB2B: user.isB2B || false,
+        };
+
+        return done(null, userSession);
+      } catch (error) {
+        return done(error);
+      }
     }
-  );
+  ));
 
-  // Routes Facebook Auth
-  app.get(
-    "/api/auth/facebook",
-    passport.authenticate("facebook", { scope: ["email"] })
-  );
-  app.get(
-    "/api/auth/facebook/callback",
-    passport.authenticate("facebook", { failureRedirect: "/api/login" }),
-    (req, res) => {
-      res.redirect("/");
-    }
-  );
-
-  // Routes login / logout legacy
-  app.get("/api/login", (req, res) => {
-    res.redirect("/auth/login");
+  passport.serializeUser((user: UserSession, cb) => {
+    cb(null, user.id);
   });
 
-  app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect("/");
+  passport.deserializeUser(async (id: string, cb) => {
+    try {
+      const user = await storage.getUser(id);
+      if (!user) {
+        return cb(null, false);
+      }
+
+      const userSession: UserSession = {
+        id: user.id,
+        email: user.email!,
+        firstName: user.firstName!,
+        lastName: user.lastName!,
+        role: user.role!,
+        isB2B: user.isB2B || false,
+      };
+
+      cb(null, userSession);
+    } catch (error) {
+      cb(error);
+    }
+  });
+
+  // Route de déconnexion
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Erreur lors de la déconnexion" });
+      }
+      res.json({ message: "Déconnexion réussie" });
     });
   });
 }
 
-// Middleware pour vérifier si authentifié (sans refresh token ici)
+// Middleware pour vérifier si authentifié
 export const isAuthenticated: RequestHandler = (req, res, next) => {
-  const user = req.user as UserSession;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Non authentifié" });
   }
-
-  const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
-    return next();
-  }
-
-  // Token expiré => accès refusé (pas de refresh token dans cette version simplifiée)
-  return res.status(401).json({ message: "Unauthorized" });
+  next();
 };
 
 export const requireRole = (requiredRoles: string[]): RequestHandler => {
   return (req, res, next) => {
-    const user = req.user as UserSession;
-
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Non authentifié" });
     }
 
-    (async () => {
-      try {
-        if (!user.claims?.sub) {
-          return res.status(401).json({ message: "Unauthorized" });
-        }
-        const userId = user.claims.sub;
-        const dbUser = await storage.getUser(userId);
-        req.dbUser = dbUser;
+    const user = req.user as UserSession;
 
-        if (!requiredRoles.includes(dbUser?.role ?? 'user')) {
-          return res.status(403).json({ message: "Forbidden" });
-        }
+    if (!requiredRoles.includes(user.role)) {
+      return res.status(403).json({ message: "Accès refusé" });
+    }
 
-        return next();
-      } catch (error) {
-        console.error("Role check error:", error);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-    })();
+    // Ajouter l'utilisateur à la requête pour un accès facile
+    req.dbUser = user as any;
+    next();
   };
 };
 
