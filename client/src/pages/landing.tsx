@@ -41,7 +41,6 @@ export default function Landing() {
       'spiritueux': 'https://images.unsplash.com/photo-1613743983303-b3e89f8a2b80?w=400&h=300&fit=crop',
       'jus-naturels': 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop',
       'cigares': 'https://images.unsplash.com/photo-1605792657660-596af9009e82?w=400&h=300&fit=crop',
-      'accessoires': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop',
     };
     return images[slug] || images.spiritueux;
   };
@@ -70,7 +69,7 @@ export default function Landing() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <Badge className="bg-amber-400 text-black font-semibold px-4 py-2">
-                  🇨🇮 100% Produits Ivoiriens Authentiques
+                  100% Produits Ivoiriens Authentiques
                 </Badge>
                 <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
                   <span className="text-white">Barelle</span>
@@ -78,8 +77,8 @@ export default function Landing() {
                   <span className="text-amber-400">Distribution</span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed">
-                  Découvrez l&apos;excellence des produits ivoiriens : spiritueux premium,
-                  jus naturels, cigares artisanaux et accessoires de qualité.
+                  Chez BARELLE  Distribution, nous croyons que la richesse d&apos;un Pays se révèle
+                  dans ce qu&apos;il produit de plus authentique.
                 </p>
               </div>
 
@@ -91,9 +90,8 @@ export default function Landing() {
                   </Button>
                 </Link>
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black px-8 py-4 text-lg"
+                  className="bg-amber-400 hover:bg-amber-500 text-black font-semibold px-8 py-4 text-lg"
                   onClick={() => window.location.href = '/auth/login'}
                 >
                   <Users className="mr-2 h-5 w-5" />
@@ -104,12 +102,12 @@ export default function Landing() {
               {/* Stats */}
               <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-700">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-amber-400">500+</div>
+                  <div className="text-3xl font-bold text-amber-400">200+</div>
                   <div className="text-sm text-gray-400">Produits authentiques</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-amber-400">4</div>
-                  <div className="text-sm text-gray-400">Catégories premium</div>
+                  <div className="text-3xl font-bold text-amber-400">4+</div>
+                  <div className="text-sm text-gray-400">Catégories</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-amber-400">100%</div>
@@ -121,7 +119,7 @@ export default function Landing() {
             <div className="relative">
               <div className="relative z-10">
                 <img
-                  src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=800&fit=crop&crop=center"
+                  src="icons/navimage.jpg"
                   alt="Produits ivoiriens premium"
                   className="rounded-2xl shadow-2xl border-4 border-amber-400/30"
                 />

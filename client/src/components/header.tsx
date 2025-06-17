@@ -2,15 +2,15 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
-  SheetClose 
+  SheetClose
 } from "@/components/ui/sheet";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -19,12 +19,12 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import CartSidebar from "./cart-sidebar";
-import { 
-  Menu, 
-  Phone, 
-  Mail, 
-  User, 
-  ShoppingCart, 
+import {
+  Menu,
+  Phone,
+  Mail,
+  User,
+  ShoppingCart,
   ChevronDown,
   LogOut,
   LogIn
@@ -60,20 +60,20 @@ export default function Header() {
               <div className="flex space-x-4">
                 <span className="flex items-center">
                   <Phone className="h-3 w-3 mr-1" />
-                  +225 XX XX XX XX
+                  +225 01 72 10 68 68
                 </span>
                 <span className="flex items-center">
                   <Mail className="h-3 w-3 mr-1" />
-                  contact@barelle-distribution.ci
+                  info@barelle-distribution.com
                 </span>
               </div>
               <div className="flex space-x-4">
                 {isAuthenticated && user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="text-white hover:text-ivorian-yellow hover:bg-transparent"
                       >
                         <User className="h-3 w-3 mr-1" />
@@ -96,9 +96,9 @@ export default function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-white hover:text-ivorian-yellow hover:bg-transparent"
                     onClick={() => window.location.href = '/auth/login'}
                   >
@@ -116,7 +116,7 @@ export default function Header() {
                   <ShoppingCart className="h-3 w-3 mr-1" />
                   Panier ({cartSummary.itemCount})
                   {cartSummary.itemCount > 0 && (
-                    <Badge 
+                    <Badge
                       className="absolute -top-1 -right-1 bg-ivorian-yellow text-ivorian-black text-xs h-5 w-5 flex items-center justify-center p-0"
                     >
                       {cartSummary.itemCount}
@@ -133,33 +133,36 @@ export default function Header() {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Link href="/">
-                  <h1 className="text-2xl font-bold text-ivorian-black">
-                    Barelle <span className="text-ivorian-amber">Distribution</span>
-                  </h1>
+                <Link href="/" className="flex items-center space-x-3">
+                  <img
+                    src="/icons/logo.png"
+                    alt="Barelle Distribution"
+                    className="h-[80px] w-[150px]"
+                  />
+                  <span className="sr-only">Barelle Distribution</span>
                 </Link>
                 <p className="ml-3 text-sm text-gray-600 hidden md:block">
                   Produits 100% Ivoiriens
                 </p>
+
               </div>
 
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex space-x-8">
-                <Link 
-                  href="/" 
-                  className={`font-medium transition-colors ${
-                    location === "/" 
-                      ? "text-ivorian-amber" 
-                      : "text-ivorian-black hover:text-ivorian-amber"
-                  }`}
+                <Link
+                  href="/"
+                  className={`font-medium transition-colors ${location === "/"
+                    ? "text-ivorian-amber"
+                    : "text-ivorian-black hover:text-ivorian-amber"
+                    }`}
                 >
                   Accueil
                 </Link>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="text-ivorian-black hover:text-ivorian-amber font-medium p-0 h-auto"
                     >
                       Produits <ChevronDown className="ml-1 h-4 w-4" />
@@ -177,13 +180,12 @@ export default function Header() {
                 </DropdownMenu>
 
                 {isAuthenticated && (
-                  <Link 
-                    href="/profile" 
-                    className={`font-medium transition-colors ${
-                      location === "/profile" 
-                        ? "text-ivorian-amber" 
-                        : "text-ivorian-black hover:text-ivorian-amber"
-                    }`}
+                  <Link
+                    href="/profile"
+                    className={`font-medium transition-colors ${location === "/profile"
+                      ? "text-ivorian-amber"
+                      : "text-ivorian-black hover:text-ivorian-amber"
+                      }`}
                   >
                     Mon Espace B2B
                   </Link>
@@ -212,7 +214,7 @@ export default function Header() {
                       <h3 className="text-lg font-medium">Produits</h3>
                       {categories.map((category) => (
                         <SheetClose key={category.id} asChild>
-                          <Link 
+                          <Link
                             href={`/products?category=${category.slug}`}
                             className="block pl-4 text-gray-600 hover:text-ivorian-amber"
                           >

@@ -1,110 +1,120 @@
-# Barelle Distribution - E-commerce Platform
 
-## Overview
+# Barelle Distribution - Plateforme E-commerce
 
-This is a B2B e-commerce platform for Barelle Distribution, specializing in Ivorian products including spiritueux (spirits), natural juices, cigars, and accessories. The application is built as a full-stack web application with a React frontend and Express.js backend, featuring Replit authentication for B2B user management and a comprehensive shopping cart system.
+## Vue d’ensemble
 
-## System Architecture
+Barelle Distribution est une plateforme e-commerce B2B spécialisée dans les produits ivoiriens : spiritueux, jus naturels, cigares et accessoires. L’application est conçue en fullstack avec un frontend React et un backend Express.js, intégrant une authentification Replit pour la gestion des utilisateurs professionnels (B2B) et un système de panier complet.
 
-The application follows a monorepo structure with clear separation between frontend and backend:
+---
 
-- **Frontend**: React with TypeScript, using Vite for development and building
-- **Backend**: Express.js server with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Authentication**: Replit Auth with OpenID Connect for B2B user management
-- **UI Framework**: Tailwind CSS with shadcn/ui components for consistent design
-- **Deployment**: Configured for Replit's autoscale deployment
+## Architecture du Système
 
-## Key Components
+L’application suit une structure monorepo bien organisée entre le frontend et le backend :
 
-### Frontend Architecture (`client/`)
-- **React Router**: Using Wouter for lightweight client-side routing
-- **State Management**: TanStack Query for server state management and caching
-- **UI Components**: Custom components built on top of shadcn/ui with Radix UI primitives
-- **Styling**: Tailwind CSS with custom Ivorian-themed color palette
-- **Form Handling**: React Hook Form with Zod validation
+ Frontend : React avec TypeScript, Vite pour le développement et la compilation
+ Backend : Express.js avec TypeScript
+ Base de données : PostgreSQL avec Drizzle ORM pour des requêtes type-safe
+ Authentification : Replit Auth via OpenID Connect
+ UI : Tailwind CSS avec les composants shadcn/ui pour une interface cohérente
+ Déploiement : Configuré pour l’infrastructure autoscale de Replit
 
-### Backend Architecture (`server/`)
-- **Express Server**: RESTful API with middleware for logging and error handling
-- **Database Layer**: Drizzle ORM with connection pooling via Neon serverless
-- **Authentication**: Passport.js with OpenID Connect strategy for Replit Auth
-- **Session Management**: PostgreSQL-backed sessions with connect-pg-simple
-- **Storage Layer**: Abstracted storage interface for data operations
+---
 
-### Database Schema (`shared/schema.ts`)
-- **Users**: B2B user profiles with company information and authentication data
-- **Products**: Product catalog with categories, pricing, and inventory
-- **Categories**: Product categorization system
-- **Cart**: Session-based shopping cart with user association
-- **Orders**: Order management for B2C and B2B transactions
-- **Sessions**: Authentication session storage
+## Composants Clés
 
-## Data Flow
+### Frontend (`client/`)
 
-1. **Authentication Flow**: Users authenticate via Replit Auth, creating B2B profiles with company information
-2. **Product Browsing**: Products are fetched from PostgreSQL and cached client-side with TanStack Query
-3. **Shopping Cart**: Cart items are stored in database with session/user association
-4. **Checkout Process**: B2C orders can be placed by anonymous users, B2B orders require authentication
-5. **Order Management**: Orders are stored with detailed item information and customer data
+ Routing : Wouter pour un routage léger côté client
+ Gestion d’état : TanStack Query pour la gestion du cache et des données serveur
+ UI Components : Composants personnalisés basés sur shadcn/ui et Radix UI
+ Styles : Tailwind CSS avec palette personnalisée ivoirienne
+ Formulaires : React Hook Form + validation Zod
 
-## External Dependencies
+### Backend (`server/`)
 
-### Authentication & Infrastructure
-- **Replit Auth**: OpenID Connect provider for user authentication
-- **Neon Database**: Serverless PostgreSQL hosting
-- **Replit Deployment**: Autoscale deployment platform
+ API REST : Serveur Express avec middleware pour logs et gestion d’erreurs
+ Base de données : Drizzle ORM avec pool de connexions via Neon
+ Auth : Passport.js avec stratégie OpenID pour Replit Auth
+ Sessions : Sessions stockées dans PostgreSQL via connect-pg-simple
+ Abstraction de stockage : Interface générique pour les opérations de données
 
-### Key Libraries
-- **Database**: Drizzle ORM, @neondatabase/serverless
-- **Authentication**: Passport.js, openid-client
-- **Frontend**: React, TanStack Query, Wouter
-- **UI**: Radix UI primitives, Tailwind CSS
-- **Forms**: React Hook Form, Zod validation
-- **Development**: Vite, TypeScript, ESBuild
+---
 
-## Deployment Strategy
+## Schéma de la Base de Données (`shared/schema.ts`)
 
-The application is configured for Replit's deployment platform with:
+ Utilisateurs : Profils B2B avec infos d’entreprise et données d’authentification
+ Produits : Catalogue avec catégories, prix, stock
+ Catégories : Classification des produits
+ Panier : Système de panier lié à une session ou un utilisateur
+ Commandes : Gestion des commandes (B2C et B2B)
+ Sessions : Stockage des sessions d’authentification
 
-- **Development**: `npm run dev` starts the Express server with Vite middleware
-- **Build Process**: Vite builds the client, ESBuild bundles the server
-- **Production**: Single Node.js process serving both API and static files
-- **Database**: Automatic connection to provisioned PostgreSQL instance
-- **Environment**: Configured for Replit's autoscale infrastructure
+---
 
-The deployment uses a parallel workflow strategy where the application serves both the React frontend and Express API from a single process, with static files served from the built client distribution.
+## Flux de Données
 
-## Recent Changes
+1. Connexion : Les utilisateurs B2B s’authentifient via Replit Auth
+2. Navigation Produits : Les produits sont récupérés depuis PostgreSQL et mis en cache via TanStack Query
+3. Panier : Le panier est lié à l’utilisateur connecté ou à une session anonyme
+4. Paiement : Les commandes B2C peuvent être faites sans compte, les commandes B2B nécessitent une connexion
+5. Gestion Commandes : Les commandes sont enregistrées avec les détails de chaque article et du client
 
-### PWA & SEO Implementation (Janvier 15, 2025)
-- ✅ PWA complète avec Service Worker fonctionnel
-- ✅ Manifeste web app avec icônes et raccourcis
-- ✅ SEO optimisé au maximum avec méta-tags complets
-- ✅ Structured data JSON-LD pour les moteurs de recherche
-- ✅ Sitemap XML et robots.txt configurés
-- ✅ Page offline pour la PWA
-- ✅ Correction du problème de chargement infini
-- ✅ Optimisation performance avec preconnect et preload
+---
 
-### Fonctionnalités Implémentées
-- ✅ Système d'authentification Replit Auth complet
-- ✅ Interface administrateur avec gestion utilisateurs/produits/commandes
-- ✅ Permissions par rôles (admin, support, user)
-- ✅ Catalogue produits avec prix cachés jusqu'à sélection
-- ✅ Panier de commandes B2C et B2B
-- ✅ Base de données PostgreSQL avec schéma complet
-- ✅ Branding ivoirien jaune et noir
+## Dépendances Externes
 
-## Changelog
+### Infrastructure et Authentification
 
-```
-Changelog:
-- Janvier 15, 2025: PWA et SEO optimisé au maximum implémentés
-- Juin 15, 2025: Configuration initiale
-```
+ Replit Auth : Fournisseur OpenID Connect
+ Neon : PostgreSQL serverless
+ Replit : Plateforme de déploiement autoscale
 
-## User Preferences
+### Bibliothèques Clés
 
-```
-Preferred communication style: Simple, everyday language.
-```
+ Base de données : Drizzle ORM, `@neondatabase/serverless`
+ Auth : Passport.js, `openid-client`
+ Frontend : React, TanStack Query, Wouter
+ UI : Radix UI, Tailwind CSS
+ Formulaires : React Hook Form, Zod
+ Dev : Vite, TypeScript, ESBuild
+
+---
+
+## Stratégie de Déploiement
+
+Déploiement optimisé pour Replit :
+
+ Dév local : `npm run dev` lance Express avec Vite en middleware
+ Build : Vite compile le frontend, ESBuild le backend
+ Prod : Un seul processus Node.js sert les APIs + les fichiers statiques
+ Base de données : Connexion automatique à Neon PostgreSQL
+ Environnement : Prévu pour l’autoscaling Replit
+
+Le serveur Express sert à la fois les routes backend et les fichiers frontend compilés.
+
+---
+
+## Derniers Changements
+
+### 📦 PWA & SEO (15 janvier 2025)
+
+ ✅ Application PWA avec Service Worker
+ ✅ Fichier manifeste avec icônes et raccourcis
+ ✅ SEO optimisé avec meta-tags complets
+ ✅ Données structurées JSON-LD pour Google
+ ✅ Sitemap XML + robots.txt
+ ✅ Page hors-ligne (offline.html)
+ ✅ Correction du bug de chargement infini
+ ✅ Amélioration performance : preconnect + preload
+
+### ✅ Fonctionnalités déjà implémentées
+
+ Authentification complète avec Replit Auth
+ Interface admin (utilisateurs, produits, commandes)
+ Rôles (admin, support, utilisateur)
+ Catalogue produits avec prix visibles uniquement après sélection
+ Panier B2B et B2C
+ Base PostgreSQL + schéma Drizzle
+ Branding aux couleurs ivoiriennes : jaune et noir
+
+---

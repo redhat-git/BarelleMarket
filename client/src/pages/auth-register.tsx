@@ -1,11 +1,11 @@
-
-import { useState } from "react";
+import { useState, useCallback, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
+
 
 export default function AuthRegister() {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +21,7 @@ export default function AuthRegister() {
     lastName: "",
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -45,13 +45,15 @@ export default function AuthRegister() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Inscription réussie ! Vous pouvez maintenant vous connecter.");
-        setFormData({
-          email: "",
-          password: "",
-          confirmPassword: "",
-          firstName: "",
-          lastName: "",
+        startTransition(() => {
+          setSuccess("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+          setFormData({
+            email: "",
+            password: "",
+            confirmPassword: "",
+            firstName: "",
+            lastName: "",
+          });
         });
       } else {
         setError(data.message || "Erreur lors de l'inscription");
@@ -59,16 +61,21 @@ export default function AuthRegister() {
     } catch (error) {
       setError("Erreur de connexion au serveur");
     } finally {
-      setIsLoading(false);
+      startTransition(() => {
+        setIsLoading(false);
+      });
     }
-  };
+  }, [formData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    startTransition(() => {
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        [name]: value,
+      }));
     });
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">

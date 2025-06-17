@@ -130,11 +130,11 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 (async () => {
   const server = await registerRoutes(app);
 
-app.use((err: Error & { status?: number; statusCode?: number }, _req: Request, res: Response, next: express.NextFunction) => {
-  const status = err.status ?? err.statusCode ?? 500;
-  const message = err.message || "Internal Server Error";
+  app.use((err: Error & { status?: number; statusCode?: number }, _req: Request, res: Response, next: express.NextFunction) => {
+    const status = err.status ?? err.statusCode ?? 500;
+    const message = err.message || "Internal Server Error";
 
-  res.status(status).json({ message });
+    res.status(status).json({ message });
   });
 
   // Serve static files or setup Vite based on the environment
