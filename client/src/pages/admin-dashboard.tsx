@@ -14,6 +14,16 @@ interface AdminStats {
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery<AdminStats>({
     queryKey: ['/api/admin/stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/stats', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    },
   });
 
   if (isLoading) {

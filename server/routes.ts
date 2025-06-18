@@ -546,8 +546,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order Management  
-  app.get('/api/admin/orders', requireSupport, async (req, res) => {
+  app.get('/api/admin/orders', isAuthenticated, async (req, res) => {
     try {
+      // Vérifier le rôle manuellement pour débugger
+      const userSession = req.user as any;
+      console.log('Admin orders - User session:', userSession);
+      
+      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+        console.log('User role check failed:', userSession?.role);
+        return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
+      }
+
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string;
@@ -560,8 +569,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/orders/:id/status', requireSupport, async (req, res) => {
+  app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req, res) => {
     try {
+      const userSession = req.user as any;
+      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+        return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
+      }
+
       const orderId = parseInt(req.params.id);
       const statusData = updateOrderStatusSchema.parse(req.body);
 
@@ -573,8 +587,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/orders/:id', requireSupport, async (req, res) => {
+  app.get('/api/admin/orders/:id', isAuthenticated, async (req, res) => {
     try {
+      const userSession = req.user as any;
+      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+        return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
+      }
+
       const id = parseInt(req.params.id);
       const order = await storage.getOrderById(id);
 
@@ -590,8 +609,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard Stats
-  app.get('/api/admin/stats', requireSupport, async (req, res) => {
+  app.get('/api/admin/stats', isAuthenticated, async (req, res) => {
     try {
+      const userSession = req.user as any;
+      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+        return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
+      }
+
       const stats = await storage.getOrderStats();
       res.json(stats);
     } catch (error) {

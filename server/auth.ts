@@ -179,22 +179,34 @@ export const isAuthenticated: RequestHandler = (req, res, next) => {
 // 🛡️ Middleware : vérifier le rôle
 export const requireRole = (roles: string[]): RequestHandler => {
   return async (req, res, next) => {
+    console.log('RequireRole middleware - isAuthenticated:', req.isAuthenticated());
+    
     if (!req.isAuthenticated()) {
+      console.log('User not authenticated');
       return res.status(401).json({ message: "Non authentifié" });
     }
 
     const userSession = req.user as UserSession;
+    console.log('User session in requireRole:', userSession);
+    console.log('Required roles:', roles, 'User role:', userSession.role);
+    
     if (!roles.includes(userSession.role)) {
+      console.log('User role not in required roles');
       return res.status(403).json({ message: "Accès refusé" });
     }
 
     try {
       const user = await storage.getUser(userSession.id);
-      if (!user) return res.status(401).json({ message: "Utilisateur introuvable" });
+      if (!user) {
+        console.log('User not found in database:', userSession.id);
+        return res.status(401).json({ message: "Utilisateur introuvable" });
+      }
 
+      console.log('User found in database:', user);
       req.dbUser = user;
       next();
     } catch (error) {
+      console.error('Error in requireRole middleware:', error);
       res.status(500).json({ message: "Erreur serveur" });
     }
   };
