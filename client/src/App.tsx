@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin-dashboard";
 import AdminUsers from "./pages/admin-users";
 import AdminProducts from "./pages/admin-products";
 import AdminOrders from "./pages/admin-orders";
+import Orders from "./pages/orders";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -38,11 +39,18 @@ function Router() {
       <Route path="/products" component={Products} />
       <Route path="/products/:slug" component={ProductDetail} />
       {isAuthenticated && (
-        <Route path="/profile" component={B2BProfile} />
+        <>
+          <Route path="/profile" component={B2BProfile} />
+          <Route path="/orders" component={Orders} />
+        </>
       )}
-      <Route path="/auth/login" component={AuthLogin} />
-      <Route path="/auth/register" component={AuthRegister} />
-      <Route path="/auth/register-b2b" component={AuthRegisterB2B} />
+      {!isAuthenticated && (
+        <>
+          <Route path="/auth/login" component={AuthLogin} />
+          <Route path="/auth/register" component={AuthRegister} />
+          <Route path="/auth/register-b2b" component={AuthRegisterB2B} />
+        </>
+      )}
       {isAuthenticated && (
         <>
           <Route path="/admin" component={AdminDashboard} />

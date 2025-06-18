@@ -424,6 +424,7 @@ export default function AuthRegisterB2B() {
           </p>
         </div>
       </div>
+      
       <Footer />
     </div>
   );

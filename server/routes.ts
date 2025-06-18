@@ -312,7 +312,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/orders/:id', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = (req.user as { claims: { sub: string } }).claims.sub;
+      const user = req.user as any;
+      const userId = user?.claims?.sub || user?.id;
 
       const order = await storage.getOrderById(id);
       if (!order || order.userId !== userId) {
@@ -385,6 +386,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error activating user:", error);
       res.status(400).json({ message: "Failed to activate user" });
+    }
+  });
+
+  app.post('/api/admin/create-admin', requireAdmin, async (req, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ message: "Tous les champs sont requis" });
+      }
+
+      // Vérifier si l'email existe déjà
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Cet email est déjà utilisé" });
+      }
+
+      const hashedPassword = await hashPassword(password);
+
+      const adminUser = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: "admin"
+      });
+
+      res.json({ 
+        message: "Administrateur créé avec succès",
+        user: { 
+          id: adminUser.id, 
+          email: adminUser.email, 
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          role: adminUser.role 
+        }
+      });
+    } catch (error) {
+      console.error("Erreur lors de la création de l'admin:", error);
+      res.status(500).json({ message: "Erreur serveur" });
     }
   });
 
