@@ -119,6 +119,14 @@ export default function AdminOrders() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
+            <div className="flex items-center gap-4 mb-2">
+              <Link href="/admin">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Retour au tableau de bord
+                </Button>
+              </Link>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
               <ShoppingCart className="h-8 w-8" />
               Gestion des Commandes

@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
 import Footer from "@/components/footer";
+import { Link } from "wouter";
 
 
 export default function AuthRegister() {
@@ -86,6 +87,16 @@ export default function AuthRegister() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
+        {/* Bouton retour */}
+        <div className="flex justify-start">
+          <Link href="/">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Retour à l'accueil
+            </Button>
+          </Link>
+        </div>
+        
         {/* Logo et titre */}
         <div className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl flex items-center justify-center">

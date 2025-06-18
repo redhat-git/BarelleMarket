@@ -13,7 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { createUserSchema, type CreateUser, type User } from "@shared/schema";
-import { Users, Plus, Edit, Trash2, Shield, UserCheck, UserX } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Shield, UserCheck, UserX, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 export default function AdminUsers() {
   const [page, setPage] = useState(1);
@@ -138,6 +139,14 @@ export default function AdminUsers() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
+            <div className="flex items-center gap-4 mb-2">
+              <Link href="/admin">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Retour au tableau de bord
+                </Button>
+              </Link>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Users className="h-8 w-8" />
               Gestion des Utilisateurs
