@@ -88,7 +88,7 @@ export default function Header() {
                           Mon Profil
                         </Link>
                       </DropdownMenuItem>
-                      {typedUser?.role === 'admin' && (
+                      {(typedUser?.role === 'admin' || typedUser?.role === 'support') && (
                         <DropdownMenuItem>
                           <Link href="/admin">
                             <User className="h-4 w-4 mr-2" />
@@ -104,7 +104,32 @@ export default function Header() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                ) : null}
+                ) : (
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      asChild
+                    >
+                      <a href="/api/login">
+                        <LogIn className="h-3 w-3 mr-1" />
+                        Se Connecter
+                      </a>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      asChild
+                    >
+                      <Link href="/register">
+                        <User className="h-3 w-3 mr-1" />
+                        S'inscrire
+                      </Link>
+                    </Button>
+                  </div>
+                )}
 
                 <Button
                   variant="ghost"
@@ -237,12 +262,20 @@ export default function Header() {
                         </SheetClose>
                       </div>
                     ) : (
-                      <SheetClose asChild>
-                        <a href="/api/login" className="text-lg font-medium flex items-center">
-                          <LogIn className="h-4 w-4 mr-2" />
-                          Se Connecter
-                        </a>
-                      </SheetClose>
+                      <div className="space-y-2">
+                        <SheetClose asChild>
+                          <a href="/api/login" className="text-lg font-medium flex items-center">
+                            <LogIn className="h-4 w-4 mr-2" />
+                            Se Connecter
+                          </a>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link href="/register" className="text-lg font-medium flex items-center">
+                            <User className="h-4 w-4 mr-2" />
+                            S'inscrire
+                          </Link>
+                        </SheetClose>
+                      </div>
                     )}
                   </nav>
                 </SheetContent>

@@ -15,6 +15,9 @@ import AuthRegister from "./pages/auth-register";
 import AuthRegisterB2B from "./pages/auth-register-b2b";
 import AdminDashboard from "./pages/admin-dashboard";
 import AdminUsers from "./pages/admin-users";
+import AdminOrders from "./pages/admin-orders";
+import AdminProducts from "./pages/admin-products";
+import AdminUsers from "./pages/admin-users";
 import AdminProducts from "./pages/admin-products";
 import AdminOrders from "./pages/admin-orders";
 

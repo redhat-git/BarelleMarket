@@ -377,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:id/deactivate', requireAdmin, async (req, res) => {
+  app.post('/api/admin/users/:id/deactivate', requireAdmin, async (req, res) => {
     try {
       const userId = req.params.id;
       await storage.deactivateUser(userId);
@@ -388,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:id/activate', requireAdmin, async (req, res) => {
+  app.post('/api/admin/users/:id/activate', requireAdmin, async (req, res) => {
     try {
       const userId = req.params.id;
       await storage.activateUser(userId);
@@ -397,6 +397,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error activating user:", error);
       res.status(400).json({ message: "Failed to activate user" });
     }
+  });
+
+  app.get('/api/logout', (req: Request, res: Response) => {
+    req.logout((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+      }
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destruction error:", err);
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+      });
+    });
   });
 
   // Product Management
