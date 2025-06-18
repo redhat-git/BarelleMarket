@@ -37,15 +37,17 @@ export default function AdminProducts() {
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to create product');
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      setIsCreateDialogOpen(false);
-      form.reset();
+      handleCloseDialog();
       toast({ title: "Produit créé avec succès" });
     },
     onError: (error: any) => {
@@ -62,14 +64,17 @@ export default function AdminProducts() {
       const response = await fetch(`/api/admin/products/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to update product');
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      setEditingProduct(null);
+      handleCloseDialog();
       toast({ title: "Produit mis à jour avec succès" });
     },
     onError: (error: any) => {
@@ -148,7 +153,19 @@ export default function AdminProducts() {
   const handleCloseDialog = () => {
     setIsCreateDialogOpen(false);
     setEditingProduct(null);
-    form.reset();
+    form.reset({
+      name: "",
+      slug: "",
+      description: "",
+      shortDescription: "",
+      price: "",
+      b2bPrice: "",
+      originalPrice: "",
+      categoryId: 0,
+      imageUrl: "",
+      stockQuantity: 0,
+      isFeatured: false,
+    });
   };
 
   const generateSlug = (name: string) => {

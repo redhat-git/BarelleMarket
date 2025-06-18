@@ -548,12 +548,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order Management  
   app.get('/api/admin/orders', isAuthenticated, async (req, res) => {
     try {
-      // Vérifier le rôle manuellement pour débugger
       const userSession = req.user as any;
       console.log('Admin orders - User session:', userSession);
       
-      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
-        console.log('User role check failed:', userSession?.role);
+      // Récupérer l'utilisateur complet depuis la base de données
+      const userId = userSession?.id || userSession?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Utilisateur non identifié" });
+      }
+
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+
+      if (dbUser.role !== 'admin' && dbUser.role !== 'support') {
+        console.log('User role check failed:', dbUser.role);
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
 
@@ -572,7 +582,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
-      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+      const userId = userSession?.id || userSession?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Utilisateur non identifié" });
+      }
+
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'support')) {
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
 
@@ -590,7 +607,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/orders/:id', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
-      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+      const userId = userSession?.id || userSession?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Utilisateur non identifié" });
+      }
+
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'support')) {
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
 
@@ -612,7 +636,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/stats', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
-      if (!userSession || (userSession.role !== 'admin' && userSession.role !== 'support')) {
+      const userId = userSession?.id || userSession?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Utilisateur non identifié" });
+      }
+
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'support')) {
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
 
