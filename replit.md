@@ -96,6 +96,17 @@ Le serveur Express sert à la fois les routes backend et les fichiers frontend c
 
 ## Derniers Changements
 
+### 🚀 Migration Replit Agent → Replit (18 juin 2025)
+
+ ✅ Migration complète de Replit Agent vers environnement Replit
+ ✅ Base de données PostgreSQL configurée et connectée
+ ✅ Schéma Drizzle ORM appliqué avec succès
+ ✅ Données de test initialisées (catégories, produits, admin)
+ ✅ Serveur Express optimisé et fonctionnel
+ ✅ Toutes les APIs REST opérationnelles
+ ✅ Interface utilisateur accessible et responsive
+ ✅ Architecture client/serveur sécurisée
+
 ### 📦 PWA & SEO (15 janvier 2025)
 
  ✅ Application PWA avec Service Worker

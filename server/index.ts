@@ -38,11 +38,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Route de connexion
-app.post('/login', passport.authenticate('local'), (req, res) => {
-  res.json({ message: 'Connexion réussie', user: req.user });
-});
-
 (async () => {
   const server = await registerRoutes(app);
 
@@ -60,11 +55,8 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
     serveStatic(app);
   }
 
-  const port = process.env.PORT ?? 5000;
-  server.listen({
-    port,
-    host: "127.0.0.1",
-  }, () => {
+  const port = parseInt(process.env.PORT ?? "5000");
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();
