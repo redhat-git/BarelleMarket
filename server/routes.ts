@@ -551,14 +551,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const hashedPassword = await hashPassword(password);
   
         const adminUser = await storage.createUser({
-          id: nanoid(),
           email,
           password: hashedPassword,
           firstName,
           lastName,
-          role: "admin",
-          isActive: true,
-          provider: "local"
+          role: "admin"
         });
   
         res.json({ 

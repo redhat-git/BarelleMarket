@@ -22,7 +22,7 @@ export default function AuthRegister() {
     lastName: "",
   });
 
-  const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -68,7 +68,7 @@ export default function AuthRegister() {
     }
   }, [formData]);
 
-  const handleChange = useCallback((e) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     startTransition(() => {
       setFormData(prevFormData => ({

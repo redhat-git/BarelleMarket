@@ -6,14 +6,11 @@ async function createAdmin() {
     const hashedPassword = await hashPassword('Barelle 2025');
     
     const adminUser = await storage.createUser({
-      id: 'admin_davidvortex',
       email: 'davidvortex3@gmail.com',
       password: hashedPassword,
       firstName: 'David',
       lastName: 'Admin',
-      role: 'admin',
-      isB2B: true,
-      isActive: true
+      role: 'admin'
     });
     
     console.log('Admin créé avec succès:', adminUser);
