@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/useCart";
-import { X, Minus, Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { X, Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import B2CCheckoutModal from "./b2c-checkout-modal";
+import B2BMinimumValidator, { B2B_MINIMUM_ORDER } from "./b2b-minimum-validator";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -13,7 +15,12 @@ interface CartSidebarProps {
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { cartSummary, updateQuantity, removeItem, isUpdating } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
+  const typedUser = user as any;
+  
+  const isB2BUser = isAuthenticated && typedUser?.isB2B;
+  const canCheckout = !isB2BUser || cartSummary.total >= B2B_MINIMUM_ORDER;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR').format(price) + ' FCFA';
@@ -112,8 +119,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
+                </div>
+              )}
+            </B2BMinimumValidator>
           </div>
 
           {/* Footer */}

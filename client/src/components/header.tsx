@@ -155,7 +155,9 @@ export default function Header() {
         {/* Main Navigation */}
         <div className="py-2 sm:py-4">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between"
+              style={{ minHeight: "60px" }} /* Ensure consistent height */
+            >
               <div className="flex items-center">
                 <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
                   <img
@@ -171,7 +173,7 @@ export default function Header() {
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden lg:flex space-x-8">
+              <nav className="hidden lg:flex space-x-4 xl:space-x-8 flex-wrap">
                 <Link
                   href="/"
                   className={`font-medium transition-colors ${location === "/"
@@ -218,8 +220,8 @@ export default function Header() {
               {/* Mobile Menu Button */}
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="sm" className="lg:hidden">
-                    <Menu className="h-6 w-6" />
+                  <Button variant="ghost" size="sm" className="lg:hidden p-2">
+                    <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right">

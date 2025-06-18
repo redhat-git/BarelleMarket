@@ -50,8 +50,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   const originalPrice = getOriginalPrice();
 
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
-      <div className="aspect-square relative overflow-hidden">
+    <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white w-full max-w-sm mx-auto">
+      <div className="aspect-square relative overflow-hidden"
+        style={{ 
+          minHeight: "200px",
+          maxHeight: "300px"
+        }}
+      >
         <img
           src={product.imageUrl || "/placeholder-product.jpg"}
           alt={product.name}
@@ -70,17 +75,17 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
 
-      <CardContent className="p-4">
-        <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
+      <CardContent className="p-3 sm:p-4">
+        <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base">
           {product.name}
         </h3>
 
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-ivorian-amber">
+            <span className="text-base sm:text-lg font-bold text-ivorian-amber">
               {displayPrice.toLocaleString()} CFA
               {isAuthenticated && typedUser?.isB2B && (
-                <span className="text-xs text-blue-600 ml-2">Prix B2B</span>
+                <span className="text-xs text-blue-600 ml-1 sm:ml-2">Prix B2B</span>
               )}
             </span>
             {originalPrice && (
@@ -96,9 +101,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {product.rating && (
-            <div className="flex items-center">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm text-gray-600 ml-1">
+            <div className="flex items-center mt-1 sm:mt-0">
+              <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs sm:text-sm text-gray-600 ml-1">
                 {product.rating} ({product.reviewCount || 0})
               </span>
             </div>
@@ -107,10 +112,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-ivorian-amber hover:bg-ivorian-yellow text-ivorian-black font-medium"
+          className="w-full bg-ivorian-amber hover:bg-ivorian-yellow text-ivorian-black font-medium text-sm sm:text-base py-2 sm:py-3"
         >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          Ajouter au Panier
+          <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Ajouter au Panier</span>
+          <span className="sm:hidden">Ajouter</span>
         </Button>
       </CardContent>
     </Card>

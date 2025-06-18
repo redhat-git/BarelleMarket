@@ -227,11 +227,11 @@ export default function AdminOrders() {
                                         {orderDetails.orderItems?.map((item) => (
                                           <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                                             <div>
-                                              <p className="font-medium">{item.productName}</p>
+                                              <p className="font-medium">{item.productName || ''}</p>
                                               <p className="text-sm text-gray-600">Quantité: {item.quantity}</p>
                                             </div>
                                             <div className="text-right">
-                                              <p className="font-medium">{parseFloat(item.subtotal).toLocaleString()} CFA</p>
+                                              <p className="font-medium">{parseFloat(item.subtotal || '0').toLocaleString()} CFA</p>
                                               <p className="text-sm text-gray-600">{parseFloat(item.productPrice).toLocaleString()} CFA/unité</p>
                                             </div>
                                           </div>

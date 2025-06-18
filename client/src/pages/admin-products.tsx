@@ -33,11 +33,13 @@ export default function AdminProducts() {
 
   const createProductMutation = useMutation({
     mutationFn: async (data: CreateProduct) => {
-      return apiRequest('/api/admin/products', {
+      const response = await fetch('/api/admin/products', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: { 'Content-Type': 'application/json' },
       });
+      if (!response.ok) throw new Error('Failed to create product');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -56,11 +58,13 @@ export default function AdminProducts() {
 
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<CreateProduct> }) => {
-      return apiRequest(`/api/admin/products/${id}`, {
+      const response = await fetch(`/api/admin/products/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
         headers: { 'Content-Type': 'application/json' },
       });
+      if (!response.ok) throw new Error('Failed to update product');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -78,9 +82,11 @@ export default function AdminProducts() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/admin/products/${id}`, {
+      const response = await fetch(`/api/admin/products/${id}`, {
         method: 'DELETE',
       });
+      if (!response.ok) throw new Error('Failed to delete product');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });

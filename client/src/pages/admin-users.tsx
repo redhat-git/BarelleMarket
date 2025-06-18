@@ -270,7 +270,7 @@ export default function AdminUsers() {
                         </div>
                       </td>
                       <td className="py-3 px-4 hidden sm:table-cell">{user.email || ''}</td>
-                      <td className="py-3 px-4">{getRoleBadge(user.role)}</td>
+                      <td className="py-3 px-4">{getRoleBadge(user.role || 'user')}</td>
                       <td className="py-3 px-4 hidden md:table-cell">
                         {user.isB2B === true ? (
                           <Badge className="bg-blue-100 text-blue-800">B2B</Badge>
