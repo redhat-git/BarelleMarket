@@ -12,7 +12,7 @@ export function useAuth() {
   const checkAuthStatus = async () => {
     try {
       console.log('Checking auth status...');
-      const response = await fetch('/api/auth/user', {
+      const response = await fetch('/api/auth/session', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'

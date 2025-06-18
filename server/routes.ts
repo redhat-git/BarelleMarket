@@ -24,13 +24,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userSession = req.user as any;
       console.log("User session in /api/auth/user:", userSession);
-      
+
       const dbUser = await storage.getUser(userSession.id);
       if (!dbUser) {
         console.log("User not found in database:", userSession.id);
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       const userResponse = {
         id: dbUser.id,
         email: dbUser.email,
@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isB2B: dbUser.isB2B,
         claims: { sub: dbUser.id }
       };
-      
+
       console.log("Returning user data:", userResponse);
       res.json(userResponse);
     } catch (error) {
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("Login error:", err);
             return res.status(500).json({ message: "Erreur lors de la connexion" });
           }
-          
+
           console.log("User logged in successfully:", user);
           res.json({ 
             message: "Connexion réussie", 
@@ -250,15 +250,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/cart/add', async (req, res) => {
     try {
       const { productId, quantity = 1 } = req.body;
-      
+
       console.log("Cart add request body:", req.body);
       console.log("Session ID:", req.sessionID);
       console.log("User authenticated:", req.isAuthenticated());
-      
+
       if (!productId || !Number.isInteger(productId) || productId <= 0) {
         return res.status(400).json({ message: "ID produit invalide" });
       }
-      
+
       if (!Number.isInteger(quantity) || quantity <= 0) {
         return res.status(400).json({ message: "Quantité invalide" });
       }
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
       console.log("Cart item added:", cartItem);
-      
+
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -550,7 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userSession = req.user as any;
       console.log('Admin orders - User session:', userSession);
-      
+
       // Récupérer l'utilisateur complet depuis la base de données
       const userId = userSession?.id || userSession?.claims?.sub;
       if (!userId) {
@@ -583,7 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userSession = req.user as any;
       const userId = userSession?.id || userSession?.claims?.sub;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
@@ -608,7 +608,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userSession = req.user as any;
       const userId = userSession?.id || userSession?.claims?.sub;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
@@ -637,7 +637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userSession = req.user as any;
       const userId = userSession?.id || userSession?.claims?.sub;
-      
+
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
@@ -681,15 +681,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (existingAdmin) {
           return res.status(400).json({ error: "Un administrateur existe déjà" });
         }
-  
+
         const { email, password, firstName, lastName } = req.body;
-  
+
         if (!email || !password || !firstName || !lastName) {
           return res.status(400).json({ error: "Tous les champs sont requis" });
         }
-  
+
         const hashedPassword = await hashPassword(password);
-  
+
         const adminUser = await storage.createUser({
           email,
           password: hashedPassword,
@@ -697,7 +697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName,
           role: "admin"
         });
-  
+
         res.json({ 
           message: "Compte administrateur créé avec succès",
           user: { 
@@ -713,6 +713,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ error: "Erreur serveur" });
       }
     });
+
+  // 🧠 Récupérer la session utilisateur
+  app.get("/api/auth/session", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Non connecté" });
+    }
+    res.json({ user: req.user });
+  });
+
+  // Endpoint pour récupérer les informations utilisateur
+  app.get("/api/auth/user", isAuthenticated, async (req, res) => {
+    try {
+      const userSession = req.user as any;
+      console.log("User session in /api/auth/user:", userSession);
+
+      const userData = {
+        id: userSession.id,
+        email: userSession.email,
+        firstName: userSession.firstName,
+        lastName: userSession.lastName,
+        role: userSession.role,
+        isB2B: userSession.isB2B,
+        claims: { sub: userSession.id }
+      };
+
+      console.log("Returning user data:", userData);
+      res.json(userData);
+    } catch (error) {
+      console.error("Error in /api/auth/user:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
 
   // Google OAuth routes (only if configured)
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
