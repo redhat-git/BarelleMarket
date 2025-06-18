@@ -23,11 +23,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userSession = req.user as any;
+      console.log("User session in /api/auth/user:", userSession);
+      
       const dbUser = await storage.getUser(userSession.id);
       if (!dbUser) {
+        console.log("User not found in database:", userSession.id);
         return res.status(404).json({ message: "User not found" });
       }
-      res.json({
+      
+      const userResponse = {
         id: dbUser.id,
         email: dbUser.email,
         firstName: dbUser.firstName,
@@ -35,7 +39,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: dbUser.role,
         isB2B: dbUser.isB2B,
         claims: { sub: dbUser.id }
-      });
+      };
+      
+      console.log("Returning user data:", userResponse);
+      res.json(userResponse);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -98,9 +105,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         req.logIn(user, (err) => {
           if (err) {
+            console.error("Login error:", err);
             return res.status(500).json({ message: "Erreur lors de la connexion" });
           }
-          res.json({ message: "Connexion réussie", user });
+          
+          console.log("User logged in successfully:", user);
+          res.json({ 
+            message: "Connexion réussie", 
+            user: {
+              id: user.id,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              role: user.role,
+              isB2B: user.isB2B
+            }
+          });
         });
       })(req, res, next);
     } catch (error) {
@@ -231,6 +251,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { productId, quantity = 1 } = req.body;
       
+      console.log("Cart add request body:", req.body);
+      console.log("Session ID:", req.sessionID);
+      console.log("User authenticated:", req.isAuthenticated());
+      
       if (!productId || !Number.isInteger(productId) || productId <= 0) {
         return res.status(400).json({ message: "ID produit invalide" });
       }
@@ -239,16 +263,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Quantité invalide" });
       }
 
+      // Vérifier que le produit existe
+      const product = await storage.getProductById(productId);
+      if (!product) {
+        return res.status(404).json({ message: "Produit non trouvé" });
+      }
+
       const sessionId = req.sessionID;
-      const userId = req.isAuthenticated() ? (req.user as any)?.id : null;
+      const userId = req.isAuthenticated() ? (req.user as any)?.id : undefined;
 
       console.log("Adding to cart:", { sessionId, userId, productId, quantity });
 
       const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
+      console.log("Cart item added:", cartItem);
+      
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      res.status(500).json({ message: "Erreur lors de l'ajout au panier", error: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ 
+        message: "Erreur lors de l'ajout au panier", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 

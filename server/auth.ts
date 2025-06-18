@@ -108,17 +108,20 @@ export async function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user: any, done) => {
-    done(null, user);
+    console.log("Serializing user:", user);
+    done(null, user.id);
   });
 
-  passport.deserializeUser(async (userSession: UserSession, cb) => {
+  passport.deserializeUser(async (id: string, cb) => {
     try {
-      const user = await storage.getUser(userSession.id);
+      console.log("Deserializing user ID:", id);
+      const user = await storage.getUser(id);
       if (!user || user.isActive === false) {
+        console.log("User not found or inactive:", id);
         return cb(null, false);
       }
 
-      const updatedUserSession: UserSession = {
+      const userSession: UserSession = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
@@ -127,7 +130,8 @@ export async function setupAuth(app: Express) {
         isB2B: user.isB2B || false,
       };
 
-      cb(null, updatedUserSession);
+      console.log("Deserialized user session:", userSession);
+      cb(null, userSession);
     } catch (error) {
       console.error("Deserialization error:", error);
       cb(null, false);

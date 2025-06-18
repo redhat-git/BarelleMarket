@@ -44,8 +44,13 @@ export default function AuthLogin() {
       const data = await response.json();
 
       if (response.ok) {
-        window.location.href = "/";
+        console.log("Login successful, redirecting...");
+        // Attendre un petit délai pour que la session soit établie
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 100);
       } else {
+        console.error("Login failed:", data);
         setError(data.message || "Erreur lors de la connexion");
       }
     } catch (error) {

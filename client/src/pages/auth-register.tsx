@@ -47,7 +47,7 @@ export default function AuthRegister() {
 
       if (response.ok) {
         startTransition(() => {
-          setSuccess("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+          setSuccess("Inscription réussie ! Redirection vers la page de connexion...");
           setFormData({
             email: "",
             password: "",
@@ -56,6 +56,11 @@ export default function AuthRegister() {
             lastName: "",
           });
         });
+        
+        // Rediriger vers la page de connexion après 2 secondes
+        setTimeout(() => {
+          window.location.href = "/auth/login";
+        }, 2000);
       } else {
         setError(data.message || "Erreur lors de l'inscription");
       }

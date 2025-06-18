@@ -13,31 +13,40 @@ export function useCart() {
     retry: false,
   });
 
-  const addToCartMutation = useMutation({
+  const addToCart = useMutation({
     mutationFn: async ({ productId, quantity = 1 }: { productId: number; quantity?: number }) => {
-      try {
-        const response = await apiRequest("POST", "/api/cart/add", { productId, quantity });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-      } catch (error) {
-        console.error("Add to cart error:", error);
-        throw error;
+      console.log('Adding to cart:', { productId, quantity });
+
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity }),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      console.log('Add to cart response:', response.status, data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to add item to cart');
       }
+
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast({
         title: "Produit ajouté",
-        description: "Le produit a été ajouté à votre panier",
+        description: "Le produit a été ajouté à votre panier avec succès.",
       });
     },
     onError: (error: any) => {
-      console.error("Cart mutation error:", error);
+      console.error('Add to cart error:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'ajouter le produit au panier",
+        description: error.message || "Impossible d'ajouter le produit au panier.",
         variant: "destructive",
       });
     },
@@ -105,11 +114,11 @@ export function useCart() {
     cartItems,
     cartSummary,
     isLoading,
-    addToCart: addToCartMutation,
+    addToCart: addToCart.mutate,
     updateQuantity: updateQuantityMutation.mutate,
     removeItem: removeItemMutation.mutate,
     clearCart: clearCartMutation.mutate,
-    isAdding: addToCartMutation.isPending,
+    isAdding: addToCart.isPending,
     isUpdating: updateQuantityMutation.isPending,
     isRemoving: removeItemMutation.isPending,
   };
