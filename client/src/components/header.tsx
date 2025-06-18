@@ -57,13 +57,13 @@ export default function Header() {
         {/* Top Bar */}
         <div className="bg-ivorian-black text-white py-2">
           <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center text-sm">
-              <div className="flex space-x-4">
-                <span className="flex items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-center text-sm space-y-2 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-4">
+                <span className="flex items-center justify-center sm:justify-start">
                   <Phone className="h-3 w-3 mr-1" />
                   +225 01 72 10 68 68
                 </span>
-                <span className="flex items-center">
+                <span className="flex items-center justify-center sm:justify-start">
                   <Mail className="h-3 w-3 mr-1" />
                   info@barelle-distribution.com
                 </span>
@@ -88,6 +88,14 @@ export default function Header() {
                           Mon Profil
                         </Link>
                       </DropdownMenuItem>
+                      {typedUser?.role === 'admin' && (
+                        <DropdownMenuItem>
+                          <Link href="/admin">
+                            <User className="h-4 w-4 mr-2" />
+                            Administration
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem>
                         <a href="/api/logout" className="flex items-center">
                           <LogOut className="h-4 w-4 mr-2" />
@@ -97,11 +105,11 @@ export default function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      className="text-white hover:text-ivorian-yellow hover:bg-transparent text-xs sm:text-sm"
                       onClick={() => window.location.href = '/auth/register'}
                     >
                       <User className="h-3 w-3 mr-1" />
@@ -110,7 +118,7 @@ export default function Header() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      className="text-white hover:text-ivorian-yellow hover:bg-transparent text-xs sm:text-sm"
                       onClick={() => window.location.href = '/auth/login'}
                     >
                       <LogIn className="h-3 w-3 mr-1" />

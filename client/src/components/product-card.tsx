@@ -72,16 +72,26 @@ export default function ProductCard({
     return stars;
   };
 
-  const formatPrice = (price: string, isB2B: boolean = false) => {
+  const formatPrice = (price: string) => {
     const numPrice = parseFloat(price);
-    const finalPrice = isB2B ? numPrice * 0.7 : numPrice; // 30% discount for B2B
-    return new Intl.NumberFormat('fr-FR').format(finalPrice) + ' XOF';
+    return new Intl.NumberFormat('fr-FR').format(numPrice) + ' FCFA';
   };
 
-  const calculateSavings = (price: string) => {
-    const numPrice = parseFloat(price);
-    const savings = numPrice * 0.3;
-    return new Intl.NumberFormat('fr-FR').format(savings) + ' XOF';
+  const getDisplayPrice = () => {
+    if (showB2BPrice && product.b2bPrice) {
+      return formatPrice(product.b2bPrice);
+    }
+    return formatPrice(product.price);
+  };
+
+  const getDiscountPercentage = () => {
+    if (product.b2bPrice && product.price) {
+      const b2bPrice = parseFloat(product.b2bPrice);
+      const regularPrice = parseFloat(product.price);
+      const discount = ((regularPrice - b2bPrice) / regularPrice) * 100;
+      return Math.round(discount);
+    }
+    return 0;
   };
 
   if (viewMode === "list") {
@@ -131,23 +141,21 @@ export default function ProductCard({
               {/* Price and Actions */}
               <div className="text-right flex-shrink-0">
                 <div className="mb-3">
-                  {showB2BPrice ? (
-                    <div>
-                      <div className="text-lg font-bold text-ivorian-black">
-                        {formatPrice(product.price, true)}
-                      </div>
-                      <div className="text-sm text-gray-500 line-through">
-                        {formatPrice(product.price, false)}
-                      </div>
-                      <div className="text-xs text-green-600 font-medium">
-                        Économie: {calculateSavings(product.price)}
-                      </div>
-                    </div>
-                  ) : (
+                  <div className="space-y-1">
                     <div className="text-lg font-bold text-ivorian-black">
-                      {formatPrice(product.price)}
+                      {getDisplayPrice()}
                     </div>
-                  )}
+                    {!showB2BPrice && product.b2bPrice && (
+                      <div className="text-xs text-green-600 font-medium">
+                        -{getDiscountPercentage()}% pour les Pros
+                      </div>
+                    )}
+                    {showB2BPrice && product.price && (
+                      <div className="text-sm text-gray-500 line-through">
+                        {formatPrice(product.price)}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -221,24 +229,22 @@ export default function ProductCard({
           </Link>
 
           <div className="mb-2">
-            {showB2BPrice ? (
-              <div>
+            {!hidePrice && (
+              <div className="space-y-1">
                 <div className="text-lg font-bold text-ivorian-black">
-                  {formatPrice(product.price, true)}
+                  {getDisplayPrice()}
                 </div>
-                <div className="text-sm text-gray-500 line-through">
-                  {formatPrice(product.price, false)}
-                </div>
-                <div className="text-xs text-green-600 font-medium">
-                  -30% B2B
-                </div>
+                {!showB2BPrice && product.b2bPrice && (
+                  <div className="text-xs text-green-600 font-medium">
+                    -{getDiscountPercentage()}% pour les Pros
+                  </div>
+                )}
+                {showB2BPrice && product.price && (
+                  <div className="text-sm text-gray-500 line-through">
+                    {formatPrice(product.price)}
+                  </div>
+                )}
               </div>
-            ) : (
-              !hidePrice && (
-                <div className="text-lg font-bold text-ivorian-black">
-                  {formatPrice(product.price)}
-                </div>
-              )
             )}
           </div>
 

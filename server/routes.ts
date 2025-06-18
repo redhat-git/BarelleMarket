@@ -296,7 +296,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/orders', isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const userId = (req.user as { claims: { sub: string } }).claims.sub;
+      const user = req.user as any;
+      const userId = user?.claims?.sub || user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
       const orders = await storage.getOrdersByUser(userId);
       res.json(orders);
     } catch (error) {
