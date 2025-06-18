@@ -28,7 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const typedUser = user as any;
 
   const handleAddToCart = () => {
-    addToCart.mutate({ productId: product.id, quantity: 1 });
+    addToCart({ productId: product.id, quantity: 1 });
   };
 
   // Déterminer le prix à afficher selon le type d'utilisateur
