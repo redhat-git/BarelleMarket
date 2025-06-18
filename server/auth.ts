@@ -108,15 +108,15 @@ export async function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user: any, done) => {
-    done(null, user.id);
+    done(null, user);
   });
 
-  passport.deserializeUser(async (id: string, cb) => {
+  passport.deserializeUser(async (userSession: UserSession, cb) => {
     try {
-      const user = await storage.getUser(id);
+      const user = await storage.getUser(userSession.id);
       if (!user) return cb(null, false);
 
-      const userSession: UserSession = {
+      const updatedUserSession: UserSession = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
@@ -125,7 +125,7 @@ export async function setupAuth(app: Express) {
         isB2B: user.isB2B || false,
       };
 
-      cb(null, userSession);
+      cb(null, updatedUserSession);
     } catch (error) {
       cb(error);
     }
@@ -138,6 +138,16 @@ export async function setupAuth(app: Express) {
       req.session.destroy(() => {
         res.clearCookie("connect.sid");
         res.json({ message: "Déconnexion réussie" });
+      });
+    });
+  });
+
+  app.get("/api/logout", (req, res) => {
+    req.logout(err => {
+      if (err) return res.status(500).json({ message: "Erreur lors de la déconnexion" });
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid");
+        res.redirect("/");
       });
     });
   });

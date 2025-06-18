@@ -294,7 +294,7 @@ export const createProductSchema = z.object({
   description: z.string().min(10, "Description requise"),
   shortDescription: z.string().max(300).optional(),
   price: z.string().min(1, "Prix B2C requis"),
-  b2bPrice: z.string().optional(),
+  b2bPrice: z.string().min(1, "Prix B2B requis"),
   originalPrice: z.string().optional(),
   categoryId: z.number().min(1, "Catégorie requise"),
   imageUrl: z.string().url().optional(),

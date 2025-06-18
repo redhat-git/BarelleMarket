@@ -22,9 +22,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/auth/user', isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const user = req.user as any;
-      const dbUser = await storage.getUser(user.id);
-      res.json(dbUser);
+      const userSession = req.user as any;
+      const dbUser = await storage.getUser(userSession.id);
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({
+        id: dbUser.id,
+        email: dbUser.email,
+        firstName: dbUser.firstName,
+        lastName: dbUser.lastName,
+        role: dbUser.role,
+        isB2B: dbUser.isB2B,
+        claims: { sub: dbUser.id }
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

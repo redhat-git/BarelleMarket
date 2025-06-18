@@ -107,6 +107,7 @@ export default function AdminProducts() {
       description: "",
       shortDescription: "",
       price: "",
+      b2bPrice: "",
       imageUrl: "",
       categoryId: 0,
       stockQuantity: 0,
@@ -130,6 +131,7 @@ export default function AdminProducts() {
       description: product.description ?? "",
       shortDescription: product.shortDescription ?? "",
       price: product.price,
+      b2bPrice: product.b2bPrice ?? "",
       imageUrl: product.imageUrl ?? "",
       categoryId: product.categoryId ?? 0,
       stockQuantity: product.stockQuantity ?? 0,
@@ -270,13 +272,26 @@ export default function AdminProducts() {
                       )}
                     />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <FormField
                         control={form.control}
                         name="price"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Prix (CFA)</FormLabel>
+                            <FormLabel>Prix B2C (CFA)</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="number" step="0.01" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="b2bPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Prix B2B (CFA)</FormLabel>
                             <FormControl>
                               <Input {...field} type="number" step="0.01" />
                             </FormControl>

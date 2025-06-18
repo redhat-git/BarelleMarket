@@ -1,262 +1,117 @@
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Star, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
-import { Link } from "wouter";
-import { ShoppingCart, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Product {
   id: number;
   name: string;
   slug: string;
-  shortDescription?: string;
-  imageUrl?: string;
-  categoryId: number;
-  rating: string;
-  reviewCount: number;
   price: string;
   b2bPrice?: string;
+  originalPrice?: string;
+  imageUrl?: string;
+  rating?: string;
+  reviewCount?: number;
   isFeatured?: boolean;
 }
 
 interface ProductCardProps {
   product: Product;
-  categoryName?: string;
-  viewMode?: "grid" | "list";
-  showB2BPrice?: boolean;
-  hidePrice?: boolean;
 }
 
-export default function ProductCard({ 
-  product, 
-  categoryName,
-  viewMode = "grid",
-  showB2BPrice = false,
-  hidePrice = false
-}: ProductCardProps) {
-  const { addToCart, isAdding } = useCart();
+export default function ProductCard({ product }: ProductCardProps) {
+  const { addToCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const typedUser = user as any;
 
-  const getCategoryColor = (categoryId: number) => {
-    switch (categoryId) {
-      case 1: // Spiritueux
-        return "bg-ivorian-yellow text-ivorian-black";
-      case 2: // Jus Naturels
-        return "bg-green-500 text-white";
-      case 3: // Cigares
-        return "bg-amber-700 text-white";
-      case 4: // Accessoires
-        return "bg-gray-700 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
+  const handleAddToCart = () => {
+    addToCart(product.id, 1);
   };
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />);
-    }
-
-    if (hasHalfStar) {
-      stars.push(<Star key="half" className="h-3 w-3 fill-yellow-400 text-yellow-400" />);
-    }
-
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="h-3 w-3 text-gray-300" />);
-    }
-
-    return stars;
-  };
-
-  const formatPrice = (price: string) => {
-    const numPrice = parseFloat(price);
-    return new Intl.NumberFormat('fr-FR').format(numPrice) + ' FCFA';
-  };
-
+  // Déterminer le prix à afficher selon le type d'utilisateur
   const getDisplayPrice = () => {
-    if (showB2BPrice && product.b2bPrice) {
-      return formatPrice(product.b2bPrice);
+    if (isAuthenticated && typedUser?.isB2B && product.b2bPrice) {
+      return parseFloat(product.b2bPrice);
     }
-    return formatPrice(product.price);
+    return parseFloat(product.price);
   };
 
-  const getDiscountPercentage = () => {
-    if (product.b2bPrice && product.price) {
-      const b2bPrice = parseFloat(product.b2bPrice);
-      const regularPrice = parseFloat(product.price);
-      const discount = ((regularPrice - b2bPrice) / regularPrice) * 100;
-      return Math.round(discount);
+  const getOriginalPrice = () => {
+    if (isAuthenticated && typedUser?.isB2B && product.b2bPrice) {
+      return parseFloat(product.price); // Le prix B2C devient le prix barré pour les B2B
     }
-    return 0;
+    return product.originalPrice ? parseFloat(product.originalPrice) : null;
   };
 
-  if (viewMode === "list") {
-    return (
-      <Card className="group hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          {/* Image */}
-          <div className="md:w-48 h-48 md:h-32 overflow-hidden bg-gray-100 flex-shrink-0">
-            <img
-              src={product.imageUrl || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&h=300&fit=crop"}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 p-4 flex flex-col justify-between">
-            <div className="flex justify-between items-start gap-4">
-              <div className="flex-1">
-                <h4 className="text-lg font-bold text-ivorian-black mb-2 line-clamp-2">
-                  {product.name}
-                </h4>
-
-                {product.shortDescription && (
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {product.shortDescription}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-4 mb-3">
-                  {product.rating && parseFloat(product.rating) > 0 && (
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{product.rating}</span>
-                      <span className="text-sm text-gray-500">({product.reviewCount})</span>
-                    </div>
-                  )}
-
-                  {product.isFeatured && (
-                    <Badge className="bg-ivorian-yellow text-ivorian-black">
-                      Populaire
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Price and Actions */}
-              <div className="text-right flex-shrink-0">
-                <div className="mb-3">
-                  <div className="space-y-1">
-                    <div className="text-lg font-bold text-ivorian-black">
-                      {getDisplayPrice()}
-                    </div>
-                    {!showB2BPrice && product.b2bPrice && (
-                      <div className="text-xs text-green-600 font-medium">
-                        -{getDiscountPercentage()}% pour les Pros
-                      </div>
-                    )}
-                    {showB2BPrice && product.price && (
-                      <div className="text-sm text-gray-500 line-through">
-                        {formatPrice(product.price)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Link href={`/products/${product.slug}`}>
-                    <Button 
-                      variant="ghost" 
-                      className="text-ivorian-amber hover:text-ivorian-yellow font-semibold p-0"
-                    >
-                      Voir Détails
-                    </Button>
-                  </Link>
-                  <Button
-                    size="sm"
-                    onClick={() => addToCart({ productId: product.id })}
-                    disabled={isAdding}
-                    className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-1" />
-                    Ajouter
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-    );
-  }
+  const displayPrice = getDisplayPrice();
+  const originalPrice = getOriginalPrice();
 
   return (
-    <Card className="group hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-      <div className="relative overflow-hidden">
+    <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
+      <div className="aspect-square relative overflow-hidden">
         <img
-          src={product.imageUrl || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400&h=300&fit=crop"}
+          src={product.imageUrl || "/placeholder-product.jpg"}
           alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
         />
+        {product.isFeatured && (
+          <Badge className="absolute top-2 left-2 bg-ivorian-yellow text-ivorian-black">
+            <Star className="w-3 h-3 mr-1" />
+            Vedette
+          </Badge>
+        )}
+        {!isAuthenticated && product.b2bPrice && (
+          <Badge className="absolute top-2 right-2 bg-blue-600 text-white">
+            Réduction Pro
+          </Badge>
+        )}
       </div>
 
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-2">
-          <Badge className={`text-xs font-semibold ${getCategoryColor(product.categoryId)}`}>
-            {categoryName || 'Produit'}
-          </Badge>
-          <div className="flex items-center">
-            {renderStars(parseFloat(product.rating))}
-            {product.reviewCount > 0 && (
-              <span className="text-gray-600 text-xs ml-1">({product.reviewCount})</span>
-            )}
-          </div>
-        </div>
-
-        <h4 className="text-lg font-bold text-ivorian-black mb-2 line-clamp-2">
+      <CardContent className="p-4">
+        <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
           {product.name}
-        </h4>
+        </h3>
 
-        {product.shortDescription && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {product.shortDescription}
-          </p>
-        )}
-
-        <div className="flex items-center justify-between">
-          <Link href={`/products/${product.slug}`}>
-            <Button 
-              variant="ghost" 
-              className="text-ivorian-amber hover:text-ivorian-yellow font-semibold p-0"
-            >
-              Voir Détails
-            </Button>
-          </Link>
-
-          <div className="mb-2">
-            {!hidePrice && (
-              <div className="space-y-1">
-                <div className="text-lg font-bold text-ivorian-black">
-                  {getDisplayPrice()}
-                </div>
-                {!showB2BPrice && product.b2bPrice && (
-                  <div className="text-xs text-green-600 font-medium">
-                    -{getDiscountPercentage()}% pour les Pros
-                  </div>
-                )}
-                {showB2BPrice && product.price && (
-                  <div className="text-sm text-gray-500 line-through">
-                    {formatPrice(product.price)}
-                  </div>
-                )}
-              </div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-ivorian-amber">
+              {displayPrice.toLocaleString()} CFA
+              {isAuthenticated && typedUser?.isB2B && (
+                <span className="text-xs text-blue-600 ml-2">Prix B2B</span>
+              )}
+            </span>
+            {originalPrice && (
+              <span className="text-sm text-gray-500 line-through">
+                {originalPrice.toLocaleString()} CFA
+              </span>
+            )}
+            {!isAuthenticated && product.b2bPrice && (
+              <span className="text-xs text-blue-600">
+                Réduction disponible pour les professionnels
+              </span>
             )}
           </div>
 
-          <Button
-            onClick={() => addToCart({ productId: product.id })}
-            disabled={isAdding}
-            className="bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber"
-          >
-            <ShoppingCart className="h-4 w-4 mr-1" />
-            {isAdding ? "..." : "Ajouter"}
-          </Button>
+          {product.rating && (
+            <div className="flex items-center">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm text-gray-600 ml-1">
+                {product.rating} ({product.reviewCount || 0})
+              </span>
+            </div>
+          )}
         </div>
+
+        <Button 
+          onClick={handleAddToCart}
+          className="w-full bg-ivorian-amber hover:bg-ivorian-yellow text-ivorian-black font-medium"
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          Ajouter au Panier
+        </Button>
       </CardContent>
     </Card>
   );

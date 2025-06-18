@@ -104,28 +104,7 @@ export default function Header() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                ) : (
-                  <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:text-ivorian-yellow hover:bg-transparent text-xs sm:text-sm"
-                      onClick={() => window.location.href = '/auth/register'}
-                    >
-                      <User className="h-3 w-3 mr-1" />
-                      S'inscrire
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:text-ivorian-yellow hover:bg-transparent text-xs sm:text-sm"
-                      onClick={() => window.location.href = '/auth/login'}
-                    >
-                      <LogIn className="h-3 w-3 mr-1" />
-                      Connexion
-                    </Button>
-                  </div>
-                )}
+                ) : null}
 
                 <Button
                   variant="ghost"
