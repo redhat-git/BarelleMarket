@@ -27,7 +27,7 @@ export default function AdminOrders() {
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append('page', page.toString());
-      if (statusFilter) params.append('status', statusFilter);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
       
       return apiRequest(`/api/admin/orders?${params}`);
     },
@@ -134,7 +134,7 @@ export default function AdminOrders() {
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les statuts</SelectItem>
+                <SelectItem value="all">Tous les statuts</SelectItem>
                 <SelectItem value="pending">En Attente</SelectItem>
                 <SelectItem value="confirmed">Confirmée</SelectItem>
                 <SelectItem value="preparing">Préparation</SelectItem>
