@@ -104,7 +104,7 @@ export function useCart() {
     cartItems,
     cartSummary,
     isLoading,
-    addToCart: addToCartMutation.mutate,
+    addToCart: addToCartMutation,
     updateQuantity: updateQuantityMutation.mutate,
     removeItem: removeItemMutation.mutate,
     clearCart: clearCartMutation.mutate,
