@@ -29,14 +29,7 @@ export default function AdminOrders() {
       params.append('page', page.toString());
       if (statusFilter) params.append('status', statusFilter);
       
-      const response = await fetch(`/api/admin/orders?${params}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch orders');
-      return response.json();
+      return apiRequest(`/api/admin/orders?${params}`);
     },
   });
 
@@ -45,27 +38,17 @@ export default function AdminOrders() {
     enabled: !!selectedOrder?.id,
     queryFn: async () => {
       if (!selectedOrder?.id) throw new Error('No order selected');
-      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch order details');
-      return response.json();
+      return apiRequest(`/api/admin/orders/${selectedOrder.id}`);
     },
   });
 
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: UpdateOrderStatus }) => {
-      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+      return apiRequest(`/api/admin/orders/${orderId}/status`, {
         method: 'PATCH',
         body: JSON.stringify(status),
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to update order');
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
