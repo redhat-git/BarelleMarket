@@ -244,7 +244,7 @@ export default function AdminOrders() {
                                         </div>
                                         <div className="flex justify-between">
                                           <span>Frais de livraison:</span>
-                                          <span>{parseFloat(orderDetails.deliveryFee).toLocaleString()} CFA</span>
+                                          <span>{parseFloat(orderDetails.deliveryFee || '0').toLocaleString()} CFA</span>
                                         </div>
                                         <div className="flex justify-between font-bold text-lg">
                                           <span>Total:</span>

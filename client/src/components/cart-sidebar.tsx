@@ -43,7 +43,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed right-0 top-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 z-50 ${
+      <div className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 z-50 ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
@@ -61,64 +61,68 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {cartSummary.items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <div className="text-center">
-                  <p className="text-lg mb-2">Votre panier est vide</p>
-                  <p className="text-sm">Ajoutez des produits pour commencer</p>
+          <div className="flex-1 p-4 overflow-y-auto">
+            <B2BMinimumValidator>
+              {cartSummary.items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                  <ShoppingCart className="h-16 w-16 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Votre panier est vide
+                  </h3>
+                  <p className="text-gray-500">
+                    Ajoutez des produits pour commencer vos achats
+                  </p>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {cartSummary.items.map((item) => (
-                  <div key={item.id} className="border-b border-gray-200 pb-4">
-                    <div className="flex items-center space-x-4">
-                      <img
-                        src={item.product.imageUrl || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=100&h=100&fit=crop"}
-                        alt={item.product.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm">{item.product.name}</h4>
-                        <p className="text-gray-600 text-xs">
-                          {formatPrice(parseFloat(item.product.price))}
-                        </p>
-                        <div className="flex items-center mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => updateQuantity({ id: item.id, quantity: Math.max(1, item.quantity - 1) })}
-                            disabled={isUpdating}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <Badge variant="secondary" className="mx-2">
-                            {item.quantity}
-                          </Badge>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => updateQuantity({ id: item.id, quantity: item.quantity + 1 })}
-                            disabled={isUpdating}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
+              ) : (
+                <div className="space-y-4">
+                  {cartSummary.items.map((item) => (
+                    <div key={item.id} className="border-b border-gray-200 pb-4">
+                      <div className="flex items-center space-x-4">
+                        <img
+                          src={item.product.imageUrl || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=100&h=100&fit=crop"}
+                          alt={item.product.name}
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm">{item.product.name}</h4>
+                          <p className="text-gray-600 text-xs">
+                            {formatPrice(parseFloat(item.product.price))}
+                          </p>
+                          <div className="flex items-center mt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => updateQuantity({ id: item.id, quantity: Math.max(1, item.quantity - 1) })}
+                              disabled={isUpdating}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <Badge variant="secondary" className="mx-2">
+                              {item.quantity}
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              onClick={() => updateQuantity({ id: item.id, quantity: item.quantity + 1 })}
+                              disabled={isUpdating}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
-                  </div>
-                ))}
+                  ))}
                 </div>
               )}
             </B2BMinimumValidator>
@@ -142,11 +146,15 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   <span className="text-ivorian-black">{formatPrice(cartSummary.total)}</span>
                 </div>
               </div>
-              <Button
+              <Button 
                 onClick={handleProceedToCheckout}
-                className="w-full bg-ivorian-yellow text-ivorian-black hover:bg-ivorian-amber font-semibold"
+                className="w-full bg-ivorian-amber hover:bg-ivorian-yellow text-ivorian-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={cartSummary.itemCount === 0 || isUpdating || !canCheckout}
               >
-                Procéder au Paiement
+                {isB2BUser && !canCheckout 
+                  ? `Minimum ${B2B_MINIMUM_ORDER.toLocaleString()} CFA requis`
+                  : `Passer la commande (${formatPrice(cartSummary.total)})`
+                }
               </Button>
               <Button
                 variant="outline"
