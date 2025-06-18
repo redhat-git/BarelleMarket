@@ -51,6 +51,29 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Force reload to clear all state
+        window.location.reload();
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force reload anyway
+      window.location.reload();
+    }
+  };
+
   return (
     <>
       <header className="bg-white shadow-lg sticky top-0 z-50">
@@ -96,8 +119,8 @@ export default function Header() {
                           </Link>
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem>
-                        <a href="/api/logout" className="flex items-center">
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <a href="#" className="flex items-center">
                           <LogOut className="h-4 w-4 mr-2" />
                           Se Déconnecter
                         </a>
@@ -257,7 +280,7 @@ export default function Header() {
                           </Link>
                         </SheetClose>
                         <SheetClose asChild>
-                          <a href="/api/logout" className="text-lg font-medium flex items-center">
+                          <a href="#" onClick={handleLogout} className="text-lg font-medium flex items-center">
                             <LogOut className="h-4 w-4 mr-2" />
                             Se Déconnecter
                           </a>

@@ -15,8 +15,16 @@ export function useCart() {
 
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity = 1 }: { productId: number; quantity?: number }) => {
-      const response = await apiRequest("POST", "/api/cart/add", { productId, quantity });
-      return response.json();
+      try {
+        const response = await apiRequest("POST", "/api/cart/add", { productId, quantity });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error("Add to cart error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
@@ -25,15 +33,8 @@ export function useCart() {
         description: "Le produit a été ajouté à votre panier",
       });
     },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Session expirée",
-          description: "Reconnectez-vous pour continuer",
-          variant: "destructive",
-        });
-        return;
-      }
+    onError: (error: any) => {
+      console.error("Cart mutation error:", error);
       toast({
         title: "Erreur",
         description: "Impossible d'ajouter le produit au panier",

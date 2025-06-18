@@ -114,7 +114,9 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser(async (userSession: UserSession, cb) => {
     try {
       const user = await storage.getUser(userSession.id);
-      if (!user) return cb(null, false);
+      if (!user || user.isActive === false) {
+        return cb(null, false);
+      }
 
       const updatedUserSession: UserSession = {
         id: user.id,
@@ -127,7 +129,8 @@ export async function setupAuth(app: Express) {
 
       cb(null, updatedUserSession);
     } catch (error) {
-      cb(error);
+      console.error("Deserialization error:", error);
+      cb(null, false);
     }
   });
 

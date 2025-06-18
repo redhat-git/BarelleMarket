@@ -45,6 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Inscription
   app.post('/api/auth/register', async (req, res) => {
     try {
+      console.log("Registration attempt:", req.body);
       const userData = registerSchema.parse(req.body);
 
       // Vérifier si l'email existe déjà
@@ -64,10 +65,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: userData.lastName,
       });
 
-      res.json({ message: "Inscription réussie", user: { id: user.id, email: user.email, firstName: user.firstName } });
+      console.log("User created successfully:", user.id);
+      res.status(201).json({ 
+        message: "Inscription réussie", 
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          firstName: user.firstName 
+        } 
+      });
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(400).json({ message: "Erreur lors de l'inscription", error: error instanceof Error ? error.message : String(error) });
+      res.status(400).json({ 
+        message: "Erreur lors de l'inscription", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 
@@ -218,14 +230,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/cart/add', async (req, res) => {
     try {
       const { productId, quantity = 1 } = req.body;
+      
+      if (!productId || !Number.isInteger(productId) || productId <= 0) {
+        return res.status(400).json({ message: "ID produit invalide" });
+      }
+      
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        return res.status(400).json({ message: "Quantité invalide" });
+      }
+
       const sessionId = req.sessionID;
-      const userId = (req.user as { claims?: { sub?: string } })?.claims?.sub;
+      const userId = req.isAuthenticated() ? (req.user as any)?.id : null;
+
+      console.log("Adding to cart:", { sessionId, userId, productId, quantity });
 
       const cartItem = await storage.addToCart(sessionId, productId, quantity, userId);
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      res.status(500).json({ message: "Failed to add to cart" });
+      res.status(500).json({ message: "Erreur lors de l'ajout au panier", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -403,13 +426,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     req.logout((err) => {
       if (err) {
         console.error("Logout error:", err);
+        return res.status(500).json({ message: "Erreur lors de la déconnexion" });
       }
       req.session.destroy((err) => {
         if (err) {
           console.error("Session destruction error:", err);
         }
         res.clearCookie('connect.sid');
-        res.redirect('/');
+        res.json({ message: "Déconnexion réussie" });
       });
     });
   });
