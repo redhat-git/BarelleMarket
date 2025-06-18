@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Order, type OrderItem, type Product, updateOrderStatusSchema, type UpdateOrderStatus } from "@shared/schema";
-import { ShoppingCart, Eye, Package, Truck, CheckCircle, XCircle, Clock } from "lucide-react";
+import { ShoppingCart, Eye, Package, Truck, CheckCircle, XCircle, Clock, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 interface OrderWithItems extends Order {
   orderItems: (OrderItem & { product: Product })[];
@@ -23,11 +24,26 @@ export default function AdminOrders() {
 
   const { data: ordersData, isLoading } = useQuery<{ orders: Order[]; total: number }>({
     queryKey: ['/api/admin/orders', page, statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      if (statusFilter) params.append('status', statusFilter);
+      
+      const response = await fetch(`/api/admin/orders?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch orders');
+      return response.json();
+    },
   });
 
   const { data: orderDetails } = useQuery<OrderWithItems>({
     queryKey: ['/api/admin/orders', selectedOrder?.id],
     enabled: !!selectedOrder?.id,
+    queryFn: async () => {
+      if (!selectedOrder?.id) throw new Error('No order selected');
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`);
+      if (!response.ok) throw new Error('Failed to fetch order details');
+      return response.json();
+    },
   });
 
   const updateOrderMutation = useMutation({

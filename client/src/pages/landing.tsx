@@ -89,14 +89,18 @@ export default function Landing() {
                     Découvrir nos produits
                   </Button>
                 </Link>
-                <Button
-                  size="lg"
-                  className="bg-amber-400 hover:bg-amber-500 text-black font-semibold px-8 py-4 text-lg"
-                  onClick={() => window.location.href = '/auth/login'}
-                >
-                  <Users className="mr-2 h-5 w-5" />
-                  Se connecter / S&apos;inscrire
-                </Button>
+                <div className="flex gap-2">
+                  <Link href="/auth/login">
+                    <Button size="lg" variant="outline" className="border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black font-semibold px-6 py-4">
+                      Se connecter
+                    </Button>
+                  </Link>
+                  <Link href="/auth/register">
+                    <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-black font-semibold px-6 py-4">
+                      S&apos;inscrire
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
               {/* Stats */}
@@ -248,7 +252,6 @@ export default function Landing() {
               <ProductCard
                 key={product.id}
                 product={product}
-                hidePrice={true}
               />
             ))}
           </div>
