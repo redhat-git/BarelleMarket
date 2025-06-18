@@ -20,6 +20,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, like } from "drizzle-orm";
+import { hashPassword } from "./auth";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -163,8 +164,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(userData: CreateUser): Promise<User> {
+    const hashedPassword = await hashPassword(userData.password);
     const newUserData: UpsertUser = {
       ...userData,
+      password: hashedPassword,
       id: `manual_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       isB2B: userData.role !== "user",
       isActive: true,

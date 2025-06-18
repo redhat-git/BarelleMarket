@@ -271,6 +271,7 @@ export const b2bRegistrationSchema = z.object({
 // Admin schemas
 export const createUserSchema = z.object({
   email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Mot de passe requis"),
   firstName: z.string().min(2, "Prénom requis"),
   lastName: z.string().min(2, "Nom requis"),
   role: z.enum(["user", "support", "admin"]),

@@ -149,22 +149,21 @@ export default function Header() {
         </div>
 
         {/* Main Navigation */}
-        <div className="py-4">
+        <div className="py-2 sm:py-4">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Link href="/" className="flex items-center space-x-3">
+                <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
                   <img
                     src="/icons/logo.png"
                     alt="Barelle Distribution"
-                    className="h-[80px] w-[150px]"
+                    className="h-[60px] w-[120px] sm:h-[80px] sm:w-[150px]"
                   />
                   <span className="sr-only">Barelle Distribution</span>
                 </Link>
-                <p className="ml-3 text-sm text-gray-600 hidden md:block">
+                <p className="ml-2 sm:ml-3 text-xs sm:text-sm text-gray-600 hidden md:block">
                   Produits 100% Ivoiriens
                 </p>
-
               </div>
 
               {/* Desktop Navigation */}

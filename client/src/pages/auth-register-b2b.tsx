@@ -187,12 +187,44 @@ export default function AuthRegisterB2B() {
                 </div>
 
                 <div>
+                  <Label htmlFor="password">Mot de passe *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...form.register("password")}
+                    className="mt-1"
+                    placeholder="Au moins 6 caractères"
+                  />
+                  {form.formState.errors.password && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {form.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    {...form.register("confirmPassword")}
+                    className="mt-1"
+                    placeholder="Confirmez votre mot de passe"
+                  />
+                  {form.formState.errors.confirmPassword && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {form.formState.errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <Label htmlFor="phone">Téléphone *</Label>
                   <Input
                     id="phone"
                     {...form.register("phone")}
                     className="mt-1"
-                    placeholder="+33 1 23 45 67 89"
+                    placeholder="+225 XX XX XX XX"
                   />
                   {form.formState.errors.phone && (
                     <p className="text-sm text-red-600 mt-1">
@@ -392,6 +424,7 @@ export default function AuthRegisterB2B() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
