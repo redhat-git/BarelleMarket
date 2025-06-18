@@ -129,7 +129,7 @@ export default function Header() {
                   </DropdownMenu>
                 ) : (
                   <div className="flex space-x-2">
-                    <Link href="/api/login">
+                    <Link href="/auth/login">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -139,7 +139,7 @@ export default function Header() {
                         Se Connecter
                       </Button>
                     </Link>
-                    <Link href="/register">
+                    <Link href="/auth/register">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -287,13 +287,13 @@ export default function Header() {
                     ) : (
                       <div className="space-y-2">
                         <SheetClose asChild>
-                          <Link href="/api/login" className="text-lg font-medium flex items-center">
+                          <Link href="/auth/login" className="text-lg font-medium flex items-center">
                             <LogIn className="h-4 w-4 mr-2" />
                             Se Connecter
                           </Link>
                         </SheetClose>
                         <SheetClose asChild>
-                          <Link href="/register" className="text-lg font-medium flex items-center">
+                          <Link href="/auth/register" className="text-lg font-medium flex items-center">
                             <User className="h-4 w-4 mr-2" />
                             S'inscrire
                           </Link>
