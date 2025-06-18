@@ -46,6 +46,7 @@ const categories: Category[] = [
 export default function Header() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
+  const typedUser = user as any;
   const { cartSummary } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -77,7 +78,7 @@ export default function Header() {
                         className="text-white hover:text-ivorian-yellow hover:bg-transparent"
                       >
                         <User className="h-3 w-3 mr-1" />
-                        {user.firstName} {user.lastName}
+                        {typedUser?.firstName || 'Utilisateur'} {typedUser?.lastName || ''}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -96,15 +97,26 @@ export default function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:text-ivorian-yellow hover:bg-transparent"
-                    onClick={() => window.location.href = '/auth/login'}
-                  >
-                    <User className="h-3 w-3 mr-1" />
-                    Espace Pro B2B
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      onClick={() => window.location.href = '/auth/register'}
+                    >
+                      <User className="h-3 w-3 mr-1" />
+                      S'inscrire
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      onClick={() => window.location.href = '/auth/login'}
+                    >
+                      <LogIn className="h-3 w-3 mr-1" />
+                      Connexion
+                    </Button>
+                  </div>
                 )}
 
                 <Button

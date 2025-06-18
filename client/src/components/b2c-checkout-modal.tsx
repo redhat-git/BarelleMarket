@@ -29,12 +29,12 @@ import { apiRequest } from "@/lib/queryClient";
 import { CartSummary } from "@/lib/types";
 
 const checkoutSchema = z.object({
-  customerName: z.string().min(2, "Le nom est requis"),
+  customerName: z.string().min(2, "Le nom complet est requis"),
   customerEmail: z.string().email("Email invalide"),
   customerPhone: z.string().min(8, "Numéro de téléphone invalide"),
-  deliveryAddress: z.string().min(10, "Adresse de livraison requise"),
-  deliveryCity: z.string().min(2, "Ville requise"),
-  deliveryDistrict: z.string().optional(),
+  deliveryAddress: z.string().min(10, "Adresse complète de livraison requise"),
+  deliveryCity: z.string().min(2, "Ville/Commune requise"),
+  deliveryDistrict: z.string().min(2, "Quartier/Zone de livraison requis"),
   paymentMethod: z.enum(["mobile", "cash", "bank"]),
   notes: z.string().optional(),
 });
