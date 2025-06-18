@@ -27,7 +27,7 @@ export default function AdminOrders() {
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append('page', page.toString());
-      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
+      if (statusFilter && statusFilter !== "all") params.append('status', statusFilter);
       
       return apiRequest(`/api/admin/orders?${params}`);
     },
