@@ -25,7 +25,14 @@ import { hashPassword } from "./auth";
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  upsertUser(user: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    profileImageUrl?: string | null;
+    provider?: string | null;
+  }): Promise<User>;
 
   // B2B specific operations
   registerB2BUser(registration: B2BRegistration): Promise<User>;
@@ -95,21 +102,19 @@ export class DatabaseStorage implements IStorage {
     email: string;
     firstName?: string;
     lastName?: string;
-    profileImageUrl?: string;
-    provider?: string;
+    profileImageUrl?: string | null;
+    provider?: string | null;
   }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
         id: userData.id,
         email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
         profileImageUrl: userData.profileImageUrl,
         role: "user",
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
         provider: userData.provider || 'external',
       })
       .onConflictDoUpdate({
