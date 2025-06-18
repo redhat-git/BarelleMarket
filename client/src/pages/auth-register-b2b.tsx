@@ -8,10 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building, Mail, Phone, MapPin } from "lucide-react";
+import { ArrowLeft, Building, Mail, Phone, MapPin, Lock, Eye, EyeOff } from "lucide-react";
+import Footer from "@/components/footer";
 
 const b2bRegistrationSchema = z.object({
   email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string(),
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   companyName: z.string().min(2, "Le nom de l'entreprise est requis"),
@@ -23,6 +26,9 @@ const b2bRegistrationSchema = z.object({
   phone: z.string().min(10, "Le numéro de téléphone est requis"),
   secondContactName: z.string().min(2, "Le nom du second contact est requis"),
   secondContactPhone: z.string().min(10, "Le téléphone du second contact est requis"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
 });
 
 type B2BRegistrationData = z.infer<typeof b2bRegistrationSchema>;
@@ -35,6 +41,8 @@ export default function AuthRegisterB2B() {
     resolver: zodResolver(b2bRegistrationSchema),
     defaultValues: {
       email: "",
+      password: "",
+      confirmPassword: "",
       firstName: "",
       lastName: "",
       companyName: "",

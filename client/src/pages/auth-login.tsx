@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import Footer from "@/components/footer";
 
 export default function AuthLogin() {
   const { isAuthenticated } = useAuth();
@@ -180,6 +181,7 @@ export default function AuthLogin() {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 }

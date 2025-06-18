@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
+import Footer from "@/components/footer";
 
 
 export default function AuthRegister() {
@@ -239,6 +240,7 @@ export default function AuthRegister() {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 }
