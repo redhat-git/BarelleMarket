@@ -129,28 +129,26 @@ export default function Header() {
                   </DropdownMenu>
                 ) : (
                   <div className="flex space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
-                      asChild
-                    >
-                      <a href="/api/login">
+                    <Link href="/api/login">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      >
                         <LogIn className="h-3 w-3 mr-1" />
                         Se Connecter
-                      </a>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:text-ivorian-yellow hover:bg-transparent"
-                      asChild
-                    >
-                      <Link href="/register">
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:text-ivorian-yellow hover:bg-transparent"
+                      >
                         <User className="h-3 w-3 mr-1" />
                         S'inscrire
-                      </Link>
-                    </Button>
+                      </Button>
+                    </Link>
                   </div>
                 )}
 
@@ -289,10 +287,10 @@ export default function Header() {
                     ) : (
                       <div className="space-y-2">
                         <SheetClose asChild>
-                          <a href="/api/login" className="text-lg font-medium flex items-center">
+                          <Link href="/api/login" className="text-lg font-medium flex items-center">
                             <LogIn className="h-4 w-4 mr-2" />
                             Se Connecter
-                          </a>
+                          </Link>
                         </SheetClose>
                         <SheetClose asChild>
                           <Link href="/register" className="text-lg font-medium flex items-center">
