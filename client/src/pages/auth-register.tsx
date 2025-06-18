@@ -240,7 +240,6 @@ export default function AuthRegister() {
           </CardContent>
         </Card>
       </div>
-      
       <Footer />
     </div>
   );

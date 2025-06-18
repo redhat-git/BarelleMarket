@@ -181,7 +181,6 @@ export default function AuthLogin() {
           </CardContent>
         </Card>
       </div>
-      
       <Footer />
     </div>
   );
