@@ -15,6 +15,7 @@ interface Product {
   rating: string;
   reviewCount: number;
   price: string;
+  b2bPrice?: string;
   isFeatured?: boolean;
 }
 

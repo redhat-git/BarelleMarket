@@ -71,7 +71,8 @@ export const products = pgTable("products", {
   slug: varchar("slug", { length: 200 }).notNull().unique(),
   description: text("description"),
   shortDescription: varchar("short_description", { length: 300 }),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Prix B2C
+  b2bPrice: decimal("b2b_price", { precision: 10, scale: 2 }), // Prix B2B (réduit)
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   categoryId: integer("category_id").references(() => categories.id),
   imageUrl: varchar("image_url"),
