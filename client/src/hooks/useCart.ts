@@ -36,7 +36,7 @@ export function useCart() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
       toast({
         title: "Produit ajouté",
         description: "Le produit a été ajouté à votre panier avec succès.",

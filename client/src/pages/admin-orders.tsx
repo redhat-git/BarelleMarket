@@ -29,7 +29,12 @@ export default function AdminOrders() {
       params.append('page', page.toString());
       if (statusFilter) params.append('status', statusFilter);
       
-      const response = await fetch(`/api/admin/orders?${params}`);
+      const response = await fetch(`/api/admin/orders?${params}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       if (!response.ok) throw new Error('Failed to fetch orders');
       return response.json();
     },
@@ -40,7 +45,12 @@ export default function AdminOrders() {
     enabled: !!selectedOrder?.id,
     queryFn: async () => {
       if (!selectedOrder?.id) throw new Error('No order selected');
-      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`);
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       if (!response.ok) throw new Error('Failed to fetch order details');
       return response.json();
     },
@@ -52,6 +62,7 @@ export default function AdminOrders() {
         method: 'PATCH',
         body: JSON.stringify(status),
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to update order');
       return response.json();
