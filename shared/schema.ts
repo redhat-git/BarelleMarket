@@ -293,13 +293,16 @@ export const createProductSchema = z.object({
   slug: z.string().min(2, "Slug requis"),
   description: z.string().min(10, "Description requise"),
   shortDescription: z.string().max(300).optional(),
-  price: z.string().min(1, "Prix B2C requis"),
-  b2bPrice: z.string().min(1, "Prix B2B requis"),
-  originalPrice: z.string().optional(),
+
+  price: z.number().min(0.01, "Prix B2C requis"), // au moins 0.01
+  b2bPrice: z.number().min(0.01, "Prix B2B requis").optional(),
+  originalPrice: z.number().min(0).optional(),
+
   categoryId: z.number().min(1, "Catégorie requise"),
   imageUrl: z.string().url().optional(),
   additionalImages: z.array(z.string().url()).optional(),
   specifications: z.record(z.string()).optional(),
+
   stockQuantity: z.number().min(0).default(0),
   isFeatured: z.boolean().default(false),
 });

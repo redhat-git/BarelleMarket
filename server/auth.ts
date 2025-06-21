@@ -184,7 +184,7 @@ export const requireRole = (roles: string[]): RequestHandler => {
     }
 
     const userSession = req.user as UserSession;
-    
+
     if (!roles.includes(userSession.role)) {
       return res.status(403).json({ message: "Accès refusé" });
     }

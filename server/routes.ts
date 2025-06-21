@@ -479,7 +479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/products', requireAdmin, upload.single("image"), async (req, res) => {
     try {
-      const body = {
+      const parsedBody = {
         ...req.body,
         price: Number(req.body.price),
         b2bPrice: req.body.b2bPrice ? Number(req.body.b2bPrice) : undefined,
@@ -487,11 +487,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: Number(req.body.categoryId),
         stockQuantity: req.body.stockQuantity ? Number(req.body.stockQuantity) : 0,
         isFeatured: req.body.isFeatured === "true",
-        image: req.file, // si tu veux l’utiliser dans storage
       };
 
-      const productData = createProductSchema.parse(body); // valide avec Zod
-      const product = await storage.createProduct(productData); // adapter storage si besoin
+
+      const productData = createProductSchema.parse(parsedBody);
+      console.log("------Parsed Product-------", productData);
+
+      console.log(req.image)
+      const product = await storage.createProduct({
+        ...productData,
+        image: {
+          name: req.file?.originalname,    // nom du fichier (ex: photo.jpg)
+          type: req.file?.mimetype,        // type MIME (ex: image/jpeg)
+          buffer: req.file?.buffer,        // contenu binaire de l'image
+        },
+      });
+
+      console.log("------Product Saved-------", product);
       res.json(product);
     } catch (error) {
       console.error("Error creating product:", error);

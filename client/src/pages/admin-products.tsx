@@ -78,6 +78,7 @@ export default function AdminProducts() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
+      console.log('---------------')
       if (!res.ok) throw new Error("Erreur lors du chargement des produits");
       return res.json();
     },
@@ -132,6 +133,7 @@ export default function AdminProducts() {
         console.log(`${key}: `, value);
       }
 
+      console.log('formData : ', formData)
       const response = await fetch("/api/admin/products", {
         method: "POST",
         body: formData,
@@ -634,11 +636,11 @@ export default function AdminProducts() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products?.map((product) => (
+          {products?.map((product: any) => (
             <Card key={product.id} className="overflow-hidden">
               <div className="aspect-square relative">
                 <img
-                  src={product.imageUrl || "/api/placeholder/300/300"}
+                  src={product.mageUrl || "/defaultImage"}
                   alt={product.name}
                   className="object-cover w-full h-full"
                 />

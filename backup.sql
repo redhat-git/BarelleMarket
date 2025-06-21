@@ -1,9 +1,7 @@
 
 --
 -- Backup complet de la base de données BARELLE Distribution
--- Généré le : $(date)
--- Inclut : users avec mots de passe, sessions, products, categories, orders, etc.
---
+
 
 -- Désactiver les contraintes pendant l'import
 SET session_replication_role = replica;
@@ -43,10 +41,7 @@ CREATE TABLE users (
 -- Données pour la table: users (avec mots de passe hachés)
 --
 
-INSERT INTO users (id, email, password, first_name, last_name, profile_image_url, provider, company_name, company_type, siret, rccm, address, city, phone, second_contact_name, second_contact_phone, is_b2b, is_active, role, permissions, created_at, updated_at) VALUES
-('admin_barelle_2025', 'admin@barelle.ci', '$2b$10$rQ7K5XvZ8wP3mN6jL9hE.uY2sA4tB7cF1xR5qW8eT9pO3kL6mN9jH2', 'Admin', 'Barelle', NULL, 'local', 'Barelle Distribution', 'Distribution', NULL, NULL, 'Abidjan, Côte d''Ivoire', 'Abidjan', '+225 01 02 03 04 05', NULL, NULL, true, true, 'admin', '{"users":["create","read","update","delete"],"products":["create","read","update","delete"],"orders":["create","read","update","delete"],"categories":["create","read","update","delete"]}', '2025-06-15 19:44:03.84469', '2025-06-15 19:44:03.84469'),
-('admin-tchimou-c5b9d173', 'tchimoudavid13@gmail.com', '$2b$10$K8nM9vX5qP2wL7jR4tE6.oS1dF3gH9kN2mB8vC7xZ5qW3eT9pL6jR4', 'David', 'Tchimou', NULL, 'local', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, 'admin', '{"users":["create","read","update","delete"],"products":["create","read","update","delete"],"orders":["create","read","update","delete"],"categories":["create","read","update","delete"]}', '2025-06-15 20:30:00', '2025-06-15 20:30:00'),
-('user-demo-b2b-001', 'demo@restaurant.ci', '$2b$10$M7nX2qR5tW8eP6jL9hK3.uA4sB7cF1xR5qW8eT9pO3kL6mN9jH2qP5', 'Demo', 'Restaurant', NULL, 'local', 'Restaurant Le Palmier', 'restaurant', '123456789', 'CI-ABJ-123456', 'Cocody, Abidjan', 'Abidjan', '+225 07 08 09 10 11', 'Marie', '+225 05 06 07 08 09', true, true, 'user', NULL, '2025-06-15 21:00:00', '2025-06-15 21:00:00');
+INSERT INTO users (id, email, password, first_name, last_name, profile_image_url, provider, company_name, company_type, siret, rccm, address, city, phone, second_contact_name, second_contact_phone, is_b2b, is_active, role, permissions, created_at, updated_at);
 
 --
 -- Structure de la table: sessions
@@ -64,10 +59,7 @@ CREATE TABLE sessions (
 -- Données pour la table: sessions (sessions actives)
 --
 
-INSERT INTO sessions (sid, sess, expire) VALUES
-('8BtWBeCt0FQx6PTxed_V_n8BbW5yhTer', '{"cookie": {"path": "/", "secure": true, "expires": "2025-06-22T21:17:44.824Z", "httpOnly": true, "originalMaxAge": 604800000}, "passport": {"user": "admin-tchimou-c5b9d173"}}', '2025-06-22 23:36:19'),
-('demo_session_restaurant_001', '{"cookie": {"path": "/", "secure": false, "expires": "2025-06-30T12:00:00.000Z", "httpOnly": true, "originalMaxAge": 604800000}, "passport": {"user": "user-demo-b2b-001"}}', '2025-06-30 14:00:00');
-
+INSERT INTO sessions (sid, sess, expire);
 --
 -- Structure de la table: categories
 --
@@ -88,11 +80,7 @@ CREATE TABLE categories (
 -- Données pour la table: categories
 --
 
-INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at) VALUES
-(1, 'Spiritueux', 'spiritueux', 'Vins, whiskies, cognacs et autres boissons alcoolisées premium', NULL, true, '2025-06-15 19:44:03.798424'),
-(2, 'Bières', 'bieres', 'Bières locales et importées', NULL, true, '2025-06-15 19:44:03.798424'),
-(3, 'Boissons non-alcoolisées', 'boissons-non-alcoolisees', 'Sodas, jus de fruits, eaux', NULL, true, '2025-06-15 19:44:03.798424'),
-(4, 'Accessoires Bar', 'accessoires-bar', 'Équipements et accessoires pour bars et restaurants', NULL, true, '2025-06-15 19:44:03.798424');
+INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at);
 
 --
 -- Structure de la table: products
@@ -126,9 +114,7 @@ CREATE TABLE products (
 -- Données pour la table: products (échantillon)
 --
 
-INSERT INTO products (id, name, slug, description, short_description, price, b2b_price, original_price, category_id, image_url, additional_images, specifications, stock_quantity, is_active, is_featured, rating, review_count, created_at, updated_at) VALUES
-(1, 'Bangui Premium', 'bangui-premium', 'Whisky premium de Côte d''Ivoire', 'Whisky local haut de gamme', 35000.00, 30000.00, 40000.00, 1, NULL, NULL, '{"origine": "Côte d''Ivoire", "degre": "40%", "volume": "70cl"}', 50, true, true, 4.5, 12, '2025-06-15 19:44:03.798424', '2025-06-15 19:44:03.798424'),
-(2, 'Bière Solibra', 'biere-solibra', 'Bière blonde ivoirienne', 'La bière de référence en Côte d''Ivoire', 800.00, 650.00, 1000.00, 2, NULL, NULL, '{"origine": "Côte d''Ivoire", "degre": "5%", "volume": "33cl"}', 200, true, false, 4.2, 25, '2025-06-15 19:44:03.798424', '2025-06-15 19:44:03.798424');
+INSERT INTO products (id, name, slug, description, short_description, price, b2b_price, original_price, category_id, image_url, additional_images, specifications, stock_quantity, is_active, is_featured, rating, review_count, created_at, updated_at);
 
 --
 -- Structure des autres tables
@@ -202,13 +188,4 @@ SELECT pg_catalog.setval('products_id_seq', 2, true);
 
 -- Réactiver les contraintes
 SET session_replication_role = DEFAULT;
-
---
--- Informations de sécurité
---
--- Mots de passe inclus dans ce backup :
--- - admin@barelle.ci : Barelle 2025
--- - tchimoudavid13@gmail.com : Barelle 2025  
--- - demo@restaurant.ci : demo123
--- Tous les mots de passe sont hachés avec bcrypt (salt rounds: 10)
---
+-- Fin du script de sauvegarde
