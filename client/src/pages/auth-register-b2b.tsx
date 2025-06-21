@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Building, Mail, Phone, MapPin, Lock, Eye, EyeOff } from "lucide-react";
-import Footer from "@/components/footer";
 
 const b2bRegistrationSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -423,8 +422,7 @@ export default function AuthRegisterB2B() {
             </a>
           </p>
         </div>
-      </div>
-      <Footer />
+      </div>=
     </div>
   );
 }

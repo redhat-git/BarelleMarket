@@ -38,21 +38,29 @@ export default function Landing() {
 
   const getCategoryImage = (slug: string) => {
     const images: { [key: string]: string } = {
-      'spiritueux': 'https://images.unsplash.com/photo-1613743983303-b3e89f8a2b80?w=400&h=300&fit=crop',
-      'jus-naturels': 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400&h=300&fit=crop',
-      'cigares': 'https://images.unsplash.com/photo-1605792657660-596af9009e82?w=400&h=300&fit=crop',
+      'Spiritueux et Alcools': '/icons/spiritueux.jpg',
+      'Vins et Liqueurs de Fruits': '/icons/vins-liqueurs.jpg',
+      'Chocolat et Confiserie': '/icons/chocolat.jpg',
+      'Épicerie Fine et Conserves': '/icons/epicerie-fine.jpg',
+      'Glaces Artisanales': '/icons/glaces.jpg',
+      'Condiments et Produits Culinaires': '/icons/condiments.jpg',
+      'Tabac': '/icons/tabac.jpg',
     };
-    return images[slug] || images.spiritueux;
+    return images[slug] || '/icons/default.jpg';
   };
 
   const getCategoryColor = (slug: string) => {
     const colors: { [key: string]: string } = {
-      'spiritueux': 'from-amber-400 to-amber-600',
-      'jus-naturels': 'from-green-400 to-green-600',
-      'cigares': 'from-amber-700 to-amber-900',
-      'accessoires': 'from-gray-700 to-gray-900',
+      'Spiritueux et Alcools': 'from-amber-400 to-amber-600',
+      'Vins et Liqueurs de Fruits': 'from-purple-400 to-purple-600',
+      'Chocolat et Confiserie': 'from-amber-700 to-amber-900',
+      'Épicerie Fine et Conserves': 'from-emerald-500 to-emerald-700',
+      'Glaces Artisanales': 'from-cyan-400 to-blue-500',
+      'Condiments et Produits Culinaires': 'from-orange-500 to-red-500',
+      'Tabac': 'from-stone-600 to-stone-800',
     };
-    return colors[slug] || colors.spiritueux;
+
+    return colors[slug] || 'from-gray-500 to-gray-700';
   };
 
   return (
@@ -315,7 +323,7 @@ export default function Landing() {
                 <h3 className="text-2xl font-bold mb-6 text-center">Inscription Gratuite</h3>
                 <div className="space-y-6">
                   <p className="text-gray-300 text-center">
-                    Connectez-vous avec votre compte Replit pour commencer
+
                   </p>
                   <Button
                     size="lg"
@@ -324,9 +332,6 @@ export default function Landing() {
                   >
                     Se connecter / S&apos;inscrire
                   </Button>
-                  <p className="text-sm text-gray-400 text-center">
-                    Accès gratuit avec votre compte Replit
-                  </p>
                 </div>
               </div>
             </div>

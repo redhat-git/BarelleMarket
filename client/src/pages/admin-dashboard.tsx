@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Package, ShoppingCart, TrendingUp, Activity, BarChart3, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
+
 
 interface AdminStats {
   totalOrders: number;
@@ -107,28 +110,40 @@ export default function AdminDashboard() {
         <div className="absolute inset-0" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
-        <div className="relative max-w-7xl mx-auto px-6 py-12">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
-              <Activity className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Tableau de Bord Administrateur</h1>
-              <p className="text-yellow-100 text-lg">Barelle Distribution - Interface de gestion professionnelle</p>
-              <div className="flex items-center gap-4 mt-3">
-                <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  {new Date().toLocaleDateString('fr-FR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </Badge>
-              </div>
-            </div>
-          </div>
+<div className="relative max-w-7xl mx-auto px-6 py-12">
+  <div className="flex items-center gap-6 flex-wrap justify-between">
+    <div className="flex items-center gap-6">
+      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
+        <Activity className="h-8 w-8 text-white" />
+      </div>
+      <div>
+        <h1 className="text-4xl font-bold mb-2">Tableau de Bord Administrateur</h1>
+        <p className="text-yellow-100 text-lg">
+          Barelle Distribution - Interface de gestion professionnelle
+        </p>
+        <div className="flex items-center gap-4 mt-3">
+          <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
+            <Calendar className="w-3 h-3 mr-1" />
+            {new Date().toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </Badge>
         </div>
+      </div>
+    </div>
+
+    <Link
+      href="/"
+      className="inline-flex items-center gap-2 text-white bg-ivorian-yellow hover:bg-yellow-400 text-sm font-medium px-4 py-2 rounded-xl transition"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Retour à l'accueil
+    </Link>
+  </div>
+</div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">

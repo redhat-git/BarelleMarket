@@ -16,8 +16,8 @@ import AuthRegisterB2B from "./pages/auth-register-b2b";
 import AdminDashboard from "./pages/admin-dashboard";
 import AdminUsers from "./pages/admin-users";
 import AdminOrders from "./pages/admin-orders";
-import AdminProducts from "./pages/admin-products";
-
+import AdminProducts from "./pages/admin-products"
+import AdminCategories from "./pages/admin-categories";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -49,6 +49,7 @@ function Router() {
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/products" component={AdminProducts} />
           <Route path="/admin/orders" component={AdminOrders} />
+          <Route path="/admin/categories" component={AdminCategories} />
         </>
       )}
       <Route component={NotFound} />

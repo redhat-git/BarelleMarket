@@ -304,6 +304,11 @@ export const createProductSchema = z.object({
   isFeatured: z.boolean().default(false),
 });
 
+export const createCategorySchema = z.object({
+  name: z.string().min(2, "Le nom est requis"),
+  slug: z.string().min(2, "Le slug est requis"),
+  description: z.string().optional(),
+});
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;

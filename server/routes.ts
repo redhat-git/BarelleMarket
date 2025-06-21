@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import multer from "multer";
 import { setupAuth, isAuthenticated, requireAdmin, requireSupport } from "./auth";
 import passport from "passport";
 import {
@@ -73,19 +74,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log("User created successfully:", user.id);
-      res.status(201).json({ 
-        message: "Inscription réussie", 
-        user: { 
-          id: user.id, 
-          email: user.email, 
-          firstName: user.firstName 
-        } 
+      res.status(201).json({
+        message: "Inscription réussie",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName
+        }
       });
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(400).json({ 
-        message: "Erreur lors de l'inscription", 
-        error: error instanceof Error ? error.message : String(error) 
+      res.status(400).json({
+        message: "Erreur lors de l'inscription",
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -110,8 +111,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           console.log("User logged in successfully:", user);
-          res.json({ 
-            message: "Connexion réussie", 
+          res.json({
+            message: "Connexion réussie",
             user: {
               id: user.id,
               email: user.email,
@@ -280,9 +281,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      res.status(500).json({ 
-        message: "Erreur lors de l'ajout au panier", 
-        error: error instanceof Error ? error.message : String(error) 
+      res.status(500).json({
+        message: "Erreur lors de l'ajout au panier",
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
@@ -474,16 +475,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Product Management
-  app.post('/api/admin/products', requireAdmin, async (req, res) => {
+  const upload = multer(); // tu peux configurer le stockage si tu veux gérer les fichiers
+
+  app.post('/api/admin/products', requireAdmin, upload.single("image"), async (req, res) => {
     try {
-      const productData = createProductSchema.parse(req.body);
-      const product = await storage.createProduct(productData);
+      const body = {
+        ...req.body,
+        price: Number(req.body.price),
+        b2bPrice: req.body.b2bPrice ? Number(req.body.b2bPrice) : undefined,
+        originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : undefined,
+        categoryId: Number(req.body.categoryId),
+        stockQuantity: req.body.stockQuantity ? Number(req.body.stockQuantity) : 0,
+        isFeatured: req.body.isFeatured === "true",
+        image: req.file, // si tu veux l’utiliser dans storage
+      };
+
+      const productData = createProductSchema.parse(body); // valide avec Zod
+      const product = await storage.createProduct(productData); // adapter storage si besoin
       res.json(product);
     } catch (error) {
       console.error("Error creating product:", error);
-      res.status(400).json({ message: "Failed to create product", error: error instanceof Error ? error.message : String(error) });
+      res.status(400).json({
+        message: "Failed to create product",
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   });
+
 
   app.patch('/api/admin/products/:id', requireAdmin, async (req, res) => {
     try {
@@ -673,46 +691,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-    // Route pour créer le premier compte admin (à utiliser une seule fois)
-    app.post("/api/init-admin", async (req: Request, res: Response) => {
-      try {
-        // Vérifier s'il y a déjà un admin
-        const existingAdmin = await storage.getUserByRole("admin");
-        if (existingAdmin) {
-          return res.status(400).json({ error: "Un administrateur existe déjà" });
-        }
-
-        const { email, password, firstName, lastName } = req.body;
-
-        if (!email || !password || !firstName || !lastName) {
-          return res.status(400).json({ error: "Tous les champs sont requis" });
-        }
-
-        const hashedPassword = await hashPassword(password);
-
-        const adminUser = await storage.createUser({
-          email,
-          password: hashedPassword,
-          firstName,
-          lastName,
-          role: "admin"
-        });
-
-        res.json({ 
-          message: "Compte administrateur créé avec succès",
-          user: { 
-            id: adminUser.id, 
-            email: adminUser.email, 
-            firstName: adminUser.firstName,
-            lastName: adminUser.lastName,
-            role: adminUser.role 
-          }
-        });
-      } catch (error) {
-        console.error("Erreur lors de la création de l'admin:", error);
-        res.status(500).json({ error: "Erreur serveur" });
+  // Route pour créer le premier compte admin (à utiliser une seule fois)
+  app.post("/api/init-admin", async (req: Request, res: Response) => {
+    try {
+      // Vérifier s'il y a déjà un admin
+      const existingAdmin = await storage.getUserByRole("admin");
+      if (existingAdmin) {
+        return res.status(400).json({ error: "Un administrateur existe déjà" });
       }
-    });
+
+      const { email, password, firstName, lastName } = req.body;
+
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ error: "Tous les champs sont requis" });
+      }
+
+      const hashedPassword = await hashPassword(password);
+
+      const adminUser = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: "admin"
+      });
+
+      res.json({
+        message: "Compte administrateur créé avec succès",
+        user: {
+          id: adminUser.id,
+          email: adminUser.email,
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          role: adminUser.role
+        }
+      });
+    } catch (error) {
+      console.error("Erreur lors de la création de l'admin:", error);
+      res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
 
   // 🧠 Récupérer la session utilisateur
   app.get("/api/auth/session", (req, res) => {

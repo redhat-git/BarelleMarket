@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
-import Footer from "@/components/footer";
 import { Link } from "wouter";
-
+/**
+ * Page de connexion pour les utilisateurs
+ * Permet aux utilisateurs de se connecter à leur compte
+ * Redirige vers la page d'accueil après une connexion réussie
+ */
 export default function AuthLogin() {
   const { isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -52,9 +54,9 @@ export default function AuthLogin() {
         }, 100);
       } else {
         console.error("Login failed:", data);
-        setError(data.message || "Erreur lors de la connexion");
+        setError(data.message ?? "Erreur lors de la connexion");
       }
-    } catch (error) {
+    } catch {
       setError("Erreur de connexion au serveur");
     } finally {
       setIsLoading(false);
@@ -76,11 +78,11 @@ export default function AuthLogin() {
           <Link href="/">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </Button>
           </Link>
         </div>
-        
+
         {/* Logo et titre */}
         <div className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl flex items-center justify-center">
@@ -166,7 +168,7 @@ export default function AuthLogin() {
               <p className="text-sm text-gray-600">
                 Pas encore de compte ?{" "}
                 <a href="/auth/register" className="text-amber-600 hover:underline font-medium">
-                  S'inscrire
+                  S&apos;inscrire
                 </a>
               </p>
             </div>
@@ -197,7 +199,6 @@ export default function AuthLogin() {
           </CardContent>
         </Card>
       </div>
-      <Footer />
     </div>
   );
 }

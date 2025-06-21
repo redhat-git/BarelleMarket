@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, User, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
-import Footer from "@/components/footer";
 import { Link } from "wouter";
 
 
@@ -57,15 +56,15 @@ export default function AuthRegister() {
             lastName: "",
           });
         });
-        
+
         // Rediriger vers la page de connexion après 2 secondes
         setTimeout(() => {
           window.location.href = "/auth/login";
         }, 2000);
       } else {
-        setError(data.message || "Erreur lors de l'inscription");
+        setError(data.message ?? "Erreur lors de l'inscription");
       }
-    } catch (error) {
+    } catch {
       setError("Erreur de connexion au serveur");
     } finally {
       startTransition(() => {
@@ -92,11 +91,11 @@ export default function AuthRegister() {
           <Link href="/">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Retour à l'accueil
+              Retour à l&apos;accueil
             </Button>
           </Link>
         </div>
-        
+
         {/* Logo et titre */}
         <div className="text-center space-y-2">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl flex items-center justify-center">
@@ -256,7 +255,6 @@ export default function AuthRegister() {
           </CardContent>
         </Card>
       </div>
-      <Footer />
     </div>
   );
 }

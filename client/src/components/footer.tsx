@@ -19,40 +19,41 @@ export default function Footer() {
     <footer className="bg-ivorian-black text-white py-16">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          {/* Company Info */}
+          {/* Social Media */}
           <div>
             <h3 className="text-2xl font-bold text-ivorian-yellow mb-4">
               Suivez-nous
             </h3>
-            <a
-              href="#"
-              className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
-              aria-label="Facebook"
-            >
-              <FacebookIcon className="h-5 w-5" />
-            </a>
-            {/* Social Links */}
-            <a
-              href="#"
-              className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
-              aria-label="Instagram"
-            >
-              <InstagramIcon className="h-5 w-5" />
-            </a>
-            <a
-              href="#"
-              className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-5 w-5" />
-            </a>
-            <a
-              href="#"
-              className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle className="h-5 w-5" />
-            </a>
+            <div className="flex space-x-4">
+              <a
+                href="https://www.facebook.com/people/Barelle-Distribution-CI/61575165243933/"
+                className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
+                aria-label="Facebook"
+              >
+                <FacebookIcon className="h-6 w-6" />
+              </a>
+              <a
+                href="https://www.instagram.com/barelledistribution/"
+                className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
+                aria-label="Instagram"
+              >
+                <InstagramIcon className="h-6 w-6" />
+              </a>
+              {/* <a
+                href=" "
+                className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-6 w-6" />
+              </a> */}
+              <a
+                href="https://wa.me/2250140777201"
+                className="text-ivorian-yellow hover:text-ivorian-amber transition-colors"
+                aria-label="WhatsApp"
+              >
+                <MessageCircle className="h-6 w-6" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -62,9 +63,9 @@ export default function Footer() {
               <li><a href="/" className="hover:text-ivorian-yellow transition-colors">Accueil</a></li>
               <li><a href="/products" className="hover:text-ivorian-yellow transition-colors">Catalogue Produits</a></li>
               <li><a href="/api/login" className="hover:text-ivorian-yellow transition-colors">Espace B2B</a></li>
-              <li><a href="#" className="hover:text-ivorian-yellow transition-colors">À Propos</a></li>
-              <li><a href="#" className="hover:text-ivorian-yellow transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-ivorian-yellow transition-colors">FAQ</a></li>
+              <li><a href=" " className="hover:text-ivorian-yellow transition-colors">À Propos</a></li>
+              <li><a href=" " className="hover:text-ivorian-yellow transition-colors">Contact</a></li>
+              <li><a href=" " className="hover:text-ivorian-yellow transition-colors">FAQ</a></li>
             </ul>
           </div>
 
@@ -72,12 +73,12 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-bold text-ivorian-yellow mb-4">Nos Produits</h4>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="/products?category=spiritueux" className="hover:text-ivorian-yellow transition-colors">Spiritueux Premium</a></li>
-              <li><a href="/products?category=jus-naturels" className="hover:text-ivorian-yellow transition-colors">Jus Naturels</a></li>
-              <li><a href="/products?category=cigares" className="hover:text-ivorian-yellow transition-colors">Cigares Artisanaux</a></li>
-              <li><a href="/products?category=accessoires" className="hover:text-ivorian-yellow transition-colors">Accessoires</a></li>
-              <li><a href="/products?featured=true" className="hover:text-ivorian-yellow transition-colors">Coffrets Cadeaux</a></li>
-              <li><a href="/products" className="hover:text-ivorian-yellow transition-colors">Nouveautés</a></li>
+              <li><a href="/products?category=spiritueux-et-alcools" className="hover:text-ivorian-yellow transition-colors">Spiritueux & Alcools</a></li>
+              <li><a href="/products?category=vins-et-liqueurs-de-fruits" className="hover:text-ivorian-yellow transition-colors">Vins & Liqueurs de Fruits</a></li>
+              <li><a href="/products?category=chocolat-et-confiserie" className="hover:text-ivorian-yellow transition-colors">Chocolat & Confiserie</a></li>
+              <li><a href="/products?category=epicerie-fine-et-conserves" className="hover:text-ivorian-yellow transition-colors">Épicerie Fine</a></li>
+              <li><a href="/products?category=glaces-artisanales" className="hover:text-ivorian-yellow transition-colors">Glaces Artisanales</a></li>
+              <li><a href="/products?category=tabac" className="hover:text-ivorian-yellow transition-colors">Cigares Artisanaux</a></li>
             </ul>
           </div>
 
@@ -89,16 +90,16 @@ export default function Footer() {
                 <MapPin className="h-4 w-4 text-ivorian-yellow mr-2 mt-1 flex-shrink-0" />
                 <span>
                   Abidjan, Côte d&#39;Ivoire<br />
-                  Zone Industrielle de Yopougon
+                  Marcory zone 4
                 </span>
               </div>
               <div className="flex items-center">
                 <Phone className="h-4 w-4 text-ivorian-yellow mr-2 flex-shrink-0" />
-                <span>+225 XX XX XX XX</span>
+                <span>+225 01 40 77 72 01</span>
               </div>
               <div className="flex items-center">
                 <Mail className="h-4 w-4 text-ivorian-yellow mr-2 flex-shrink-0" />
-                <span>contact@barelle-distribution.ci</span>
+                <span>info@barelle-distribution.com</span>
               </div>
               <div className="flex items-start">
                 <Clock className="h-4 w-4 text-ivorian-yellow mr-2 mt-1 flex-shrink-0" />
@@ -115,12 +116,12 @@ export default function Footer() {
         <div className="border-t border-gray-700 pt-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
             <div className="text-gray-400 text-sm">
-              © 2024 Barelle Distribution. Tous droits réservés.
+              © 2025 Barelle Distribution. Tous droits réservés.
             </div>
             <div className="flex space-x-4 text-sm text-gray-400">
-              <a href="#" className="hover:text-ivorian-yellow transition-colors">Mentions Légales</a>
-              <a href="#" className="hover:text-ivorian-yellow transition-colors">Politique de Confidentialité</a>
-              <a href="#" className="hover:text-ivorian-yellow transition-colors">CGV</a>
+              <a href=" " className="hover:text-ivorian-yellow transition-colors">Mentions Légales</a>
+              <a href=" " className="hover:text-ivorian-yellow transition-colors">Politique de Confidentialité</a>
+              <a href=" " className="hover:text-ivorian-yellow transition-colors">CGV</a>
             </div>
             <div className="text-sm text-gray-400 lg:text-right">
               Site réalisé avec ❤️ en Côte d&#39;Ivoire

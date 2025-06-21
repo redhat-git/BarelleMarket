@@ -22,27 +22,27 @@ export default function ProductDetail() {
   });
 
   interface Category {
-      id: number;
-      name: string;
-      slug: string;
-    }
-  
-    interface Product {
-      id: number;
-      categoryId: number;
-      name: string;
-      description: string;
-      price: string;
-      originalPrice?: string;
-      imageUrl: string;
-      additionalImages?: string[];
-      rating: string;
-      reviewCount: number;
-      stockQuantity: number;
-      specifications?: Record<string, string>;
-    }
-  
-    const { data: categories = [] } = useQuery<Category[]>({
+    id: number;
+    name: string;
+    slug: string;
+  }
+
+  interface Product {
+    id: number;
+    categoryId: number;
+    name: string;
+    description: string;
+    price: string;
+    originalPrice?: string;
+    imageUrl: string;
+    additionalImages?: string[];
+    rating: string;
+    reviewCount: number;
+    stockQuantity: number;
+    specifications?: Record<string, string>;
+  }
+
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -76,7 +76,8 @@ export default function ProductDetail() {
 
   const category = categories.find(c => c.id === product.categoryId);
   const images = [product.imageUrl, ...(product.additionalImages || [])].filter(Boolean);
-  const currentImage = images[selectedImageIndex] || "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=600&h=600&fit=crop";
+  //Image secours
+  const currentImage = images[selectedImageIndex] || "images";
 
   const formatPrice = (price: string) => {
     return new Intl.NumberFormat('fr-FR').format(parseFloat(price)) + ' FCFA';
@@ -95,12 +96,12 @@ export default function ProductDetail() {
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
- for (let i = 0; i < fullStars; i++) {
+    for (let i = 0; i < fullStars; i++) {
       stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
     }
 
-  const emptyStars = 5 - fullStars;
-  for (let i = 0; i < emptyStars; i++) {
+    const emptyStars = 5 - fullStars;
+    for (let i = 0; i < emptyStars; i++) {
       stars.push(<Star key={`empty-${i}`} className="h-4 w-4 text-gray-300" />);
     }
 
@@ -161,16 +162,15 @@ export default function ProductDetail() {
                 />
               </div>
 
-          {/* Thumbnail Images */}
+              {/* Thumbnail Images */}
               {images.length > 1 && (
                 <div className="flex gap-2">
                   {images.map((image, index) => (
                     <button
                       key={`${product.id}-${image}`}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`w-16 h-16 rounded border-2 overflow-hidden ${
-                        selectedImageIndex === index ? 'border-ivorian-yellow' : 'border-gray-200 hover:border-ivorian-yellow'
-                      }`}
+                      className={`w-16 h-16 rounded border-2 overflow-hidden ${selectedImageIndex === index ? 'border-ivorian-yellow' : 'border-gray-200 hover:border-ivorian-yellow'
+                        }`}
                     >
                       <img
                         src={image}
@@ -278,11 +278,11 @@ export default function ProductDetail() {
                   {isAdding ? "Ajout en cours..." : "Ajouter au Panier"}
                 </Button>
 
-      <Button
-        variant="outline"
-        onClick={handleAddToWishlist}
-        className="border-ivorian-black text-ivorian-black hover:bg-ivorian-black hover:text-white font-semibold py-3"
-      >
+                <Button
+                  variant="outline"
+                  onClick={handleAddToWishlist}
+                  className="border-ivorian-black text-ivorian-black hover:bg-ivorian-black hover:text-white font-semibold py-3"
+                >
                   <Heart className="h-5 w-5 mr-2" />
                   Ajouter aux Favoris
                 </Button>
