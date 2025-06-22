@@ -1,36 +1,33 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const vite_1 = require("vite");
-const plugin_react_1 = __importDefault(require("@vitejs/plugin-react"));
-const path_1 = __importDefault(require("path"));
-const url_1 = require("url");
-// Obtenez le répertoire courant de manière compatible avec les modules ES
-const __filename = (0, url_1.fileURLToPath)(import.meta.url);
-const __dirname = path_1.default.dirname(__filename);
-exports.default = (0, vite_1.defineConfig)({
-    plugins: [(0, plugin_react_1.default)()],
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Résolution du chemin
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default defineConfig({
+    plugins: [react()],
     resolve: {
         alias: {
-            "@": path_1.default.resolve(__dirname, "client", "src"),
-            "@shared": path_1.default.resolve(__dirname, "shared"),
-            "@assets": path_1.default.resolve(__dirname, "attached_assets"),
+            '@': path.resolve(__dirname, 'client', 'src'),
+            '@shared': path.resolve(__dirname, 'shared'),
+            '@assets': path.resolve(__dirname, 'attached_assets'),
         },
     },
-    root: path_1.default.resolve(__dirname, "client"),
+    root: path.resolve(__dirname, 'client'),
     build: {
-        outDir: path_1.default.resolve(__dirname, "dist", "public"),
+        outDir: path.resolve(__dirname, 'dist', 'public'),
         emptyOutDir: true,
     },
     server: {
         hmr: {
-            overlay: false, // Désactive l'overlay HMR
+            overlay: false,
         },
         fs: {
             strict: true,
-            deny: ["**/.*"],
+            deny: ['**/.*'],
         },
     },
 });
