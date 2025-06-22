@@ -1,44 +1,119 @@
 {
+  "compilerOptions": {
+    // Version et module
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    
+    // Mode strict
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    
+    // Vérifications supplémentaires
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    
+    // Sortie et build
+    "outDir": "./dist",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "importHelpers": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    
+    // Optimisations
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo",
+    
+    // JSX pour React
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    
+    // Paths et aliases
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./client/src/*"],
+      "@shared/*": ["./shared/*"],
+      "@server/*": ["./server/*"],
+      "@types/*": ["./types/*"],
+      "@utils/*": ["./shared/utils/*"],
+      "@db/*": ["./server/db/*"],
+      "@auth/*": ["./server/auth/*"],
+      "@routes/*": ["./server/routes/*"],
+      "@middleware/*": ["./server/middleware/*"],
+      "@components/*": ["./client/src/components/*"],
+      "@hooks/*": ["./client/src/hooks/*"],
+      "@lib/*": ["./client/src/lib/*"],
+      "@pages/*": ["./client/src/pages/*"],
+      "@assets/*": ["./client/src/assets/*"]
+    },
+    
+    // Types globaux
+    "types": [
+      "node",
+      "vite/client",
+      "express",
+      "express-session",
+      "passport"
+    ],
+    
+    // Mode emit
+    "noEmit": false,
+    "emitOnError": false,
+    
+    // Compatibilité
+    "allowJs": true,
+    "checkJs": false
+  },
   "include": [
     "client/src/**/*",
+    "server/**/*",
     "shared/**/*",
-    "server/**/*"
+    "types/**/*",
+    "*.ts",
+    "*.tsx",
+    "vite.config.ts",
+    "drizzle.config.ts"
   ],
   "exclude": [
     "node_modules",
-    "build",
     "dist",
-    "**/*.test.ts"
+    "build",
+    ".next",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__/**",
+    "**/__mocks__/**"
   ],
-  "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
-    "strict": true,
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable"
-    ],
-    "jsx": "preserve",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "types": [
-      "node",
-      "vite/client"
-    ],
-    "paths": {
-      "@/*": [
-        "./client/src/*"
-      ],
-      "@shared/*": [
-        "./shared/*"
-      ]
-    },
-    "forceConsistentCasingInFileNames": true
+  "ts-node": {
+    "esm": true,
+    "files": true,
+    "experimentalSpecifierResolution": "node"
   }
 }
