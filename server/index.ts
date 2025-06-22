@@ -5,10 +5,17 @@ import { registerRoutes } from './routes';
 import { setupVite, serveStatic, log } from './vite';
 import { db } from './db';
 import { products } from '@shared/schema';
+import cors from 'cors';
+
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+// Middleware CORS
+app.use(cors({
+  origin: 'https://barelle-distribution.com', // autorise ton domaine
+  credentials: true // important si tu utilises les cookies ou les sessions
+}));
 
 // Middleware de journalisation API
 app.use((req, res, next) => {

@@ -1,8 +1,9 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import fs from "fs";
 import multer from "multer";
-import { setupAuth, isAuthenticated, requireAdmin, requireSupport } from "./auth";
+import { setupAuth, hashPassword, isAuthenticated, requireAdmin, requireSupport } from "./auth";
 import passport from "passport";
 import {
   b2cOrderSchema,
@@ -13,8 +14,18 @@ import {
   registerSchema,
   loginSchema
 } from "@shared/schema";
-import { hashPassword } from "./auth";
 import { nanoid } from "nanoid";
+import express from "express";
+import { fileURLToPath } from "url";
+import path from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express(); // d'abord tu crées l'application Express
+
+// Ensuite tu déclares les fichiers statiques
+app.use('/produits', express.static(path.join(__dirname, 'produits')));
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -475,8 +486,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Product Management
-  const upload = multer(); // tu peux configurer le stockage si tu veux gérer les fichiers
+  const upload = multer();
 
+  // Sert les fichiers du dossier "produits" statiquement
+  app.use("/produits", express.static(path.join(__dirname, "produits")));
+
+  // POST - Créer un produit
   app.post('/api/admin/products', requireAdmin, upload.single("image"), async (req, res) => {
     try {
       const parsedBody = {
@@ -489,21 +504,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isFeatured: req.body.isFeatured === "true",
       };
 
+      const uploadDir = path.join(__dirname, "produits");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
 
-      const productData = createProductSchema.parse(parsedBody);
-      console.log("------Parsed Product-------", productData);
+      let imageUrl: string | undefined = undefined;
+      if (req.file) {
+        const filename = `${Date.now()}_${req.file.originalname}`;
+        const filePath = path.join(uploadDir, filename);
+        fs.writeFileSync(filePath, req.file.buffer);
+        imageUrl = `${req.protocol}://${req.get("host")}/produits/${filename}`;
+      }
 
-      console.log(req.image)
-      const product = await storage.createProduct({
-        ...productData,
-        image: {
-          name: req.file?.originalname,    // nom du fichier (ex: photo.jpg)
-          type: req.file?.mimetype,        // type MIME (ex: image/jpeg)
-          buffer: req.file?.buffer,        // contenu binaire de l'image
-        },
+      const productData = createProductSchema.parse({
+        ...parsedBody,
+        imageUrl,
       });
 
-      console.log("------Product Saved-------", product);
+      const product = await storage.createProduct(productData);
       res.json(product);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -514,20 +533,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-  app.patch('/api/admin/products/:id', requireAdmin, async (req, res) => {
+  // PATCH - Mettre à jour un produit
+app.patch(
+  "/api/admin/products/:id",
+  requireAdmin,
+  upload.single("image"),
+  async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const productData = req.body;
 
-      const product = await storage.updateProduct(id, productData);
-      res.json(product);
+      const parsedBody = {
+        ...req.body,
+        price: Number(req.body.price),
+        b2bPrice: req.body.b2bPrice ? Number(req.body.b2bPrice) : undefined,
+        originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : undefined,
+        categoryId: Number(req.body.categoryId),
+        stockQuantity: req.body.stockQuantity ? Number(req.body.stockQuantity) : 0,
+        isFeatured: req.body.isFeatured === "true",
+      };
+
+      const uploadDir = path.join(__dirname, "produits");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const host = req.get("host");       // exemple: localhost:5000
+      const protocol = req.protocol;      // http ou https
+
+      let imageUrl: string | undefined = undefined;
+
+      if (req.file) {
+        const filename = `${Date.now()}_${req.file.originalname}`;
+        const filePath = path.join(uploadDir, filename);
+        fs.writeFileSync(filePath, req.file.buffer);
+
+        // Génère une URL complète valide
+        imageUrl = `${protocol}://${host}/produits/${filename}`;
+      } else if (req.body.imageUrl) {
+        imageUrl = req.body.imageUrl;
+      }
+
+
+      // Appliquer le schéma Zod
+      const productData = updateProductSchema.parse({
+        ...parsedBody,
+        ...(imageUrl ? { imageUrl } : {}),
+      });
+
+      const updated = await storage.updateProduct(id, productData);
+      res.json(updated);
     } catch (error) {
       console.error("Error updating product:", error);
       res.status(400).json({ message: "Failed to update product" });
     }
-  });
+  }
+);
 
+  // DELETE - Supprimer un produit
   app.delete('/api/admin/products/:id', requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -538,7 +600,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: "Failed to delete product" });
     }
   });
-
   // Category Management
   app.post('/api/admin/categories', requireAdmin, async (req, res) => {
     try {
@@ -580,34 +641,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userSession = req.user as any;
       console.log('Admin orders - User session:', userSession);
-
-      // Récupérer l'utilisateur complet depuis la base de données
+  
       const userId = userSession?.id || userSession?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
-
+  
       const dbUser = await storage.getUser(userId);
       if (!dbUser) {
         return res.status(404).json({ message: "Utilisateur non trouvé" });
       }
-
+  
       if (dbUser.role !== 'admin' && dbUser.role !== 'support') {
-        console.log('User role check failed:', dbUser.role);
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
-
+  
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string;
-
-      const result = await storage.getAllOrders(page, limit, status);
-      res.json(result);
+  
+      const result = await storage.getAllOrders(page, limit, status || null);
+  
+      console.log("Nombre de commandes envoyées :", result.length);
+      console.log("Exemple de commande :", result[0]);
+  
+      res.json({
+        orders: result,
+        total: result.length
+      });
     } catch (error) {
       console.error("Error fetching orders:", error);
       res.status(500).json({ message: "Failed to fetch orders" });
     }
-  });
+  });  
 
   app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req, res) => {
     try {

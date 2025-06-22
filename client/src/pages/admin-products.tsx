@@ -124,7 +124,9 @@ export default function AdminProducts() {
       }
 
       if (data.image && data.image instanceof File) {
-        formData.append("image", data.image);
+        formData.append("image", data.image); // ✅ nouvelle image
+      } else if (data.imageUrl) {
+        formData.append("imageUrl", data.imageUrl); // ✅ ancienne image
       }
 
       // Log FormData for debugging
@@ -211,6 +213,7 @@ export default function AdminProducts() {
       if (data.image && data.image instanceof File) {
         formData.append("image", data.image);
       }
+      // Ne pas faire : formData.append("imageUrl", "quelque chose")      
 
       // Log FormData for debugging
       console.log("FormData entries pour update:");
@@ -640,7 +643,7 @@ export default function AdminProducts() {
             <Card key={product.id} className="overflow-hidden">
               <div className="aspect-square relative">
                 <img
-                  src={product.mageUrl || "/defaultImage"}
+                  src={product.imageUrl}
                   alt={product.name}
                   className="object-cover w-full h-full"
                 />

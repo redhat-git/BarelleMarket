@@ -312,6 +312,24 @@ export const createCategorySchema = z.object({
   slug: z.string().min(2, "Le slug est requis"),
   description: z.string().optional(),
 });
+
+export const updateProductSchema = z.object({
+  name: z.string().min(1),
+  slug: z.string().min(1),
+  description: z.string().min(1),
+  shortDescription: z.string().min(1),
+  price: z.number(),
+  b2bPrice: z.number().optional(),
+  originalPrice: z.number().optional(),
+  stockQuantity: z.number(),
+  categoryId: z.number(),
+  isFeatured: z.boolean(),
+  // 🔁 change ceci :
+  imageUrl: z.string().min(1).optional(), // ✅ accepte les chemins relatifs aussi
+});
+
+
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
