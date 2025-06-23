@@ -285,7 +285,6 @@ export const createUserSchema = z.object({
 export const updateOrderStatusSchema = z.object({
   orderStatus: z.enum(["pending", "confirmed", "preparing", "shipped", "delivered", "cancelled"]),
   paymentStatus: z.enum(["pending", "paid", "failed"]),
-  notes: z.string().optional(),
 });
 
 export const createProductSchema = z.object({

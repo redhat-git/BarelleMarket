@@ -534,60 +534,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PATCH - Mettre à jour un produit
-app.patch(
-  "/api/admin/products/:id",
-  requireAdmin,
-  upload.single("image"),
-  async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
+  app.patch(
+    "/api/admin/products/:id",
+    requireAdmin,
+    upload.single("image"),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id);
 
-      const parsedBody = {
-        ...req.body,
-        price: Number(req.body.price),
-        b2bPrice: req.body.b2bPrice ? Number(req.body.b2bPrice) : undefined,
-        originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : undefined,
-        categoryId: Number(req.body.categoryId),
-        stockQuantity: req.body.stockQuantity ? Number(req.body.stockQuantity) : 0,
-        isFeatured: req.body.isFeatured === "true",
-      };
+        const parsedBody = {
+          ...req.body,
+          price: Number(req.body.price),
+          b2bPrice: req.body.b2bPrice ? Number(req.body.b2bPrice) : undefined,
+          originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : undefined,
+          categoryId: Number(req.body.categoryId),
+          stockQuantity: req.body.stockQuantity ? Number(req.body.stockQuantity) : 0,
+          isFeatured: req.body.isFeatured === "true",
+        };
 
-      const uploadDir = path.join(__dirname, "produits");
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+        const uploadDir = path.join(__dirname, "produits");
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const host = req.get("host");       // exemple: localhost:5000
+        const protocol = req.protocol;      // http ou https
+
+        let imageUrl: string | undefined = undefined;
+
+        if (req.file) {
+          const filename = `${Date.now()}_${req.file.originalname}`;
+          const filePath = path.join(uploadDir, filename);
+          fs.writeFileSync(filePath, req.file.buffer);
+
+          // Génère une URL complète valide
+          imageUrl = `${protocol}://${host}/produits/${filename}`;
+        } else if (req.body.imageUrl) {
+          imageUrl = req.body.imageUrl;
+        }
+
+
+        // Appliquer le schéma Zod
+        const productData = updateProductSchema.parse({
+          ...parsedBody,
+          ...(imageUrl ? { imageUrl } : {}),
+        });
+
+        const updated = await storage.updateProduct(id, productData);
+        res.json(updated);
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(400).json({ message: "Failed to update product" });
       }
-
-      const host = req.get("host");       // exemple: localhost:5000
-      const protocol = req.protocol;      // http ou https
-
-      let imageUrl: string | undefined = undefined;
-
-      if (req.file) {
-        const filename = `${Date.now()}_${req.file.originalname}`;
-        const filePath = path.join(uploadDir, filename);
-        fs.writeFileSync(filePath, req.file.buffer);
-
-        // Génère une URL complète valide
-        imageUrl = `${protocol}://${host}/produits/${filename}`;
-      } else if (req.body.imageUrl) {
-        imageUrl = req.body.imageUrl;
-      }
-
-
-      // Appliquer le schéma Zod
-      const productData = updateProductSchema.parse({
-        ...parsedBody,
-        ...(imageUrl ? { imageUrl } : {}),
-      });
-
-      const updated = await storage.updateProduct(id, productData);
-      res.json(updated);
-    } catch (error) {
-      console.error("Error updating product:", error);
-      res.status(400).json({ message: "Failed to update product" });
     }
-  }
-);
+  );
 
   // DELETE - Supprimer un produit
   app.delete('/api/admin/products/:id', requireAdmin, async (req, res) => {
@@ -641,30 +641,30 @@ app.patch(
     try {
       const userSession = req.user as any;
       console.log('Admin orders - User session:', userSession);
-  
+
       const userId = userSession?.id || userSession?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
-  
+
       const dbUser = await storage.getUser(userId);
       if (!dbUser) {
         return res.status(404).json({ message: "Utilisateur non trouvé" });
       }
-  
+
       if (dbUser.role !== 'admin' && dbUser.role !== 'support') {
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
-  
+
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string;
-  
+
       const result = await storage.getAllOrders(page, limit, status || null);
-  
+
       console.log("Nombre de commandes envoyées :", result.length);
       console.log("Exemple de commande :", result[0]);
-  
+
       res.json({
         orders: result,
         total: result.length
@@ -673,13 +673,12 @@ app.patch(
       console.error("Error fetching orders:", error);
       res.status(500).json({ message: "Failed to fetch orders" });
     }
-  });  
+  });
 
   app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
       const userId = userSession?.id || userSession?.claims?.sub;
-
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
@@ -690,6 +689,7 @@ app.patch(
       }
 
       const orderId = parseInt(req.params.id);
+      console.log('Received PATCH body:', JSON.stringify(req.body, null, 2)); // Ajout du log
       const statusData = updateOrderStatusSchema.parse(req.body);
 
       const order = await storage.updateOrderStatus(orderId, statusData);
