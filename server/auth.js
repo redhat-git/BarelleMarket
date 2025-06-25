@@ -4,9 +4,11 @@ const { Strategy: LocalStrategy } = require('passport-local');
 const session = require('express-session');
 const connectPg = require('connect-pg-simple');
 const storageModule = require('./storage');
-const storage = storageModule.storage || storageModule.default?.storage;
+console.log('📦 Storage module:', storageModule); // <-- ajoute ça
 
-console.log('storageModule =', storageModule);
+const storage = storageModule.storage || storageModule.default?.storage;
+console.log('📦 Storage instance:', storage); // <-- ajoute ça aussi
+
 
 
 // 🔐 Vérification des variables d'environnement
