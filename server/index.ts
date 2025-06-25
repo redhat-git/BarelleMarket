@@ -4,7 +4,7 @@ const express = require('express');
 const { registerRoutes } = require('./routes');
 const { serveStatic, log } = require('./vite'); // <-- plus setupVite ici
 const { db } = require('./db');
-const { products } = require('@shared/schema');
+const { products } = require('@shared/schema.ts');
 const cors = require('cors');
 
 const app = express();

@@ -17,7 +17,7 @@ import {
   type CreateUser,
   type UpdateOrderStatus,
   type CreateProduct,
-} from "@shared/schema";
+} from "@shared/schema.ts";
 import { db } from "./db";
 import { eq, and, desc, like } from "drizzle-orm";
 import { hashPassword } from "./auth";
