@@ -111,6 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       passport.authenticate('local', (err: any, user: any, info: any) => {
         if (err) {
+          console.error("Erreur Passport:", err);
           return res.status(500).json({ message: "Erreur serveur" });
         }
         if (!user) {
