@@ -63,7 +63,7 @@ async function setupVite(app, server) {
 }
 
 function serveStatic(app) {
-  const distPath = path.resolve(__dirname, 'dist', 'public');
+  const distPath = path.resolve(__dirname, '..', 'dist', 'public');
   if (!fs.existsSync(distPath)) {
     console.error(`Build directory not found: ${distPath}. Skipping static file serving.`);
     return;
@@ -73,5 +73,6 @@ function serveStatic(app) {
     res.sendFile(path.resolve(distPath, 'index.html'));
   });
 }
+
 
 module.exports = { log, setupVite, serveStatic };
