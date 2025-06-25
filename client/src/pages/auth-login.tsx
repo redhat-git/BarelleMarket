@@ -36,14 +36,11 @@ export default function AuthLogin() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',  // <=== important pour envoyer les cookies
         body: JSON.stringify(formData),
-        credentials: 'include',
-        // Permet de conserver les cookies de session
       });
 
       const data = await response.json();
