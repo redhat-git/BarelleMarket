@@ -6,6 +6,7 @@ const { serveStatic, log } = require('./vite'); // <-- plus setupVite ici
 const { db } = require('./db');
 import { categories } from "../shared/schema";
 const cors = require('cors');
+const { products } = require('./db');
 
 const app = express();
 app.use(express.json());
