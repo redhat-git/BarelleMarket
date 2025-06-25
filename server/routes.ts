@@ -14,7 +14,8 @@ import {
   registerSchema,
   loginSchema,
   updateProductSchema
-} from "@shared/schema.ts";
+} from '../shared/schema';
+
 import { nanoid } from "nanoid";
 import express from "express";
 import { fileURLToPath } from "url";
