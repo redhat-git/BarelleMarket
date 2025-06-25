@@ -8,12 +8,6 @@ const storageModule = require('./storage');
 // DEBUG: pour voir ce que contient vraiment le module
 console.log('📦 Storage module =', storageModule);
 
-// On essaye d’accéder correctement à `storage`, selon le type d’export
-const storage = storageModule.storage || storageModule.default?.storage;
-
-console.log('📦 Instance de storage =', storage);
-
-
 
 
 // 🔐 Vérification des variables d'environnement
