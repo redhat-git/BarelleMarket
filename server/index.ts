@@ -1,11 +1,11 @@
 // server/index.ts
-import 'dotenv/config';
-import express, { type Request, type Response } from 'express';
-import { registerRoutes } from './routes';
-import { serveStatic, log } from './vite'; // <-- plus setupVite ici
-import { db } from './db';
-import { products } from '@shared/schema';
-import cors from 'cors';
+require('dotenv').config();
+const express = require('express');
+const { registerRoutes } = require('./routes');
+const { serveStatic, log } = require('./vite'); // <-- plus setupVite ici
+const { db } = require('./db');
+const { products } = require('@shared/schema');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
@@ -20,7 +20,7 @@ app.use(cors({
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, unknown> | undefined;
+  let capturedJsonResponse;
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
@@ -55,7 +55,7 @@ db.select().from(products).limit(1)
   const server = await registerRoutes(app);
 
   // Gestion des erreurs Express
-  app.use((err: Error & { status?: number; statusCode?: number }, _req: Request, res: Response, _next: express.NextFunction) => {
+  app.use((err, _req, res, _next) => {
     const status = err.status ?? err.statusCode ?? 500;
     const message = err.message || 'Internal Server Error';
     res.status(status).json({ message });
@@ -63,7 +63,7 @@ db.select().from(products).limit(1)
 
   // Setup Vite en dev, sinon fichiers statiques
   if (app.get('env') === 'development') {
-    const { setupVite } = await import('./vite');  // import dynamique uniquement en dev
+    const { setupVite } = require('./vite'); // Changé en require
     await setupVite(app, server);
   } else {
     serveStatic(app);
