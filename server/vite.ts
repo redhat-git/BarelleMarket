@@ -1,13 +1,10 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
-// import statique supprimé :
-// import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
 
-let viteLogger: ReturnType<typeof import("vite").createLogger>;
+let viteLogger: any;
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -16,12 +13,14 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
-
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
 export async function setupVite(app: Express, server: Server) {
-  // Import dynamique de vite
+  if (process.env.NODE_ENV !== "development") {
+    throw new Error("setupVite should only be called in development mode");
+  }
+
   const vite = await import("vite");
   if (!viteLogger) {
     viteLogger = vite.createLogger();
@@ -34,21 +33,19 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const viteServer = await vite.createServer({
-    ...viteConfig,
+    server: serverOptions,
     configFile: false,
     customLogger: {
       ...viteLogger,
-      error: (msg, options) => {
+      error: (msg: string, options: any) => {
         viteLogger.error(msg, options);
         process.exit(1);
       },
     },
-    server: serverOptions,
     appType: "custom",
   });
 
   app.use(viteServer.middlewares);
-
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
@@ -60,7 +57,6 @@ export async function setupVite(app: Express, server: Server) {
         "index.html",
       );
 
-      // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
@@ -85,8 +81,6 @@ export function serveStatic(app: Express) {
   }
 
   app.use(express.static(distPath));
-
-  // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
