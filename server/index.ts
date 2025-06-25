@@ -69,6 +69,8 @@ db.select().from(products).limit(1)
     serveStatic(app);
   }
 
+  // Démarrage du serveur  
+
   const port = parseInt(process.env.PORT ?? '5000', 10);
   server.listen(port, '0.0.0.0', () => {
     log(`🚀 Serveur lancé sur http://localhost:${port}`);
