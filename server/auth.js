@@ -26,6 +26,8 @@ function getSession() {
     tableName: 'sessions',
   });
 
+  const isProduction = process.env.NODE_ENV === 'production';
+
   return session({
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
@@ -33,9 +35,9 @@ function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction, // true en production, false en développement
       maxAge: sessionTtl,
-      sameSite: 'none',  // <=== important !
+      sameSite: isProduction ? 'none' : 'lax', // 'none' en prod, 'lax' en dev
     },
   });
 }
@@ -55,17 +57,22 @@ async function setupAuth(app) {
       },
       async (email, password, done) => {
         try {
+          console.log('🔐 Tentative de connexion pour:', email);
+
           const user = await storage.getUserByEmail(email);
           if (!user || !user.password) {
+            console.log('❌ Utilisateur non trouvé ou pas de mot de passe');
             return done(null, false, { message: 'Email ou mot de passe incorrect' });
           }
 
           if (user.isActive === false) {
+            console.log('❌ Compte désactivé');
             return done(null, false, { message: 'Compte désactivé' });
           }
 
           const isValid = await bcrypt.compare(password, user.password);
           if (!isValid) {
+            console.log('❌ Mot de passe incorrect');
             return done(null, false, { message: 'Email ou mot de passe incorrect' });
           }
 
@@ -78,8 +85,10 @@ async function setupAuth(app) {
             isB2B: user.isB2B || false,
           };
 
+          console.log('✅ Connexion réussie pour:', email);
           return done(null, userSession);
         } catch (error) {
+          console.error('💥 Erreur lors de l\'authentification:', error);
           return done(error);
         }
       }
@@ -87,13 +96,16 @@ async function setupAuth(app) {
   );
 
   passport.serializeUser((user, done) => {
+    console.log('📝 Sérialisation utilisateur:', user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id, done) => {
     try {
+      console.log('🔍 Désérialisation utilisateur:', id);
       const user = await storage.getUser(id);
       if (!user || user.isActive === false) {
+        console.log('❌ Utilisateur non trouvé ou désactivé lors de la désérialisation');
         return done(null, false);
       }
 
@@ -106,14 +118,17 @@ async function setupAuth(app) {
         isB2B: user.isB2B || false,
       };
 
+      console.log('✅ Désérialisation réussie');
       done(null, userSession);
     } catch (error) {
+      console.error('💥 Erreur lors de la désérialisation:', error);
       done(error);
     }
   });
 
   // 🧠 Récupérer la session utilisateur
   app.get('/api/auth/session', (req, res) => {
+    console.log('🔍 Vérification session, isAuthenticated:', req.isAuthenticated());
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: 'Non connecté' });
     }
@@ -122,12 +137,26 @@ async function setupAuth(app) {
 
   // 🔓 Login (à ne pas oublier !)
   app.post('/api/auth/login', (req, res, next) => {
+    console.log('🔐 Tentative de login avec:', req.body.email);
+
     passport.authenticate('local', (err, user, info) => {
-      if (err) return res.status(500).json({ message: 'Erreur serveur' });
-      if (!user) return res.status(401).json({ message: info?.message || 'Identifiants incorrects' });
+      if (err) {
+        console.error('💥 Erreur serveur lors du login:', err);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
+
+      if (!user) {
+        console.log('❌ Échec de l\'authentification:', info?.message);
+        return res.status(401).json({ message: info?.message || 'Identifiants incorrects' });
+      }
 
       req.login(user, (err) => {
-        if (err) return res.status(500).json({ message: 'Erreur session' });
+        if (err) {
+          console.error('💥 Erreur lors de la création de session:', err);
+          return res.status(500).json({ message: 'Erreur session' });
+        }
+
+        console.log('✅ Login réussi, session créée');
         return res.json({ user });
       });
     })(req, res, next);
@@ -144,7 +173,7 @@ async function setupAuth(app) {
     });
   });
 
-  // Redirection côté navigateur (si tu as besoin d’un lien HTML)
+  // Redirection côté navigateur (si tu as besoin d'un lien HTML)
   app.get('/api/logout', (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: 'Erreur lors de la déconnexion' });
