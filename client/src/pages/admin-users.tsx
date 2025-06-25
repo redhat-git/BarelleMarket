@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { createUserSchema, type CreateUser, type User } from "@shared/schema";
+import { createUserSchema, type CreateUser, type User } from "@shared/schema.ts";
 import { Users, Plus, Edit, Trash2, Shield, UserCheck, UserX, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
@@ -42,8 +42,8 @@ export default function AdminUsers() {
       toast({ title: "Utilisateur créé avec succès" });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Erreur", 
+      toast({
+        title: "Erreur",
         description: error.message || "Impossible de créer l'utilisateur",
         variant: "destructive"
       });
@@ -65,8 +65,8 @@ export default function AdminUsers() {
       toast({ title: "Rôle mis à jour avec succès" });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Erreur", 
+      toast({
+        title: "Erreur",
         description: error.message || "Impossible de mettre à jour le rôle",
         variant: "destructive"
       });
@@ -87,8 +87,8 @@ export default function AdminUsers() {
       toast({ title: "Statut utilisateur mis à jour" });
     },
     onError: (error: any) => {
-      toast({ 
-        title: "Erreur", 
+      toast({
+        title: "Erreur",
         description: error.message || "Impossible de changer le statut",
         variant: "destructive"
       });
@@ -153,7 +153,7 @@ export default function AdminUsers() {
             </h1>
             <p className="text-gray-600 mt-2">Gérez les comptes utilisateurs et leurs permissions</p>
           </div>
-          
+
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-green-600 hover:bg-green-700">
@@ -296,7 +296,7 @@ export default function AdminUsers() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-2">
-                          <Select 
+                          <Select
                             onValueChange={(value) => updateUserRoleMutation.mutate({ userId: user.id, role: value })}
                             defaultValue={user.role || 'user'}
                           >
