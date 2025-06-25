@@ -93,6 +93,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return await db.query.users.findFirst({
+      where: (user, { eq }) => eq(user.email, email),
+    });
+  };
+
   // async getUserByRole(role: string): Promise<User | undefined> {
   //   const [user] = await db.select().from(users).where(eq(users.role, role));
   //   return user;
@@ -593,11 +599,6 @@ export class DatabaseStorage implements IStorage {
       todayOrders: todayOrders.length,
       totalRevenue: totalRevenue.reduce((sum, order) => sum + parseFloat(order.sum || '0'), 0)
     };
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    return user;
   }
 
   async createLocalUser(userData: { email: string; password: string; firstName: string; lastName: string; isB2B?: boolean }): Promise<User> {
