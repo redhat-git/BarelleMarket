@@ -4,11 +4,12 @@ const { Strategy: LocalStrategy } = require('passport-local');
 const session = require('express-session');
 const connectPg = require('connect-pg-simple');
 const storageModule = require('./storage');
+const storage = storageModule.storage;
 
 // DEBUG: pour voir ce que contient vraiment le module
-console.log('📦 Storage module =', storageModule);
+console.log('📦 Storage module =', storageModule);;
 
-
+console.log('📦 Instance de storage =', storage);
 
 // 🔐 Vérification des variables d'environnement
 if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET manquante');
