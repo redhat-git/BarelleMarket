@@ -1,3 +1,5 @@
+// 📄 server/storage.ts
+import { DatabaseStorage } from './database-storage';
 import {
   users,
   categories,

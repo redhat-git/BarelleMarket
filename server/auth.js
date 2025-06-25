@@ -4,10 +4,15 @@ const { Strategy: LocalStrategy } = require('passport-local');
 const session = require('express-session');
 const connectPg = require('connect-pg-simple');
 const storageModule = require('./storage');
-console.log('📦 Storage module:', storageModule); // <-- ajoute ça
 
+// DEBUG: pour voir ce que contient vraiment le module
+console.log('📦 Storage module =', storageModule);
+
+// On essaye d’accéder correctement à `storage`, selon le type d’export
 const storage = storageModule.storage || storageModule.default?.storage;
-console.log('📦 Storage instance:', storage); // <-- ajoute ça aussi
+
+console.log('📦 Instance de storage =', storage);
+
 
 
 
