@@ -1,59 +1,74 @@
 import { db } from "./db";
-import { categories, products, users } from "@shared/schema";
+import { categories, users } from "@shared/schema";
+import bcrypt from "bcrypt";
 
 async function seed() {
   try {
     console.log("🌱 Seeding database...");
 
-    // Create categories
+    // Hasher un mot de passe par défaut
+    const password = "barelle2025"; // à changer ensuite
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const categoryData = [
       {
-        name: "Spiritueux",
-        slug: "spiritueux",
-        description: "Spiritueux ivoiriens authentiques",
+        name: "Spiritueux et Alcools",
+        slug: "spiritueux-et-alcools",
+        description: "Spiritueux, rhums arrangés et liqueurs artisanales ivoiriennes",
         imageUrl: null,
         isActive: true,
       },
       {
-        name: "Jus Naturels",
-        slug: "jus-naturels",
-        description: "Jus de fruits naturels de Côte d'Ivoire",
+        name: "Vins et Liqueurs de Fruits",
+        slug: "vins-et-liqueurs-de-fruits",
+        description: "Vins et liqueurs à base de fruits tropicaux de Côte d'Ivoire",
         imageUrl: null,
         isActive: true,
       },
       {
-        name: "Cigares",
-        slug: "cigares",
-        description: "Cigares de qualité premium",
+        name: "Chocolat et Confiserie",
+        slug: "chocolat-et-confiserie",
+        description: "Chocolats artisanaux et matières premières chocolatières",
         imageUrl: null,
         isActive: true,
       },
       {
-        name: "Accessoires",
-        slug: "accessoires",
-        description: "Accessoires et articles complémentaires",
+        name: "Tabac",
+        slug: "tabac",
+        description: "Cigares 100% ivoiriens",
+        imageUrl: null,
+        isActive: true,
+      },
+      {
+        name: "Épicerie Fine et Conserves",
+        slug: "epicerie-fine-et-conserves",
+        description: "Produits gastronomiques ivoiriens : terrines, confitures, chutneys",
+        imageUrl: null,
+        isActive: true,
+      },
+      {
+        name: "Condiments et Produits Culinaires",
+        slug: "condiments-et-produits-culinaires",
+        description: "Condiments, jus et produits culinaires tropicaux",
+        imageUrl: null,
+        isActive: true,
+      },
+      {
+        name: "Glaces Artisanales",
+        slug: "glaces-artisanales",
+        description: "Glaces aux saveurs locales : tamarin, bissap, baobab, bandji",
         imageUrl: null,
         isActive: true,
       },
     ];
 
     await db.insert(categories).values(categoryData).onConflictDoNothing();
-    console.log(`✅ Categories ensured in database`);
+    console.log(`✅ Categories inserted`);
 
-    // Get existing categories
-    const existingCategories = await db.select().from(categories);
-
-    const categoryMap = new Map(existingCategories.map(cat => [cat.slug, cat.id]));
-
-    await db.insert(products).values(productData).onConflictDoNothing();
-    console.log(`✅ Products ensured in database`);
-
-    // Create admin user - Barelle Distribution
-    // Using the createAdminUser method directly here will cause a compilation error since `storage` is not defined.
-    // I will keep the original implementation for now.
     const adminUser = {
       id: "admin_barelle_2025",
       email: "info@barelle-distribution.com",
+      password: "Cecethan2016", // Mot de passe par défaut à changer
       firstName: "Barelle",
       lastName: "Distribution",
       profileImageUrl: null,
@@ -73,27 +88,19 @@ async function seed() {
       }),
     };
 
-    const insertedAdmin = await db.insert(users).values(adminUser).returning();
-    console.log(`✅ Created admin user: ${insertedAdmin[0].email}`);
+    const inserted = await db.insert(users).values(adminUser).returning();
+    console.log(`✅ Created admin user: ${inserted[0].email}`);
 
-    console.log("Database seeded successfully!");
+    console.log("🌱 Seeding complete!");
   } catch (error) {
-    console.error("Error seeding database:", error);
-    throw error;
+    console.error("❌ Error during seeding:", error);
+    process.exit(1);
   }
 }
 
-// Run seed if called directly
+// Exécution directe
 if (import.meta.url.endsWith(process.argv[1])) {
-  seed()
-    .then(() => {
-      console.log("Seeding completed");
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error("Seeding failed:", error);
-      process.exit(1);
-    });
+  seed();
 }
 
 export { seed };

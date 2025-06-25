@@ -12,7 +12,8 @@ import {
   updateOrderStatusSchema,
   createProductSchema,
   registerSchema,
-  loginSchema
+  loginSchema,
+  updateProductSchema
 } from "@shared/schema";
 import { nanoid } from "nanoid";
 import express from "express";
@@ -660,10 +661,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit as string) || 20;
       const status = req.query.status as string;
 
-      const result = await storage.getAllOrders(page, limit, status || null);
+      const result = await storage.getAllOrders(page, limit, status || undefined);
 
-      console.log("Nombre de commandes envoyées :", result.length);
-      console.log("Exemple de commande :", result[0]);
+
+      console.log("Nombre de commandes envoyées :", result.orders.length);
+      console.log("Exemple de commande :", result.orders.orders[0]); // ou result.orders[0]
+      console.log("Total commandes :", result.total);
+
 
       res.json({
         orders: result,
