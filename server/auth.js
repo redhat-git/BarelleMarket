@@ -5,38 +5,26 @@ const { Strategy: LocalStrategy } = require('passport-local');
 const session = require('express-session');
 const connectPg = require('connect-pg-simple');
 const { storage } = require('./storage');
-// server/auth.js
-require('express');
 
 // Vérification des variables d'environnement
-if (!process.env.SESSION_ENV) throw new Error('SESSION_SECRET not found');
-if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL not found');
+if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET manquante');
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL manquante');
 
-// 🔐 Hash password
+// 🔐 Hachage mot de passe
 async function hashPassword(password) {
   const saltRounds = 10;
   return await bcrypt.hash(password, saltRounds);
 }
 
-// 👤 Structure de la session (juste pour documentation, pas de TypeScript en JS pur)
-const UserSession = {
-  id: String,
-  email: String,
-  firstName: String,
-  lastName: String,
-  role: String,
-  isB2B: Boolean
-};
-
 // 🎯 Middleware session
 function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 7 jours
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    connectString: process.env.DATABASE_URL,
+  const PgStore = connectPg(session);
+  const sessionStore = new PgStore({
+    conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
     ttl: sessionTtl,
-    tableName: 'sessions_sessions'
+    tableName: 'sessions',
   });
 
   return session({
@@ -47,8 +35,8 @@ function getSession() {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: sessionTtl
-    }
+      maxAge: sessionTtl,
+    },
   });
 }
 
@@ -60,11 +48,10 @@ async function setupAuth(app) {
   app.use(passport.session());
 
   passport.use(
-    'local',
     new LocalStrategy(
       {
         usernameField: 'email',
-        passwordField: 'password'
+        passwordField: 'password',
       },
       async (email, password, done) => {
         try {
@@ -74,7 +61,7 @@ async function setupAuth(app) {
           }
 
           if (user.isActive === false) {
-            return done(null, false, { message: 'Utilisateur désactivé' });
+            return done(null, false, { message: 'Compte désactivé' });
           }
 
           const isValid = await bcrypt.compare(password, user.password);
@@ -88,7 +75,7 @@ async function setupAuth(app) {
             firstName: user.firstName,
             lastName: user.lastName,
             role: user.role,
-            isB2B: user.isB2B || false
+            isB2B: user.isB2B || false,
           };
 
           return done(null, userSession);
@@ -119,7 +106,7 @@ async function setupAuth(app) {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
-        isB2B: user.isB2B || false
+        isB2B: user.isB2B || false,
       };
 
       console.log('Deserialized user session:', userSession);
@@ -132,77 +119,80 @@ async function setupAuth(app) {
 
   // 🔓 Déconnexion
   app.post('/api/auth/logout', (req, res) => {
-    req.logout(err => {
-      if (err) return res.status(401).json({ message: 'Erreur lors de la déconnexion' });
+    req.logout((err) => {
+      if (err) return res.status(500).json({ message: 'Erreur lors de la déconnexion' });
       req.session.destroy(() => {
         res.clearCookie('connect.sid');
         res.json({ message: 'Déconnexion réussie' });
       });
     });
-    app.get('/api/logout', (req, res) => {
-      req.logout(err => {
-        if (err) return res.status(401).json({ message: 'Erreur lors de la déconnexion' });
-        req.session.destroy(() => {
-          res.clearCookie('connect.sid');
-          res.redirect('/');
-        });
+  });
+
+  app.get('/api/logout', (req, res) => {
+    req.logout((err) => {
+      if (err) return res.status(500).json({ message: 'Erreur lors de la déconnexion' });
+      req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.redirect('/');
       });
     });
+  });
 
-    // 🧑‍🚀 Récupérer la session utilisateur
-    app.get('/api/auth/session', (req, res) => {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: 'Non connecté' });
-      }
-      res.json({ user: req.user });
-    });
-  }
+  // 🧠 Récupérer la session utilisateur
+  app.get('/api/auth/session', (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Non connecté' });
+    }
+    res.json({ user: req.user });
+  });
+}
 
 // 🛡️ Middleware : vérifier la connexion
-const isAuthenticated = (req, res, next) => {
+function isAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Non authentifié' });
+  }
+  next();
+}
+
+// 🛡️ Middleware : vérifier le rôle
+function requireRole(roles) {
+  return async (req, res, next) => {
     if (!req.isAuthenticated()) {
-      res.status(401).json({ message: 'Non authentifié' });
+      return res.status(401).json({ message: 'Non authentifié' });
     }
-    next();
-  };
 
-  // 🛡️ Middleware : vérifier le rôle
-  const requireRole = (roles) => {
-    return async (req, res, next) => {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: 'Non authentifié' });
+    const userSession = req.user;
+
+    if (!roles.includes(userSession.role)) {
+      return res.status(403).json({ message: 'Accès refusé' });
+    }
+
+    try {
+      const user = await storage.getUser(userSession.id);
+      if (!user) {
+        return res.status(401).json({ message: 'Utilisateur introuvable' });
       }
 
-      const userSession = req.user;
-
-      if (!roles.includes(userSession.role)) {
-        return res.status(403).json({ message: 'Accès refusé' });
-      }
-
-      try {
-        const user = await storage.getUser(userSession.id);
-        if (!user) {
-          return res.status(401).json({ message: 'Utilisateur introuvable' });
-        }
-
-        req.dbUser = user;
-        next();
-      } catch (error) {
-        console.error('Error dans le middleware requireRole:', error);
-        res.status(401).json({ message: 'Erreur serveur' });
-      }
-    };
+      req.dbUser = user;
+      next();
+    } catch (error) {
+      console.error('Error in requireRole middleware:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
   };
+}
 
-  // Raccourcis de rôle
-  const adminOnly = requireRole(['admin']);
-  const supportOrAdminOnly = requireRole(['admin', 'support']);
+// Raccourcis de rôle
+const requireAdmin = requireRole(['admin']);
+const requireSupport = requireRole(['admin', 'support']);
 
-  module.exports = {
-    hashPassword,
-    setupAuth,
-    isAuthenticated,
-    requireRole,
-    adminOnly,
-    supportOrAdminOnly
-  };
+module.exports = {
+  hashPassword,
+  getSession,
+  setupAuth,
+  isAuthenticated,
+  requireRole,
+  requireAdmin,
+  requireSupport,
+};
