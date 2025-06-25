@@ -3,7 +3,9 @@ const passport = require('passport');
 const { Strategy: LocalStrategy } = require('passport-local');
 const session = require('express-session');
 const connectPg = require('connect-pg-simple');
-const { storage } = require('./storage');
+const storageModule = require('./storage');
+console.log('storageModule =', storageModule);
+
 
 // 🔐 Vérification des variables d'environnement
 if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET manquante');
