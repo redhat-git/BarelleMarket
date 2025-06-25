@@ -2,11 +2,10 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { registerRoutes } from './routes';
-import { setupVite, serveStatic, log } from './vite';
+import { serveStatic, log } from './vite'; // <-- plus setupVite ici
 import { db } from './db';
 import { products } from '@shared/schema';
 import cors from 'cors';
-
 
 const app = express();
 app.use(express.json());
@@ -64,13 +63,13 @@ db.select().from(products).limit(1)
 
   // Setup Vite en dev, sinon fichiers statiques
   if (app.get('env') === 'development') {
+    const { setupVite } = await import('./vite');  // import dynamique uniquement en dev
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
   // Démarrage du serveur  
-
   const port = parseInt(process.env.PORT ?? '5000', 10);
   server.listen(port, '0.0.0.0', () => {
     log(`🚀 Serveur lancé sur http://localhost:${port}`);
