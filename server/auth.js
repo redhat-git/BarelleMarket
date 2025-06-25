@@ -3,7 +3,8 @@ const passport = require('passport');
 const { Strategy: LocalStrategy } = require('passport-local');
 const session = require('express-session');
 const connectPg = require('connect-pg-simple');
-const { storage } = require('./storage');
+import { storage } from './storage';
+
 
 console.log('📦 Instance de storage =', storage);
 
