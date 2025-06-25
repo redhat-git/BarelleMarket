@@ -8,13 +8,14 @@ const { setupAuth } = require('./auth');
 
 const app = express();
 
+app.set('trust proxy', 1); // Pour faire confiance au proxy inverse (comme Nginx) pour les en-têtes X-Forwarded-For
 // Middleware JSON / URL Encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // CORS
 app.use(cors({
-  origin: 'https://barelle-distribution.com', // 🔒 à adapter en dev si besoin
+  origin: 'https://barelle-app.onrender.com',
   credentials: true,
 }));
 

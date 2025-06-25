@@ -42,6 +42,8 @@ export default function AuthLogin() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+        credentials: 'include',
+        // Permet de conserver les cookies de session
       });
 
       const data = await response.json();
