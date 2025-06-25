@@ -85,41 +85,6 @@ export interface IStorage {
     totalRevenue: number;
   }>;
 
-  // Local auth methods
-  async getUserByEmail(email: string): Promise<User | undefined> {
-  console.log('Recherche utilisateur par email:', email);
-  const [user] = await db.select().from(users).where(eq(users.email, email));
-  console.log('Utilisateur trouvé:', user);
-  return user;
-}
-
-async createLocalUser(userData: { email: string; password: string; firstName: string; lastName: string; isB2B?: boolean }): Promise < User > {
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-
-  const [user] = await db
-    .insert(users)
-    .values({
-      email: userData.email,
-      password: hashedPassword,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      isB2B: userData.isB2B ?? false,
-      role: "user",
-      isActive: true,
-      provider: 'local',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .returning();
-
-  return user;
-}
-
-async getUserByRole(role: string): Promise < User | undefined > {
-  const [user] = await db.select().from(users).where(eq(users.role, role));
-  return user;
-}
-
 
 export class DatabaseStorage implements IStorage {
   // User operations
