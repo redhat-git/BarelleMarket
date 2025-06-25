@@ -4,3 +4,8 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+# Ignorer les fichiers non suivis
+server/create-admin.ts
+server/tsconfig.json
+server/update-catalog.ts
+shared/schema.js
