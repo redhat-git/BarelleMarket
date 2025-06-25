@@ -1,4 +1,3 @@
-// server/auth.js
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const { Strategy: LocalStrategy } = require('passport-local');
@@ -6,17 +5,17 @@ const session = require('express-session');
 const connectPg = require('connect-pg-simple');
 const { storage } = require('./storage');
 
-// Vérification des variables d'environnement
+// 🔐 Vérification des variables d'environnement
 if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET manquante');
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL manquante');
 
-// 🔐 Hachage mot de passe
+// 🔐 Hachage de mot de passe
 async function hashPassword(password) {
   const saltRounds = 10;
   return await bcrypt.hash(password, saltRounds);
 }
 
-// 🎯 Middleware session
+// 🎯 Middleware session avec store PostgreSQL
 function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 7 jours
   const PgStore = connectPg(session);
@@ -36,13 +35,14 @@ function getSession() {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: sessionTtl,
+      sameSite: 'lax',
     },
   });
 }
 
-// 🔐 Passport + stratégie locale
+// 🔐 Initialisation Passport + stratégie locale
 async function setupAuth(app) {
-  app.set('trust proxy', 1);
+  app.set('trust proxy', 1); // important sur Render
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
@@ -87,16 +87,13 @@ async function setupAuth(app) {
   );
 
   passport.serializeUser((user, done) => {
-    console.log('Serializing user:', user);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id, done) => {
     try {
-      console.log('Deserializing user ID:', id);
       const user = await storage.getUser(id);
       if (!user || user.isActive === false) {
-        console.log('User not found or inactive:', id);
         return done(null, false);
       }
 
@@ -109,15 +106,34 @@ async function setupAuth(app) {
         isB2B: user.isB2B || false,
       };
 
-      console.log('Deserialized user session:', userSession);
       done(null, userSession);
     } catch (error) {
-      console.error('Deserialization error:', error);
       done(error);
     }
   });
 
-  // 🔓 Déconnexion
+  // 🧠 Récupérer la session utilisateur
+  app.get('/api/auth/session', (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Non connecté' });
+    }
+    res.json({ user: req.user });
+  });
+
+  // 🔓 Login (à ne pas oublier !)
+  app.post('/api/auth/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+      if (err) return res.status(500).json({ message: 'Erreur serveur' });
+      if (!user) return res.status(401).json({ message: info?.message || 'Identifiants incorrects' });
+
+      req.login(user, (err) => {
+        if (err) return res.status(500).json({ message: 'Erreur session' });
+        return res.json({ user });
+      });
+    })(req, res, next);
+  });
+
+  // 🔒 Logout
   app.post('/api/auth/logout', (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: 'Erreur lors de la déconnexion' });
@@ -128,6 +144,7 @@ async function setupAuth(app) {
     });
   });
 
+  // Redirection côté navigateur (si tu as besoin d’un lien HTML)
   app.get('/api/logout', (req, res) => {
     req.logout((err) => {
       if (err) return res.status(500).json({ message: 'Erreur lors de la déconnexion' });
@@ -137,17 +154,9 @@ async function setupAuth(app) {
       });
     });
   });
-
-  // 🧠 Récupérer la session utilisateur
-  app.get('/api/auth/session', (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Non connecté' });
-    }
-    res.json({ user: req.user });
-  });
 }
 
-// 🛡️ Middleware : vérifier la connexion
+// 🛡️ Middleware : vérifie si connecté
 function isAuthenticated(req, res, next) {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: 'Non authentifié' });
@@ -155,7 +164,7 @@ function isAuthenticated(req, res, next) {
   next();
 }
 
-// 🛡️ Middleware : vérifier le rôle
+// 🛡️ Middleware : vérifie le rôle
 function requireRole(roles) {
   return async (req, res, next) => {
     if (!req.isAuthenticated()) {
@@ -177,13 +186,12 @@ function requireRole(roles) {
       req.dbUser = user;
       next();
     } catch (error) {
-      console.error('Error in requireRole middleware:', error);
       res.status(500).json({ message: 'Erreur serveur' });
     }
   };
 }
 
-// Raccourcis de rôle
+// Raccourcis
 const requireAdmin = requireRole(['admin']);
 const requireSupport = requireRole(['admin', 'support']);
 
