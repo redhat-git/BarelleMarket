@@ -15,9 +15,10 @@ app.use(express.urlencoded({ extended: false }));
 
 // CORS
 app.use(cors({
-  origin: 'https://barelle-app.onrender.com',
+  origin: 'https://barelle-distribution.com',
   credentials: true,
 }));
+
 
 // 🧾 Middleware de journalisation API
 app.use((req, res, next) => {
