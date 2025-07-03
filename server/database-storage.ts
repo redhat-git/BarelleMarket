@@ -1,7 +1,7 @@
 // 📄 server/database-storage.ts
 import { eq } from 'drizzle-orm';
 import { db } from './db';
-import { users, products, categories } from '../shared/schema';
+import { users, products, categories, orders } from '../shared/schema';
 
 export class DatabaseStorage {
     // 🔐 Authentification
@@ -29,8 +29,9 @@ export class DatabaseStorage {
         return await db.select().from(categories);
     }
 
+    // ⭐ Notation d’un produit
     async rateProduct(productId: number, newRating: number) {
-        // Récupérer le produit
+        // 1. Récupérer le produit concerné
         const product = await db
             .select()
             .from(products)
@@ -38,17 +39,16 @@ export class DatabaseStorage {
             .limit(1)
             .then(res => res[0]);
 
-        if (!product) {
-            return null;
-        }
+        if (!product) return null;
 
+        // 2. Calcul de la nouvelle moyenne
         const oldAvg = Number(product.rating) || 0;
         const oldCount = Number(product.reviewCount) || 0;
 
         const newCount = oldCount + 1;
         const updatedAvg = Math.round(((oldAvg * oldCount + newRating) / newCount) * 10) / 10;
 
-        // Mettre à jour dans la base
+        // 3. Mise à jour dans la base
         await db
             .update(products)
             .set({
@@ -57,8 +57,20 @@ export class DatabaseStorage {
             })
             .where(eq(products.id, productId));
 
-        // Retourne la nouvelle note et nombre d'avis
-        return { rating: updatedAvg, reviewCount: newCount };
+        // 4. Retourner les nouvelles valeurs
+        return {
+            rating: updatedAvg,
+            reviewCount: newCount,
+        };
+    }
+
+    async getAllOrders() {
+        const result = await db.select().from(orders);
+        return result || [];
+    }
+    async getOrderById(id: string) {
+        const result = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+        return result[0] || null;
     }
     // ✅ Ajoute d'autres méthodes selon tes besoins : panier, commandes, etc.
 }

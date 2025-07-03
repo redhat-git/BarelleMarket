@@ -244,29 +244,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/products/:id/rate', async (req, res) => {
     try {
-      const productId = parseInt(req.params.id, 10);
+      const productId = parseInt(req.params.id);
       const { rating } = req.body;
 
-      if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
-        return res.status(400).json({ message: "La note doit être un nombre entre 1 et 5" });
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: 'Note invalide (doit être entre 1 et 5)' });
       }
 
-      const updatedProduct = await storage.rateProduct(productId, rating);
+      const updated = await storage.rateProduct(productId, rating);
 
-      if (!updatedProduct) {
-        return res.status(404).json({ message: "Produit non trouvé" });
+      if (!updated) {
+        return res.status(404).json({ message: 'Produit non trouvé' });
       }
 
-      res.json({
-        message: "Note enregistrée",
-        nouvelle_moyenne: updatedProduct.rating,
-        nombre_avis: updatedProduct.review_count,
-      });
+      res.json(updated);
     } catch (error) {
-      console.error("Erreur lors de la notation du produit :", error);
-      res.status(500).json({ message: "Erreur serveur" });
+      console.error('Erreur lors de la notation du produit:', error);
+      res.status(500).json({ message: 'Erreur serveur lors de l’enregistrement de la note' });
     }
   });
+
 
   // Cart operations
   app.get('/api/cart', async (req, res) => {
