@@ -25,7 +25,6 @@ import {
   Mail,
   User,
   ShoppingCart,
-  ChevronDown,
   LogOut,
   LogIn
 } from "lucide-react";
@@ -70,9 +69,6 @@ export default function Header() {
       window.location.reload();
     }
   };
-
-  // Debug temporaire
-  console.log("typedUser", typedUser);
 
   const userRole = typedUser?.role?.toLowerCase();
 
@@ -200,27 +196,6 @@ export default function Header() {
               >
                 Accueil
               </Link>
-              {/* 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-ivorian-black hover:text-ivorian-amber font-medium p-0 h-auto"
-                  >
-                    Produits <ChevronDown className="ml-1 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {categories.map((category) => (
-                    <DropdownMenuItem key={category.id}>
-                      <Link href={`/products?category=${category.slug}`}>
-                        {category.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu> */}
-
 
 
             </nav>
@@ -264,7 +239,7 @@ export default function Header() {
                           Mon Espace B2B
                         </Link>
                       </SheetClose>
-                      {(userRole === 'admin' ?? userRole === 'support') && (
+                      {(userRole === 'admin' || userRole === 'support') && (
                         <SheetClose asChild>
                           <Link href="/admin" className="text-lg font-medium">
                             Administration
@@ -272,7 +247,7 @@ export default function Header() {
                         </SheetClose>
                       )}
                       <SheetClose asChild>
-                        <a href="/home" onClick={handleLogout} className="text-lg font-medium flex items-center">
+                        <a href="/landing" onClick={handleLogout} className="text-lg font-medium flex items-center">
                           <LogOut className="h-4 w-4 mr-2" />
                           Se Déconnecter
                         </a>
