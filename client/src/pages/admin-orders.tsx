@@ -76,10 +76,11 @@ export default function AdminOrders() {
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'Cache-Control': 'no-cache',
           },
         });
+
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
