@@ -252,21 +252,9 @@ export default function B2CCheckoutModal({ isOpen, onClose, cartSummary }: Reado
                         className="space-y-2"
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="mobile" id="mobile" />
-                          <label htmlFor="mobile" className="text-sm font-medium">
-                            Paiement Mobile (Orange Money, MTN Mobile Money)
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
                           <RadioGroupItem value="cash" id="cash" />
                           <label htmlFor="cash" className="text-sm font-medium">
                             Paiement à la livraison
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="bank" id="bank" />
-                          <label htmlFor="bank" className="text-sm font-medium">
-                            Virement bancaire
                           </label>
                         </div>
                       </RadioGroup>

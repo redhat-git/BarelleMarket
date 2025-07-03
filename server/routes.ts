@@ -242,6 +242,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/products/:id/rate', async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id, 10);
+      const { rating } = req.body;
+
+      if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "La note doit être un nombre entre 1 et 5" });
+      }
+
+      const updatedProduct = await storage.rateProduct(productId, rating);
+
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Produit non trouvé" });
+      }
+
+      res.json({
+        message: "Note enregistrée",
+        nouvelle_moyenne: updatedProduct.rating,
+        nombre_avis: updatedProduct.review_count,
+      });
+    } catch (error) {
+      console.error("Erreur lors de la notation du produit :", error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  });
+
   // Cart operations
   app.get('/api/cart', async (req, res) => {
     try {

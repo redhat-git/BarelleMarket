@@ -23,7 +23,6 @@ import {
   type Order,
   type OrderItem,
   type Product,
-  updateOrderStatusSchema,
   type UpdateOrderStatus,
 } from '@shared/schema';
 import {
@@ -44,7 +43,7 @@ interface OrderWithItems extends Order {
 
 export default function AdminOrders() {
   console.log('AdminOrders component rendu');
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<OrderWithItems | null>(null);
   const { toast } = useToast();
@@ -89,8 +88,14 @@ export default function AdminOrders() {
         console.log('Orders fetched with fetch:', JSON.stringify(result, null, 2));
       }
 
+      // Vérifier si result est défini et est un objet
+      if (!result || typeof result !== 'object') {
+        console.error('Réponse serveur invalide:', result);
+        throw new Error('Réponse serveur invalide : result est undefined ou non un objet');
+      }
+
       // Normaliser la structure des données
-      if (result.orders?.orders) {
+      if (result.orders?.orders && Array.isArray(result.orders.orders)) {
         return {
           orders: result.orders.orders,
           total: result.orders.total || result.orders.orders.length || 0,
@@ -102,7 +107,18 @@ export default function AdminOrders() {
           total: result.total || result.orders.length || 0,
         };
       }
-      throw new Error('Structure de données inattendue: ' + JSON.stringify(result));
+
+      // Gérer explicitement le cas où result.orders est undefined
+      if (result.orders === undefined || result.orders === null) {
+        console.warn('result.orders est undefined ou null:', result);
+        return {
+          orders: [],
+          total: 0,
+        };
+      }
+
+      console.error('Structure de données inattendue:', JSON.stringify(result, null, 2));
+      throw new Error('Structure de données inattendue : ' + JSON.stringify(result));
     },
     retry: 3,
     retryDelay: 1000,

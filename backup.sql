@@ -7,7 +7,7 @@
 SET session_replication_role = replica;
 
 --
--- Structure de la table: users (avec mots de passe)
+-- Structure de la table: users
 --
 
 DROP TABLE IF EXISTS users CASCADE;
@@ -38,12 +38,6 @@ CREATE TABLE users (
 );
 
 --
--- Données pour la table: users (avec mots de passe hachés)
---
-
-INSERT INTO users (id, email, password, first_name, last_name, profile_image_url, provider, company_name, company_type, siret, rccm, address, city, phone, second_contact_name, second_contact_phone, is_b2b, is_active, role, permissions, created_at, updated_at);
-
---
 -- Structure de la table: sessions
 --
 
@@ -55,14 +49,6 @@ CREATE TABLE sessions (
     expire timestamp without time zone NOT NULL
 );
 
---
--- Données pour la table: sessions (sessions actives)
---
-
-INSERT INTO sessions (sid, sess, expire);
---
--- Structure de la table: categories
---
 
 DROP TABLE IF EXISTS categories CASCADE;
 
@@ -75,12 +61,6 @@ CREATE TABLE categories (
     is_active boolean DEFAULT true,
     created_at timestamp without time zone DEFAULT now()
 );
-
---
--- Données pour la table: categories
---
-
-INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at);
 
 --
 -- Structure de la table: products
@@ -109,13 +89,6 @@ CREATE TABLE products (
     created_at timestamp without time zone DEFAULT now(),
     updated_at timestamp without time zone DEFAULT now()
 );
-
---
--- Données pour la table: products (échantillon)
---
-
-INSERT INTO products (id, name, slug, description, short_description, price, b2b_price, original_price, category_id, image_url, additional_images, specifications, stock_quantity, is_active, is_featured, rating, review_count, created_at, updated_at);
-
 --
 -- Structure des autres tables
 --

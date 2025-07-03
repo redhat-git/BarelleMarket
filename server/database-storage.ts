@@ -29,5 +29,36 @@ export class DatabaseStorage {
         return await db.select().from(categories);
     }
 
+    async rateProduct(productId: number, newRating: number) {
+        // Récupérer le produit
+        const product = await db
+            .select()
+            .from(products)
+            .where(eq(products.id, productId))
+            .limit(1)
+            .then(res => res[0]);
+
+        if (!product) {
+            return null;
+        }
+
+        const oldAvg = Number(product.rating) || 0;
+        const oldCount = Number(product.reviewCount) || 0;
+
+        const newCount = oldCount + 1;
+        const updatedAvg = Math.round(((oldAvg * oldCount + newRating) / newCount) * 10) / 10;
+
+        // Mettre à jour dans la base
+        await db
+            .update(products)
+            .set({
+                rating: updatedAvg,
+                reviewCount: newCount,
+            })
+            .where(eq(products.id, productId));
+
+        // Retourne la nouvelle note et nombre d'avis
+        return { rating: updatedAvg, reviewCount: newCount };
+    }
     // ✅ Ajoute d'autres méthodes selon tes besoins : panier, commandes, etc.
 }

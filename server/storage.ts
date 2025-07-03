@@ -86,7 +86,7 @@ export interface IStorage {
     todayOrders: number;
     totalRevenue: number;
   }>;
-} // <- This closing brace was missing!
+} 
 
 export class DatabaseStorage implements IStorage {
   // User operations

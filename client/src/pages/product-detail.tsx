@@ -13,6 +13,8 @@ export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const { addToCart, isAdding } = useCart();
   const { toast } = useToast();
 
@@ -76,7 +78,6 @@ export default function ProductDetail() {
 
   const category = categories.find(c => c.id === product.categoryId);
   const images = [product.imageUrl, ...(product.additionalImages || [])].filter(Boolean);
-  //Image secours
   const currentImage = images[selectedImageIndex] || "images";
 
   const formatPrice = (price: string) => {
@@ -96,11 +97,23 @@ export default function ProductDetail() {
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(<Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />);
     }
 
-    const emptyStars = 5 - fullStars;
+    if (hasHalfStar) {
+      stars.push(
+        <Star
+          key="half"
+          className="h-4 w-4 text-yellow-400"
+          style={{ clipPath: "inset(0 50% 0 0)" }}
+        />
+      );
+    }
+
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(<Star key={`empty-${i}`} className="h-4 w-4 text-gray-300" />);
     }
@@ -119,12 +132,42 @@ export default function ProductDetail() {
     });
   };
 
+  const handleRating = async (rating: number) => {
+    setUserRating(rating);
+    setIsSubmittingRating(true);
+
+    try {
+      const res = await fetch(`/api/products/${product.id}/rate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rating }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Erreur d'envoi");
+      }
+
+      toast({
+        title: "Merci !",
+        description: "Votre note a été enregistrée.",
+      });
+    } catch (err) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer la note.",
+      });
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
           <Link href="/" className="hover:text-ivorian-amber">Accueil</Link>
           <span>/</span>
@@ -141,7 +184,6 @@ export default function ProductDetail() {
           <span className="text-gray-900">{product.name}</span>
         </div>
 
-        {/* Back Button */}
         <Link href="/products">
           <Button variant="ghost" className="mb-6">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -149,10 +191,8 @@ export default function ProductDetail() {
           </Button>
         </Link>
 
-        {/* Product Detail */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="grid lg:grid-cols-2 gap-8 p-8">
-            {/* Product Images */}
             <div>
               <div className="relative overflow-hidden rounded-lg shadow-lg mb-4">
                 <img
@@ -162,15 +202,13 @@ export default function ProductDetail() {
                 />
               </div>
 
-              {/* Thumbnail Images */}
               {images.length > 1 && (
                 <div className="flex gap-2">
                   {images.map((image, index) => (
                     <button
                       key={`${product.id}-${image}`}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`w-16 h-16 rounded border-2 overflow-hidden ${selectedImageIndex === index ? 'border-ivorian-yellow' : 'border-gray-200 hover:border-ivorian-yellow'
-                        }`}
+                      className={`w-16 h-16 rounded border-2 overflow-hidden ${selectedImageIndex === index ? 'border-ivorian-yellow' : 'border-gray-200 hover:border-ivorian-yellow'}`}
                     >
                       <img
                         src={image}
@@ -183,7 +221,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Product Info */}
             <div>
               <div className="mb-4">
                 <Badge className={`text-xs font-semibold mb-3 ${getCategoryColor(product.categoryId)}`}>
@@ -192,23 +229,38 @@ export default function ProductDetail() {
 
                 <div className="flex items-center">
                   <div className="flex mr-2">
-                    {renderStars(parseFloat(product.rating))}
+                    {renderStars(Number(product.rating) || 0)}
                   </div>
                   {product.reviewCount > 0 && (
                     <span className="text-gray-600 text-sm">({product.reviewCount} avis)</span>
                   )}
                 </div>
+
+                <div className="flex items-center mt-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => handleRating(star)}
+                      disabled={isSubmittingRating}
+                    >
+                      <Star
+                        className={`h-5 w-5 ${userRating && star <= userRating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                          } hover:text-yellow-400`}
+                      />
+                    </button>
+                  ))}
+                  {userRating && (
+                    <span className="ml-2 text-sm text-gray-600">Votre note : {userRating}/5</span>
+                  )}
+                </div>
               </div>
 
-              <h1 className="text-3xl font-bold text-ivorian-black mb-4">
-                {product.name}
-              </h1>
+              <h1 className="text-3xl font-bold text-ivorian-black mb-4">{product.name}</h1>
 
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                {product.description}
-              </p>
+              <p className="text-gray-700 mb-6 leading-relaxed">{product.description}</p>
 
-              {/* Price - Only shown on product detail pages */}
               <div className="mb-6">
                 <div className="flex items-center space-x-4 mb-4">
                   <span className="text-3xl font-bold text-ivorian-black">
@@ -228,7 +280,6 @@ export default function ProductDetail() {
                 <p className="text-sm text-gray-600">Prix TTC, hors frais de livraison</p>
               </div>
 
-              {/* Specifications */}
               {product.specifications && (
                 <div className="mb-6">
                   <h4 className="font-bold mb-2">Caractéristiques:</h4>
@@ -240,7 +291,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Quantity Selector */}
               <div className="flex items-center space-x-4 mb-6">
                 <span className="font-semibold">Quantité:</span>
                 <div className="flex items-center border border-gray-300 rounded-lg">
@@ -267,7 +317,6 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col space-y-3">
                 <Button
                   onClick={handleAddToCart}
@@ -288,7 +337,6 @@ export default function ProductDetail() {
                 </Button>
               </div>
 
-              {/* Stock Status */}
               {product.stockQuantity === 0 && (
                 <p className="text-red-600 font-semibold mt-4">Produit en rupture de stock</p>
               )}
