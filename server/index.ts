@@ -8,8 +8,7 @@ const { setupAuth } = require('./auth');
 
 const app = express();
 
-app.set('trust proxy', 1); // Pour faire confiance au proxy inverse (comme Nginx) pour les en-têtes X-Forwarded-For
-// Middleware JSON / URL Encoded
+app.set('trust proxy', 1); // Trust first proxy (for Heroku, etc.)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -65,7 +64,7 @@ db.select().from(products).limit(1)
   // 🧯 Gestion des erreurs express
   app.use((err, _req, res, _next) => {
     const status = err.status ?? err.statusCode ?? 500;
-    const message = err.message || 'Internal Server Error';
+    const message = err.message ?? 'Internal Server Error';
     res.status(status).json({ message });
   });
 

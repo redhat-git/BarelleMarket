@@ -1,40 +1,33 @@
 User-agent: *
 Allow: /
-Allow: /products
-Allow: /products/*
 Disallow: /admin
 Disallow: /admin/*
 Disallow: /api
 Disallow: /api/*
 Disallow: /profile
 
-Sitemap: https://barelle.ci/sitemap.xml
+Sitemap: https://barelle-distribution.com/sitemap.xml
 
-# Specific crawlers
+# Spécifique à Google
 User-agent: Googlebot
 Allow: /
-Allow: /products
-Allow: /products/*
 Disallow: /admin
 Disallow: /api
 
+# Spécifique à Bing
 User-agent: Bingbot
 Allow: /
-Allow: /products
-Allow: /products/*
 Disallow: /admin
 Disallow: /api
 
-# Social media crawlers
+# Réseaux sociaux
 User-agent: facebookexternalhit
-Allow: /
 Allow: /products
-Allow: /products/*
+Allow: /
 
 User-agent: Twitterbot
-Allow: /
 Allow: /products
-Allow: /products/*
+Allow: /
 
-# Crawl delay for courtesy
+# Délai de courtoisie
 Crawl-delay: 1

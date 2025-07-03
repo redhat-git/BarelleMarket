@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { CartItemWithProduct, CartSummary } from "@/lib/types";
-import { isUnauthorizedError } from "@/lib/authUtils";
 
 export function useCart() {
   const queryClient = useQueryClient();
@@ -72,7 +71,18 @@ export function useCart() {
   const removeItemMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await apiRequest("DELETE", `/api/cart/${id}`);
-      return response.json();
+
+      if (!response.ok) {
+        throw new Error("Suppression échouée");
+      }
+
+      // Par sécurité, si le backend ne renvoie pas de JSON (ou renvoie vide), on évite l'erreur
+      const text = await response.text();
+      try {
+        return text ? JSON.parse(text) : null;
+      } catch {
+        return null;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });

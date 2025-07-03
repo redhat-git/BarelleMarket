@@ -7,7 +7,12 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(method: string, url: string, options: RequestInit = {}) {
+export async function apiRequest(
+  method: string,
+  url: string,
+  data?: any,
+  options: RequestInit = {}
+) {
   const response = await fetch(url, {
     method,
     ...options,
@@ -16,14 +21,20 @@ export async function apiRequest(method: string, url: string, options: RequestIn
       'Cache-Control': 'no-cache',
       ...(options.headers || {}),
     },
+    credentials: "include",
+    body: data ? JSON.stringify(data) : undefined,
   });
+
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const text = await response.text();
+    throw new Error(`HTTP ${response.status}: ${text}`);
   }
-  return response.json();
+
+  return response;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
+
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =

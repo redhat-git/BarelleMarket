@@ -31,8 +31,8 @@
   <meta name="msapplication-navbutton-color" content="#fbbf24" />
 
   <!-- Icons -->
-  <link rel="icon" type="image/svg+xml" href="/client/public/icon.svg" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/client/public/icon.svg" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.svg" />
 
   <!-- Open Graph Meta Tags -->
   <meta property="og:type" content="website" />
@@ -62,7 +62,7 @@
         "addressLocality": "Abidjan"
       }
     }
-    </script>
+  </script>
 
   <!-- Preconnect -->
   <link rel="preconnect" href="https://images.unsplash.com" />
@@ -88,6 +88,67 @@
           });
       });
     }
+  </script>
+
+  <!-- PWA Install Prompt -->
+  <script>
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      const installDiv = document.createElement('div');
+      installDiv.id = 'install-prompt';
+      installDiv.style = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #fbbf24;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        font-family: Arial, sans-serif;
+        z-index: 10000;
+      `;
+
+      installDiv.innerHTML = `
+        <p style="margin: 0 0 10px 0; color: #1a1a1a;">Installer l'application Barelle pour une meilleure expérience ?</p>
+        <button id="btn-install" style="
+          background: #1a1a1a;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          cursor: pointer;
+          border-radius: 5px;
+        ">Installer</button>
+        <button id="btn-dismiss" style="
+          margin-left: 10px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+        ">✕</button>
+      `;
+
+      document.body.appendChild(installDiv);
+
+      document.getElementById('btn-install').addEventListener('click', async () => {
+        installDiv.style.display = 'none';
+        deferredPrompt.prompt();
+        const choiceResult = await deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Utilisateur a accepté l\'installation');
+        } else {
+          console.log('Utilisateur a refusé l\'installation');
+        }
+        deferredPrompt = null;
+      });
+
+      document.getElementById('btn-dismiss').addEventListener('click', () => {
+        installDiv.style.display = 'none';
+      });
+    });
   </script>
 </body>
 

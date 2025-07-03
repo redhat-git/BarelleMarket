@@ -15,12 +15,9 @@ import {
   loginSchema,
   updateProductSchema
 } from '../shared/schema';
-
-import { nanoid } from "nanoid";
 import express from "express";
-import { fileURLToPath } from "url";
 import path from "path";
-const __filename = __filename; // Déjà disponible en CommonJS
+const __filename = __filename;
 const __dirname = path.dirname(__filename);
 
 const app = express(); // d'abord tu crées l'application Express
@@ -381,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/orders', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const user = req.user as any;
-      const userId = user?.claims?.sub || user?.id;
+      const userId = user?.claims?.sub ?? user?.id;
       if (!userId) {
         return res.status(401).json({ message: "User ID not found" });
       }
@@ -684,7 +681,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
-      const userId = userSession?.id || userSession?.claims?.sub;
+      const userId = userSession?.id ?? userSession?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
@@ -709,7 +706,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/orders/:id', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
-      const userId = userSession?.id || userSession?.claims?.sub;
+      const userId = userSession?.id ?? userSession?.claims?.sub;
 
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
@@ -738,7 +735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/stats', isAuthenticated, async (req, res) => {
     try {
       const userSession = req.user as any;
-      const userId = userSession?.id || userSession?.claims?.sub;
+      const userId = userSession?.id ?? userSession?.claims?.sub;
 
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });

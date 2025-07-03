@@ -2,14 +2,19 @@
   "name": "Barelle Distribution - Produits Ivoiriens Authentiques",
   "short_name": "Barelle",
   "description": "Plateforme e-commerce spécialisée dans la distribution de produits 100% ivoiriens : spiritueux, jus naturels, cigares et accessoires de qualité premium.",
+  "lang": "fr",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#1a1a1a",
   "theme_color": "#fbbf24",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "lang": "fr",
-  "categories": ["business", "shopping", "food"],
+  "categories": [
+    "business",
+    "shopping",
+    "food"
+  ],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -66,14 +71,38 @@
       "short_name": "Catalogue",
       "description": "Parcourir notre catalogue de produits ivoiriens",
       "url": "/products",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-produit.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Spiritueux",
       "short_name": "Spiritueux",
       "description": "Découvrir nos spiritueux premium",
       "url": "/products?category=spiritueux",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/homepage.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/screenshots/catalogue.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

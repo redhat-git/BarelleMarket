@@ -1,119 +1,93 @@
 const CACHE_NAME = 'barelle-v1.0.0';
 const OFFLINE_URL = '/offline.html';
 
-// Assets à mettre en cache
+// Fichiers à mettre en cache (à adapter selon ton routing)
 const urlsToCache = [
   '/',
   '/products',
   '/manifest.json',
   '/offline.html',
-  // CSS et JS seront ajoutés dynamiquement
+  '/icon.svg',
 ];
 
-// Installation du Service Worker
+// 🔧 Installation
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Cache ouvert');
+        console.log('✅ Cache initial créé');
         return cache.addAll(urlsToCache);
       })
-      .then(() => {
-        return self.skipWaiting();
-      })
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activation du Service Worker
+// 🔁 Activation
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Suppression du cache obsolète:', cacheName);
-            return caches.delete(cacheName);
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) {
+            console.log('🧹 Suppression cache obsolète:', name);
+            return caches.delete(name);
           }
         })
-      );
-    }).then(() => {
-      return self.clients.claim();
-    })
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-// Stratégie de cache: Network First avec fallback
+// 📡 Gestion des requêtes
 self.addEventListener('fetch', (event) => {
-  // Ignorer les requêtes non-GET
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  // Ignorer les requêtes vers l'API
-  if (event.request.url.includes('/api/')) {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
+  if (event.request.url.includes('/api/')) return;
 
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        // Si la réponse est valide, la mettre en cache
-        if (response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseClone);
-            });
+      .then((res) => {
+        if (res.status === 200) {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
         }
-        return response;
+        return res;
       })
-      .catch(() => {
-        // En cas d'échec réseau, chercher en cache
-        return caches.match(event.request)
-          .then((response) => {
-            if (response) {
-              return response;
-            }
-            // Pour les pages HTML, retourner la page offline
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match(OFFLINE_URL);
-            }
-          });
-      })
+      .catch(() =>
+        caches.match(event.request).then((cachedRes) => {
+          if (cachedRes) return cachedRes;
+          if (event.request.headers.get('accept')?.includes('text/html')) {
+            return caches.match(OFFLINE_URL);
+          }
+        })
+      )
   );
 });
 
-// Gestion des notifications push (optionnel)
+// 🔔 Notifications Push
 self.addEventListener('push', (event) => {
-  if (event.data) {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
-      data: data.url || '/',
-      actions: [
-        {
-          action: 'open',
-          title: 'Voir',
-          icon: '/icons/icon-72x72.png'
-        }
-      ]
-    };
+  if (!event.data) return;
 
-    event.waitUntil(
-      self.registration.showNotification(data.title, options)
-    );
-  }
+  const data = event.data.json();
+  const options = {
+    body: data.body,
+    icon: '/icon.svg',
+    badge: '/icon.svg',
+    data: data.url || '/',
+    actions: [
+      {
+        action: 'open',
+        title: 'Voir',
+        icon: '/icon.svg',
+      },
+    ],
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// Gestion des clics sur les notifications
+// 📲 Gestion du clic sur la notification
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
-  if (event.action === 'open' || !event.action) {
-    event.waitUntil(
-      self.clients.openWindow(event.notification.data || '/')
-    );
-  }
+  const url = event.notification.data || '/';
+  event.waitUntil(self.clients.openWindow(url));
 });
