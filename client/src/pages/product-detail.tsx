@@ -227,15 +227,6 @@ export default function ProductDetail() {
                   {category?.name ?? 'Produit'}
                 </Badge>
 
-                <div className="flex items-center">
-                  <div className="flex mr-2">
-                    {renderStars(Number(product.rating) || 0)}
-                  </div>
-                  {product.reviewCount > 0 && (
-                    <span className="text-gray-600 text-sm">({product.reviewCount} avis)</span>
-                  )}
-                </div>
-
                 <div className="flex items-center mt-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
