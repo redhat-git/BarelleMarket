@@ -658,7 +658,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: "Failed to delete category" });
     }
   });
-
+ 
   // Order Management  
   app.get('/api/admin/orders', isAuthenticated, async (req, res) => {
     try {
@@ -685,15 +685,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const result = await storage.getAllOrders(page, limit, status || undefined);
 
+      console.log("Type of result:", typeof result);
+      console.log("Result structure:", result);
+      console.log("Nombre de commandes envoyées :", result?.orders?.length || result?.length || 0);
 
-      console.log("Nombre de commandes envoyées :", result.orders.length);
-      console.log("Exemple de commande :", result.orders.orders[0]); // ou result.orders[0]
-      console.log("Total commandes :", result.total);
+      // Fix: Handle different possible return structures from storage.getAllOrders
+      let orders, total;
+      
+      if (result && typeof result === 'object') {
+        // Case 1: result is { orders: [...], total: number }
+        if (result.orders && Array.isArray(result.orders)) {
+          orders = result.orders;
+          total = result.total || result.orders.length;
+        }
+        // Case 2: result is directly an array
+        else if (Array.isArray(result)) {
+          orders = result;
+          total = result.length;
+        }
+        // Case 3: result has a different structure
+        else {
+          console.error("Unexpected result structure:", result);
+          orders = [];
+          total = 0;
+        }
+      } else {
+        console.error("Result is not an object:", result);
+        orders = [];
+        total = 0;
+      }
 
+      console.log("Final orders length:", orders.length);
+      console.log("Final total:", total);
 
       res.json({
-        orders: result,
-        total: result.length
+        orders: orders,
+        total: total
       });
     } catch (error) {
       console.error("Error fetching orders:", error);
