@@ -66,9 +66,20 @@ export default function AdminOrders() {
       console.log('Fetching URL:', url);
     
       try {
-        const result = await apiRequest('GET', url, {
-          headers: { 'Cache-Control': 'no-cache' },
+        // Utiliser fetch directement pour les requêtes GET sans body
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+          },
         });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
         console.log('Orders fetched:', JSON.stringify(result, null, 2));
     
         // Vérifier si result est défini et est un objet
@@ -126,14 +137,7 @@ export default function AdminOrders() {
       const url = `/api/admin/orders/${selectedOrder.id}`;
       console.log('Fetching order details URL:', url);
 
-      let result;
       try {
-        result = await apiRequest('GET', url, {
-          headers: { 'Cache-Control': 'no-cache' },
-        });
-        console.log('Order details fetched:', JSON.stringify(result, null, 2));
-      } catch (err) {
-        console.warn('apiRequest failed for order details, trying fetch:', err);
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -145,15 +149,16 @@ export default function AdminOrders() {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        result = await response.json();
-        console.log(
-          'Order details fetched with fetch:',
-          JSON.stringify(result, null, 2),
-        );
-      }
 
-      // Normaliser la structure si nécessaire
-      return result.order || result;
+        const result = await response.json();
+        console.log('Order details fetched:', JSON.stringify(result, null, 2));
+
+        // Normaliser la structure si nécessaire
+        return result.order || result;
+      } catch (error) {
+        console.error('Erreur lors de la récupération des détails:', error);
+        throw error;
+      }
     },
     staleTime: 0,
   });
