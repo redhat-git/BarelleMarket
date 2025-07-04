@@ -66,7 +66,6 @@ export default function AdminOrders() {
       console.log('Fetching URL:', url);
     
       try {
-        // Utiliser fetch directement pour les requêtes GET sans body
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -82,22 +81,13 @@ export default function AdminOrders() {
         const result = await response.json();
         console.log('Orders fetched:', JSON.stringify(result, null, 2));
     
-        // Vérifier si result est défini et est un objet
+        // Improved data validation and normalization
         if (!result || typeof result !== 'object') {
-          console.error('Réponse serveur invalide:', result);
-          throw new Error('Réponse serveur invalide');
+          console.error('Invalid server response:', result);
+          throw new Error('Invalid server response');
         }
     
-        // Gérer explicitement le cas où result.orders est undefined ou null
-        if (result.orders === undefined || result.orders === null) {
-          console.warn('result.orders est undefined ou null:', result);
-          return {
-            orders: [],
-            total: 0,
-          };
-        }
-    
-        // Normaliser la structure des données
+        // If the result has orders array, use it
         if (result.orders && Array.isArray(result.orders)) {
           return {
             orders: result.orders,
@@ -105,7 +95,7 @@ export default function AdminOrders() {
           };
         }
     
-        // Si les données sont directement un array
+        // If the result is directly an array
         if (Array.isArray(result)) {
           return {
             orders: result,
@@ -113,20 +103,20 @@ export default function AdminOrders() {
           };
         }
     
-        // Gérer le cas où la structure est inattendue
-        console.warn('Structure inattendue, retour de données vides:', result);
+        // If no orders found, return empty
+        console.warn('No orders found in response:', result);
         return {
           orders: [],
           total: 0,
         };
       } catch (error) {
-        console.error('Erreur lors de la récupération des commandes:', error);
+        console.error('Error fetching orders:', error);
         throw error;
       }
     },
     retry: 3,
     retryDelay: 1000,
-    staleTime: 0, // Forcer la récupération des données fraîches
+    staleTime: 5 * 60 * 1000, // 5 minutes instead of 0
   });
 
   const { data: orderDetails } = useQuery<OrderWithItems>({
@@ -153,14 +143,13 @@ export default function AdminOrders() {
         const result = await response.json();
         console.log('Order details fetched:', JSON.stringify(result, null, 2));
 
-        // Normaliser la structure si nécessaire
         return result.order || result;
       } catch (error) {
-        console.error('Erreur lors de la récupération des détails:', error);
+        console.error('Error fetching order details:', error);
         throw error;
       }
     },
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateOrderMutation = useMutation({
@@ -172,13 +161,13 @@ export default function AdminOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
-      toast({ title: 'Commande mise à jour avec succès' });
+      toast({ title: 'Order updated successfully' });
     },
     onError: (error: any) => {
       console.error('Error updating order:', error);
       toast({
-        title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour la commande',
+        title: 'Error',
+        description: error.message || 'Failed to update order',
         variant: 'destructive',
       });
     },
@@ -246,14 +235,15 @@ export default function AdminOrders() {
     }
   };
 
-  // Debug logs
+  // Enhanced debug logging
   console.log('Current state:', {
     isLoading,
-    error,
+    error: error?.message,
     ordersData,
     ordersCount: ordersData?.orders?.length,
     statusFilter,
     page,
+    hasOrders: !!(ordersData?.orders && ordersData.orders.length > 0),
   });
 
   if (isLoading) {
@@ -276,13 +266,13 @@ export default function AdminOrders() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center text-red-600">
-                <h2 className="text-xl font-semibold mb-2">Erreur de chargement</h2>
-                <p>{error instanceof Error ? error.message : 'Une erreur est survenue'}</p>
+                <h2 className="text-xl font-semibold mb-2">Loading Error</h2>
+                <p>{error instanceof Error ? error.message : 'An error occurred'}</p>
                 <Button
                   onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] })}
                   className="mt-4"
                 >
-                  Réessayer
+                  Retry
                 </Button>
               </div>
             </CardContent>
@@ -291,6 +281,10 @@ export default function AdminOrders() {
       </div>
     );
   }
+
+  // Safe check for orders
+  const orders = ordersData?.orders || [];
+  const hasOrders = orders.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
@@ -301,30 +295,30 @@ export default function AdminOrders() {
               <Link href="/admin">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <ArrowLeft className="h-4 w-4" />
-                  Retour au tableau de bord
+                  Back to Dashboard
                 </Button>
               </Link>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
               <ShoppingCart className="h-8 w-8" />
-              Gestion des Commandes
+              Order Management
             </h1>
-            <p className="text-gray-600 mt-2">Suivez et gérez toutes les commandes</p>
+            <p className="text-gray-600 mt-2">Track and manage all orders</p>
           </div>
 
           <div className="flex gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrer par statut" />
+                <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="pending">En Attente</SelectItem>
-                <SelectItem value="confirmed">Confirmée</SelectItem>
-                <SelectItem value="preparing">Préparation</SelectItem>
-                <SelectItem value="shipped">Expédiée</SelectItem>
-                <SelectItem value="delivered">Livrée</SelectItem>
-                <SelectItem value="cancelled">Annulée</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="preparing">Preparing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -333,35 +327,38 @@ export default function AdminOrders() {
         <Card>
           <CardHeader>
             <CardTitle>
-              Liste des Commandes
-              {ordersData?.total && (
+              Order List
+              {ordersData?.total !== undefined && (
                 <span className="text-sm font-normal text-gray-500 ml-2">
-                  ({ordersData.total} commandes)
+                  ({ordersData.total} orders)
                 </span>
               )}
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Debug info - remove in production */}
             <div className="mb-4 p-3 bg-blue-50 rounded text-sm">
-              <strong>Debug:</strong> {ordersData?.orders?.length || 0} commandes chargées
-              {ordersData && !ordersData.orders?.length && (
-                <span className="text-red-600">
-                  {' '}
-                  - Données: {JSON.stringify(ordersData, null, 2)}
+              <strong>Debug:</strong> {orders.length} orders loaded
+              {ordersData && (
+                <span className="ml-2">
+                  - API Response: {JSON.stringify({ 
+                    ordersLength: ordersData.orders?.length, 
+                    total: ordersData.total 
+                  })}
                 </span>
               )}
             </div>
 
-            {!ordersData?.orders?.length ? (
+            {!hasOrders ? (
               <div className="text-center py-8">
                 <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Aucune commande trouvée
+                  No orders found
                 </h3>
                 <p className="text-gray-500">
                   {statusFilter && statusFilter !== 'all'
-                    ? `Aucune commande avec le statut "${statusFilter}"`
-                    : "Aucune commande n'a été passée pour le moment"}
+                    ? `No orders with status "${statusFilter}"`
+                    : "No orders have been placed yet"}
                 </p>
                 {statusFilter && statusFilter !== 'all' && (
                   <Button
@@ -369,7 +366,7 @@ export default function AdminOrders() {
                     onClick={() => setStatusFilter('all')}
                     className="mt-4"
                   >
-                    Voir toutes les commandes
+                    Show all orders
                   </Button>
                 )}
               </div>
@@ -378,17 +375,17 @@ export default function AdminOrders() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4">N° Commande</th>
-                      <th className="text-left py-3 px-4 hidden sm:table-cell">Client</th>
+                      <th className="text-left py-3 px-4">Order #</th>
+                      <th className="text-left py-3 px-4 hidden sm:table-cell">Customer</th>
                       <th className="text-left py-3 px-4">Total</th>
                       <th className="text-left py-3 px-4 hidden md:table-cell">Type</th>
-                      <th className="text-left py-3 px-4">Statut</th>
-                      <th className="text-left py-3 px-4 hidden lg:table-cell">Paiement</th>
+                      <th className="text-left py-3 px-4">Status</th>
+                      <th className="text-left py-3 px-4 hidden lg:table-cell">Payment</th>
                       <th className="text-left py-3 px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {ordersData.orders.map((order) => (
+                    {orders.map((order) => (
                       <tr key={order.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
                           <div className="font-medium">
@@ -397,16 +394,16 @@ export default function AdminOrders() {
                           <div className="text-sm text-gray-500">
                             {order.createdAt
                               ? new Date(order.createdAt).toLocaleDateString('fr-FR')
-                              : 'Date inconnue'}
+                              : 'Unknown date'}
                           </div>
                         </td>
                         <td className="py-3 px-4 hidden sm:table-cell">
                           <div>
                             <div className="font-medium">
-                              {order.customerName || 'Nom non disponible'}
+                              {order.customerName || 'Name not available'}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {order.customerEmail || 'Email non disponible'}
+                              {order.customerEmail || 'Email not available'}
                             </div>
                           </div>
                         </td>
@@ -450,7 +447,7 @@ export default function AdminOrders() {
                               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                                 <DialogHeader>
                                   <DialogTitle>
-                                    Détails de la Commande{' '}
+                                    Order Details{' '}
                                     {order.orderNumber || `#${order.id}`}
                                   </DialogTitle>
                                 </DialogHeader>
@@ -460,24 +457,24 @@ export default function AdminOrders() {
                                       <Card>
                                         <CardHeader>
                                           <CardTitle className="text-lg">
-                                            Informations Client
+                                            Customer Information
                                           </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-2">
                                           <p>
-                                            <strong>Nom:</strong>{' '}
+                                            <strong>Name:</strong>{' '}
                                             {orderDetails.customerName ||
-                                              'Non renseigné'}
+                                              'Not provided'}
                                           </p>
                                           <p>
                                             <strong>Email:</strong>{' '}
                                             {orderDetails.customerEmail ||
-                                              'Non renseigné'}
+                                              'Not provided'}
                                           </p>
                                           <p>
-                                            <strong>Téléphone:</strong>{' '}
+                                            <strong>Phone:</strong>{' '}
                                             {orderDetails.customerPhone ||
-                                              'Non renseigné'}
+                                              'Not provided'}
                                           </p>
                                           <p>
                                             <strong>Type:</strong>{' '}
@@ -489,19 +486,19 @@ export default function AdminOrders() {
                                       <Card>
                                         <CardHeader>
                                           <CardTitle className="text-lg">
-                                            Livraison
+                                            Delivery
                                           </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-2">
                                           <p>
-                                            <strong>Adresse:</strong>{' '}
+                                            <strong>Address:</strong>{' '}
                                             {orderDetails.deliveryAddress ||
-                                              'Non renseignée'}
+                                              'Not provided'}
                                           </p>
                                           <p>
-                                            <strong>Ville:</strong>{' '}
+                                            <strong>City:</strong>{' '}
                                             {orderDetails.deliveryCity ||
-                                              'Non renseignée'}
+                                              'Not provided'}
                                           </p>
                                           {orderDetails.deliveryDistrict && (
                                             <p>
@@ -516,7 +513,7 @@ export default function AdminOrders() {
                                     <Card>
                                       <CardHeader>
                                         <CardTitle className="text-lg">
-                                          Produits Commandés
+                                          Ordered Products
                                         </CardTitle>
                                       </CardHeader>
                                       <CardContent>
@@ -529,10 +526,10 @@ export default function AdminOrders() {
                                               <div>
                                                 <p className="font-medium">
                                                   {item.productName ||
-                                                    'Produit sans nom'}
+                                                    'Product without name'}
                                                 </p>
                                                 <p className="text-sm text-gray-600">
-                                                  Quantité: {item.quantity}
+                                                  Quantity: {item.quantity}
                                                 </p>
                                               </div>
                                               <div className="text-right">
@@ -547,7 +544,7 @@ export default function AdminOrders() {
                                                     item.productPrice?.toString() ||
                                                     '0',
                                                   ).toLocaleString()}{' '}
-                                                  CFA/unité
+                                                  CFA/unit
                                                 </p>
                                               </div>
                                             </div>
@@ -555,7 +552,7 @@ export default function AdminOrders() {
                                         </div>
                                         <div className="mt-4 pt-4 border-t space-y-2">
                                           <div className="flex justify-between">
-                                            <span>Sous-total:</span>
+                                            <span>Subtotal:</span>
                                             <span>
                                               {parseFloat(
                                                 orderDetails.subtotal?.toString() ||
@@ -565,7 +562,7 @@ export default function AdminOrders() {
                                             </span>
                                           </div>
                                           <div className="flex justify-between">
-                                            <span>Frais de livraison:</span>
+                                            <span>Delivery fee:</span>
                                             <span>
                                               {parseFloat(
                                                 orderDetails.deliveryFee?.toString() ||
@@ -590,70 +587,64 @@ export default function AdminOrders() {
 
                                     <Card>
                                       <CardHeader>
-                                        <CardTitle className="text-lg">Mettre à Jour le Statut</CardTitle>
+                                        <CardTitle className="text-lg">Update Status</CardTitle>
                                       </CardHeader>
                                       <CardContent>
-                                        {orderDetails ? (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                              <label className="block text-sm font-medium mb-2">Statut de la Commande</label>
-                                              <Select
-                                                value={orderDetails.orderStatus || 'pending'}
-                                                onValueChange={(value: 'pending' | 'confirmed' | 'preparing' | 'shipped' | 'delivered' | 'cancelled') => {
-                                                  console.log('Updating orderStatus:', value);
-                                                  console.log('Current orderDetails:', JSON.stringify(orderDetails, null, 2));
-                                                  updateOrderMutation.mutate({
-                                                    orderId: orderDetails.id,
-                                                    status: {
-                                                      orderStatus: value,
-                                                      paymentStatus: orderDetails.paymentStatus || 'pending',
-                                                    },
-                                                  });
-                                                }}
-                                              >
-                                                <SelectTrigger>
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="pending">En Attente</SelectItem>
-                                                  <SelectItem value="confirmed">Confirmée</SelectItem>
-                                                  <SelectItem value="preparing">Préparation</SelectItem>
-                                                  <SelectItem value="shipped">Expédiée</SelectItem>
-                                                  <SelectItem value="delivered">Livrée</SelectItem>
-                                                  <SelectItem value="cancelled">Annulée</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                            <div>
-                                              <label className="block text-sm font-medium mb-2">Statut du Paiement</label>
-                                              <Select
-                                                value={orderDetails.paymentStatus || 'pending'}
-                                                onValueChange={(value: 'pending' | 'paid' | 'failed') => {
-                                                  console.log('Updating paymentStatus:', value);
-                                                  console.log('Current orderDetails:', JSON.stringify(orderDetails, null, 2));
-                                                  updateOrderMutation.mutate({
-                                                    orderId: orderDetails.id,
-                                                    status: {
-                                                      orderStatus: orderDetails.orderStatus || 'pending',
-                                                      paymentStatus: value,
-                                                    },
-                                                  });
-                                                }}
-                                              >
-                                                <SelectTrigger>
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="pending">En Attente</SelectItem>
-                                                  <SelectItem value="paid">Payée</SelectItem>
-                                                  <SelectItem value="failed">Échouée</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div>
+                                            <label className="block text-sm font-medium mb-2">Order Status</label>
+                                            <Select
+                                              value={orderDetails.orderStatus || 'pending'}
+                                              onValueChange={(value: 'pending' | 'confirmed' | 'preparing' | 'shipped' | 'delivered' | 'cancelled') => {
+                                                console.log('Updating orderStatus:', value);
+                                                updateOrderMutation.mutate({
+                                                  orderId: orderDetails.id,
+                                                  status: {
+                                                    orderStatus: value,
+                                                    paymentStatus: orderDetails.paymentStatus || 'pending',
+                                                  },
+                                                });
+                                              }}
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="confirmed">Confirmed</SelectItem>
+                                                <SelectItem value="preparing">Preparing</SelectItem>
+                                                <SelectItem value="shipped">Shipped</SelectItem>
+                                                <SelectItem value="delivered">Delivered</SelectItem>
+                                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                                              </SelectContent>
+                                            </Select>
                                           </div>
-                                        ) : (
-                                          <p className="text-gray-500">Chargement des détails de la commande...</p>
-                                        )}
+                                          <div>
+                                            <label className="block text-sm font-medium mb-2">Payment Status</label>
+                                            <Select
+                                              value={orderDetails.paymentStatus || 'pending'}
+                                              onValueChange={(value: 'pending' | 'paid' | 'failed') => {
+                                                console.log('Updating paymentStatus:', value);
+                                                updateOrderMutation.mutate({
+                                                  orderId: orderDetails.id,
+                                                  status: {
+                                                    orderStatus: orderDetails.orderStatus || 'pending',
+                                                    paymentStatus: value,
+                                                  },
+                                                });
+                                              }}
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="paid">Paid</SelectItem>
+                                                <SelectItem value="failed">Failed</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
                                       </CardContent>
                                     </Card>
                                   </div>
