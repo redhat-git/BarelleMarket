@@ -53,6 +53,7 @@ export default function AdminOrders() {
     orders: Order[];
     total: number;
   }>({
+    queryKey: ['/api/admin/orders', page, statusFilter],
     queryFn: async () => {
       console.log('Fetching orders with params:', { page, statusFilter });
       const params = new URLSearchParams();
@@ -65,7 +66,6 @@ export default function AdminOrders() {
       console.log('Fetching URL:', url);
     
       try {
-        // Correction: ne pas passer de body pour GET
         const result = await apiRequest('GET', url, {
           headers: { 'Cache-Control': 'no-cache' },
         });
@@ -112,19 +112,6 @@ export default function AdminOrders() {
         console.error('Erreur lors de la récupération des commandes:', error);
         throw error;
       }
-    },
-
-      // Gérer explicitement le cas où result.orders est undefined
-      if (result.orders === undefined || result.orders === null) {
-        console.warn('result.orders est undefined ou null:', result);
-        return {
-          orders: [],
-          total: 0,
-        };
-      }
-
-      console.error('Structure de données inattendue:', JSON.stringify(result, null, 2));
-      throw new Error('Structure de données inattendue : ' + JSON.stringify(result));
     },
     retry: 3,
     retryDelay: 1000,
