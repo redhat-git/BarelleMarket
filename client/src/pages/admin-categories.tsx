@@ -72,13 +72,7 @@ export default function AdminCategories() {
             return res.json();
         },
         onSuccess: () => {
-            // FIX 1: Utiliser la même clé que dans useQuery
             queryClient.invalidateQueries({ queryKey: ["categories"] });
-
-            // FIX 2: Alternative - Mise à jour manuelle du cache
-            // queryClient.setQueryData(["categories"], (old: Category[] | undefined) => {
-            //     return old ? [...old, newCategory] : [newCategory];
-            // });
 
             setIsDialogOpen(false);
             setEditingCategory(null);

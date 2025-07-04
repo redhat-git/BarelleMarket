@@ -53,61 +53,58 @@ export default function AdminOrders() {
     orders: Order[];
     total: number;
   }>({
-    queryKey: ['/api/admin/orders', page, statusFilter],
-    queryFn: async () => {
-      console.log('Fetching orders with params:', { page, statusFilter });
-      const params = new URLSearchParams();
-      params.append('page', page.toString());
-      if (statusFilter && statusFilter !== 'all') {
-        params.append('status', statusFilter);
-      }
+    // Remplacez la fonction queryFn dans votre useQuery (lignes 44-102)
+  queryFn: async () => {
+    console.log('Fetching orders with params:', { page, statusFilter });
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    if (statusFilter && statusFilter !== 'all') {
+      params.append('status', statusFilter);
+    }
 
-      const url = `/api/admin/orders?${params}`;
-      console.log('Fetching URL:', url);
+    const url = `/api/admin/orders?${params}`;
+    console.log('Fetching URL:', url);
 
-      let result;
-      try {
-        result = await apiRequest('GET', url, {
-          headers: { 'Cache-Control': 'no-cache' },
-        });
-        console.log('Orders fetched:', JSON.stringify(result, null, 2));
-      } catch (err) {
-        console.warn('apiRequest failed, trying fetch directly:', err);
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-          },
-        });
-
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        result = await response.json();
-        console.log('Orders fetched with fetch:', JSON.stringify(result, null, 2));
-      }
-
+    try {
+      // Correction: ne pas passer de body pour GET
+      const result = await apiRequest('GET', url, {
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+      console.log('Orders fetched:', JSON.stringify(result, null, 2));
+      
       // Vérifier si result est défini et est un objet
       if (!result || typeof result !== 'object') {
         console.error('Réponse serveur invalide:', result);
-        throw new Error('Réponse serveur invalide : result est undefined ou non un objet');
+        throw new Error('Réponse serveur invalide');
       }
 
       // Normaliser la structure des données
-      if (result.orders?.orders && Array.isArray(result.orders.orders)) {
-        return {
-          orders: result.orders.orders,
-          total: result.orders.total || result.orders.orders.length || 0,
-        };
-      }
-      if (Array.isArray(result.orders)) {
+      if (result.orders && Array.isArray(result.orders)) {
         return {
           orders: result.orders,
-          total: result.total || result.orders.length || 0,
+          total: result.total || result.orders.length,
         };
       }
+
+      // Si les données sont directement un array
+      if (Array.isArray(result)) {
+        return {
+          orders: result,
+          total: result.length,
+        };
+      }
+
+      // Gérer le cas où result.orders est undefined
+      console.warn('Structure inattendue, retour de données vides:', result);
+      return {
+        orders: [],
+        total: 0,
+      };
+    } catch (error) {
+      console.error('Erreur lors de la récupération des commandes:', error);
+      throw error;
+    }
+  },
 
       // Gérer explicitement le cas où result.orders est undefined
       if (result.orders === undefined || result.orders === null) {
