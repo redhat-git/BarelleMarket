@@ -30,7 +30,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Auth routes
-
   app.get('/api/auth/user', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userSession = req.user as any;
@@ -735,16 +734,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Utilisateur non identifié" });
       }
-
+  
       const dbUser = await storage.getUser(userId);
       if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'support')) {
         return res.status(403).json({ message: "Accès refusé - rôle insuffisant" });
       }
-
+  
       const orderId = parseInt(req.params.id);
-      console.log('Received PATCH body:', JSON.stringify(req.body, null, 2)); // Ajout du log
-      const statusData = updateOrderStatusSchema.parse(req.body);
-
+      console.log('Received PATCH body:', JSON.stringify(req.body, null, 2));
+      
+      // Fix: Handle the double-encoded JSON body
+      let statusData;
+      if (req.body.body && typeof req.body.body === 'string') {
+        // If the body is wrapped in a 'body' property as a JSON string, parse it
+        try {
+          const parsedBody = JSON.parse(req.body.body);
+          statusData = updateOrderStatusSchema.parse(parsedBody);
+        } catch (parseError) {
+          console.error('Error parsing nested JSON body:', parseError);
+          return res.status(400).json({ message: "Invalid JSON format in request body" });
+        }
+      } else {
+        // Normal case: body is directly accessible
+        statusData = updateOrderStatusSchema.parse(req.body);
+      }
+  
       const order = await storage.updateOrderStatus(orderId, statusData);
       res.json(order);
     } catch (error) {
